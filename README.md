@@ -207,7 +207,7 @@ dotnet ef database update
 ## 📞 Suporte
 
 Para suporte técnico ou dúvidas:
-- **Email:** suporte@empresa.com
+- **Email:** jvpushbp@gmail.com
 - **TI:** Acesse a área de administração
 - **Documentação:** Este README
 
