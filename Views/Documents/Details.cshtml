@@ -1,0 +1,175 @@
+@model IntranetDocumentos.Models.Document
+@{
+    ViewData["Title"] = "Detalhes do Documento";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3>
+                    <i class="bi bi-file-text"></i> Detalhes do Documento
+                </h3>
+                <div>
+                    <a asp-action="Download" asp-route-id="@Model.Id" class="btn btn-primary">
+                        <i class="bi bi-download"></i> Download
+                    </a>
+                    @if (User.IsInRole("Admin") || Model.UploaderId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+                    {
+                        <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                            <i class="bi bi-trash"></i> Excluir
+                        </button>
+                    }
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-file"></i> Informações do Arquivo</h6>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Nome:</strong></td>
+                                <td>@Model.OriginalFileName</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tipo:</strong></td>
+                                <td>@Model.ContentType</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tamanho:</strong></td>
+                                <td>@GetFileSize(Model.FileSize)</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-info-circle"></i> Informações Adicionais</h6>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Departamento:</strong></td>
+                                <td>
+                                    @if (Model.Department != null)
+                                    {
+                                        <span class="badge bg-primary">@Model.Department.Name</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Geral</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Enviado por:</strong></td>
+                                <td>@Model.Uploader.Email</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Data de envio:</strong></td>
+                                <td>@Model.UploadDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <hr />
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h6><i class="bi bi-eye"></i> Visualização</h6>
+                        <div class="p-3 bg-light rounded">
+                            @if (Model.ContentType.Contains("image"))
+                            {
+                                <div class="text-center">
+                                    <img src="@Url.Action("Download", new { id = Model.Id })" 
+                                         class="img-fluid" style="max-height: 400px;" 
+                                         alt="@Model.OriginalFileName" />
+                                </div>
+                            }
+                            else if (Model.ContentType.Contains("pdf"))
+                            {
+                                <div class="text-center">
+                                    <i class="bi bi-file-earmark-pdf" style="font-size: 4rem; color: #dc3545;"></i>
+                                    <p class="mt-2">Arquivo PDF - Clique em Download para visualizar</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center">
+                                    <i class="bi @GetFileIcon(Model.ContentType)" style="font-size: 4rem; color: #6c757d;"></i>
+                                    <p class="mt-2">@Model.ContentType</p>
+                                    <p class="text-muted">Clique em Download para abrir o arquivo</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar para Lista
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmação de exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o documento <strong>@Model.OriginalFileName</strong>?</p>
+                <p class="text-danger"><small>Esta ação não pode ser desfeita.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" asp-action="Delete" asp-route-id="@Model.Id" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete() {
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
+}
+
+@functions {
+    private string GetFileIcon(string contentType)
+    {
+        return contentType.ToLower() switch
+        {
+            var ct when ct.Contains("pdf") => "bi-file-earmark-pdf",
+            var ct when ct.Contains("word") => "bi-file-earmark-word",
+            var ct when ct.Contains("excel") => "bi-file-earmark-excel",
+            var ct when ct.Contains("powerpoint") => "bi-file-earmark-ppt",
+            var ct when ct.Contains("image") => "bi-file-earmark-image",
+            var ct when ct.Contains("text") => "bi-file-earmark-text",
+            var ct when ct.Contains("zip") => "bi-file-earmark-zip",
+            _ => "bi-file-earmark"
+        };
+    }
+
+    private string GetFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+}

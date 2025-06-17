@@ -1,0 +1,145 @@
+@model List<(IntranetDocumentos.Models.ApplicationUser user, IList<string> roles)>
+@{
+    ViewData["Title"] = "Administração de Usuários";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-gear"></i> Administração de Usuários</h2>
+    <div>
+        <a asp-action="CreateUser" class="btn btn-success">
+            <i class="bi bi-person-plus"></i> Novo Usuário
+        </a>
+        <a asp-action="Departments" class="btn btn-info">
+            <i class="bi bi-building"></i> Departamentos
+        </a>
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="text-center py-5">
+        <i class="bi bi-people" style="font-size: 3rem; color: #6c757d;"></i>
+        <h4 class="text-muted mt-3">Nenhum usuário encontrado</h4>
+        <p class="text-muted">Comece criando o primeiro usuário do sistema.</p>
+        <a asp-action="CreateUser" class="btn btn-success">
+            <i class="bi bi-person-plus"></i> Criar Usuário
+        </a>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th><i class="bi bi-envelope"></i> Email</th>
+                            <th><i class="bi bi-building"></i> Departamento</th>
+                            <th><i class="bi bi-shield"></i> Função</th>
+                            <th><i class="bi bi-calendar"></i> Criado em</th>
+                            <th><i class="bi bi-gear"></i> Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (user, roles) in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <i class="bi bi-person-circle"></i>
+                                    @user.Email
+                                    @if (user.EmailConfirmed)
+                                    {
+                                        <i class="bi bi-check-circle text-success" title="Email confirmado"></i>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">@user.Department.Name</span>
+                                </td>
+                                <td>
+                                    @if (roles.Any())
+                                    {
+                                        @foreach (var role in roles)
+                                        {
+                                            <span class="badge @GetRoleBadgeClass(role)">@role</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Sem função</span>
+                                    }
+                                </td>
+                                <td>@user.LockoutEnd?.ToString("dd/MM/yyyy") ?? "N/A"</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="EditUser" asp-route-id="@user.Id" 
+                                           class="btn btn-sm btn-outline-primary" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        @if (user.Email != "admin@intranet.com")
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="confirmDelete('@user.Id', '@user.Email')" 
+                                                    title="Excluir">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal de confirmação de exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o usuário <strong id="userEmail"></strong>?</p>
+                <p class="text-danger"><small>Esta ação não pode ser desfeita e todos os documentos enviados por este usuário serão mantidos.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="deleteForm" method="post" asp-action="DeleteUser" class="d-inline">
+                    <input type="hidden" id="userId" name="id" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, email) {
+            document.getElementById('userId').value = id;
+            document.getElementById('userEmail').textContent = email;
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
+}
+
+@functions {
+    private string GetRoleBadgeClass(string role)
+    {
+        return role switch
+        {
+            "Admin" => "bg-danger",
+            "Gestor" => "bg-warning",
+            "Usuario" => "bg-info",
+            _ => "bg-secondary"
+        };
+    }
+}
