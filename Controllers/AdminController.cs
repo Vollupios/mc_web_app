@@ -43,12 +43,11 @@ namespace IntranetDocumentos.Controllers
             }
 
             return View(usersWithRoles);
-        }
-
-        [HttpGet]
+        }        [HttpGet]
         public async Task<IActionResult> CreateUser()
         {
-            var departments = await _context.Departments.OrderBy(d => d.Name).ToListAsync();            var roles = await _roleManager.Roles.Select(r => r.Name!).ToListAsync();
+            var departments = await _context.Departments.OrderBy(d => d.Name).ToListAsync();
+            var roles = await _roleManager.Roles.Select(r => r.Name!).ToListAsync();
 
             var viewModel = new CreateUserViewModel
             {
@@ -85,12 +84,11 @@ namespace IntranetDocumentos.Controllers
                     _logger.LogInformation("Usuário {Email} criado com sucesso.", model.Email);
                     TempData["Success"] = "Usuário criado com sucesso!";
                     return RedirectToAction(nameof(Index));
-                }
-
-                foreach (var error in result.Errors)
+                }                foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
-                }            }
+                }
+            }
 
             // Recarregar listas em caso de erro
             model.AvailableDepartments = await _context.Departments.OrderBy(d => d.Name).ToListAsync();
@@ -116,7 +114,8 @@ namespace IntranetDocumentos.Controllers
                 return NotFound();
             }
 
-            var userRoles = await _userManager.GetRolesAsync(user);            var departments = await _context.Departments.OrderBy(d => d.Name).ToListAsync();
+            var userRoles = await _userManager.GetRolesAsync(user);
+            var departments = await _context.Departments.OrderBy(d => d.Name).ToListAsync();
             var allRoles = await _roleManager.Roles.Select(r => r.Name!).ToListAsync();
 
             var viewModel = new CreateUserViewModel
@@ -179,9 +178,10 @@ namespace IntranetDocumentos.Controllers
 
                 foreach (var error in updateResult.Errors)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-            }            // Recarregar listas em caso de erro
+                    ModelState.AddModelError(string.Empty, error.Description);                }
+            }
+
+            // Recarregar listas em caso de erro
             model.AvailableDepartments = await _context.Departments.OrderBy(d => d.Name).ToListAsync();
             model.AvailableRoles = await _roleManager.Roles.Select(r => r.Name!).ToListAsync();
 
