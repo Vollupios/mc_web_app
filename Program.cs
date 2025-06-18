@@ -3,23 +3,23 @@ using Microsoft.AspNetCore.Identity;
 using IntranetDocumentos.Data;
 using IntranetDocumentos.Models;
 using IntranetDocumentos.Services;
-
-// ...existing code...
-
-// Inicialização assíncrona do banco e seed
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    await SeedAsync(services, app.Configuration);
-}
-
-app.Run();
+using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Validação da connection string
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("A connection string 'DefaultConnection' não foi encontrada. Configure-a no appsettings.json.");
+}
+
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(connectionString));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -77,12 +77,11 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
+app.UseStaticFiles();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Documents}/{action=Index}/{id?}")
-    .WithStaticAssets();
+    pattern: "{controller=Documents}/{action=Index}/{id?}");
 
 // Initialize database and roles
 using (var scope = app.Services.CreateScope())
