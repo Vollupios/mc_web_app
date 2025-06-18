@@ -14,6 +14,9 @@ namespace IntranetDocumentos.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<DocumentsController> _logger;
 
+        /// <summary>
+        /// Controller para operações de documentos. Garante autenticação e logging.
+        /// </summary>
         public DocumentsController(
             IDocumentService documentService,
             UserManager<ApplicationUser> userManager,
@@ -24,11 +27,15 @@ namespace IntranetDocumentos.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Lista documentos disponíveis para o usuário logado.
+        /// </summary>
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
+                _logger.LogWarning("Usuário não autenticado tentou acessar Index.");
                 return Challenge();
             }
 
@@ -36,6 +43,9 @@ namespace IntranetDocumentos.Controllers
             return View(documents);
         }
 
+        /// <summary>
+        /// Exibe o formulário de upload de documentos.
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Upload()
         {
@@ -54,6 +64,9 @@ namespace IntranetDocumentos.Controllers
             return View(viewModel);
         }
 
+        /// <summary>
+        /// Realiza o upload de um documento.
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(UploadViewModel model)
@@ -107,6 +120,9 @@ namespace IntranetDocumentos.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// Realiza o download de um documento.
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Download(int id)
         {
@@ -143,6 +159,9 @@ namespace IntranetDocumentos.Controllers
             return File(memory, document.ContentType, document.OriginalFileName);
         }
 
+        /// <summary>
+        /// Exclui um documento.
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -174,6 +193,9 @@ namespace IntranetDocumentos.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        /// <summary>
+        /// Exibe os detalhes de um documento.
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {

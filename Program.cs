@@ -4,8 +4,10 @@ using IntranetDocumentos.Data;
 using IntranetDocumentos.Models;
 using IntranetDocumentos.Services;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +19,15 @@ if (string.IsNullOrEmpty(connectionString))
     throw new InvalidOperationException("A connection string 'DefaultConnection' não foi encontrada. Configure-a no appsettings.json.");
 }
 
+// Adiciona CORS restritivo via configuração
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new string[0];
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
@@ -63,6 +74,9 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
+// Ativa CORS
+app.UseCors();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -70,6 +84,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Força HTTPS sempre
 app.UseHttpsRedirection();
 app.UseRouting();
 
@@ -83,22 +98,27 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Documents}/{action=Index}/{id?}");
 
-// Initialize database and roles
+// Inicialização assíncrona do banco e seed
+// Inicializa o banco de dados e cria os roles
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var config = app.Configuration;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         
-        await SeedData.Initialize(context, userManager, roleManager);
+        await SeedData.Initialize(context, userManager, roleManager, config, logger);
+        logger.LogInformation("Seed da base de dados concluído com sucesso");
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "Erro ao inicializar o banco de dados.");
+        // Não relançamos a exceção aqui para permitir que a aplicação continue mesmo se o seed falhar
     }
 }
 
@@ -109,7 +129,9 @@ public static class SeedData
     public static async Task Initialize(
         ApplicationDbContext context,
         UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole> roleManager)
+        RoleManager<IdentityRole> roleManager,
+        IConfiguration config,
+        ILogger logger)
     {
         // Ensure database is created
         await context.Database.EnsureCreatedAsync();
@@ -125,9 +147,9 @@ public static class SeedData
         }
 
         // Create default admin user if it doesn't exist
-        var adminEmail = "admin@intranet.com";
+        var adminEmail = config["AdminUser:Email"] ?? "admin@intranet.com";
+        var adminPassword = config["AdminUser:Password"] ?? "Admin123!";
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
-        
         if (adminUser == null)
         {
             // Find TI department
@@ -146,9 +168,14 @@ public static class SeedData
                 EmailConfirmed = true,
                 DepartmentId = tiDepartment.Id
             };
-
-            await userManager.CreateAsync(adminUser, "Admin123!");
+            var result = await userManager.CreateAsync(adminUser, adminPassword);
+            if (!result.Succeeded)
+            {
+                logger.LogError("Falha ao criar usuário admin: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
+                throw new Exception("Falha ao criar usuário admin");
+            }
             await userManager.AddToRoleAsync(adminUser, "Admin");
+            // Não precisa de SaveChangesAsync aqui, pois Identity já salva.
         }
 
         await context.SaveChangesAsync();

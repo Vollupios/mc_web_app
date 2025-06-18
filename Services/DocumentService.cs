@@ -10,15 +10,21 @@ namespace IntranetDocumentos.Services
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IWebHostEnvironment _environment;
+        private readonly ILogger<DocumentService> _logger;
 
+        /// <summary>
+        /// Serviço de documentos, responsável por regras de negócio e persistência.
+        /// </summary>
         public DocumentService(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            IWebHostEnvironment environment)
+            IWebHostEnvironment environment,
+            ILogger<DocumentService> logger)
         {
             _context = context;
             _userManager = userManager;
             _environment = environment;
+            _logger = logger;
         }
 
         public async Task<List<Document>> GetDocumentsForUserAsync(ApplicationUser user)
@@ -50,6 +56,12 @@ namespace IntranetDocumentos.Services
 
         public async Task<Document?> GetDocumentByIdAsync(int id)
         {
+            if (id <= 0)
+            {
+                _logger.LogWarning("Id inválido para busca de documento: {Id}", id);
+                return null;
+            }
+
             return await _context.Documents
                 .Include(d => d.Uploader)
                 .Include(d => d.Department)
@@ -58,59 +70,69 @@ namespace IntranetDocumentos.Services
 
         public async Task<Document> SaveDocumentAsync(IFormFile file, ApplicationUser uploader, int? departmentId)
         {
-            // Gerar nome único para o arquivo
-            var fileExtension = Path.GetExtension(file.FileName);
-            var storedFileName = $"{Guid.NewGuid()}{fileExtension}";
-            
-            // Determinar pasta de destino
-            var folderName = departmentId.HasValue 
-                ? (await _context.Departments.FindAsync(departmentId.Value))?.Name ?? "Geral"
-                : "Geral";
-            
-            var documentsPath = Path.Combine(_environment.ContentRootPath, "DocumentsStorage", folderName);
-            Directory.CreateDirectory(documentsPath);
-            
-            var filePath = Path.Combine(documentsPath, storedFileName);
-
-            // Salvar arquivo no disco
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            try
             {
-                await file.CopyToAsync(stream);
+                // Gerar nome único para o arquivo
+                var fileExtension = Path.GetExtension(file.FileName);
+                var storedFileName = $"{Guid.NewGuid()}{fileExtension}";
+                
+                // Determinar pasta de destino
+                var folderName = departmentId.HasValue 
+                    ? (await _context.Departments.FindAsync(departmentId.Value))?.Name ?? "Geral"
+                    : "Geral";
+                
+                var documentsPath = Path.Combine(_environment.ContentRootPath, "DocumentsStorage", folderName);
+                Directory.CreateDirectory(documentsPath);
+                
+                var filePath = Path.Combine(documentsPath, storedFileName);
+
+                // Salvar arquivo no disco
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                // Criar registro no banco
+                var document = new Document
+                {
+                    OriginalFileName = file.FileName,
+                    StoredFileName = storedFileName,
+                    ContentType = file.ContentType,
+                    FileSize = file.Length,
+                    UploadDate = DateTime.Now,
+                    UploaderId = uploader.Id,
+                    DepartmentId = departmentId
+                };
+
+                _context.Documents.Add(document);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Documento salvo: {FileName} por {User}", file.FileName, uploader.Email);
+
+                return document;
             }
-
-            // Criar registro no banco
-            var document = new Document
+            catch (Exception ex)
             {
-                OriginalFileName = file.FileName,
-                StoredFileName = storedFileName,
-                ContentType = file.ContentType,
-                FileSize = file.Length,
-                UploadDate = DateTime.Now,
-                UploaderId = uploader.Id,
-                DepartmentId = departmentId
-            };
-
-            _context.Documents.Add(document);
-            await _context.SaveChangesAsync();
-
-            return document;
+                _logger.LogError(ex, "Erro ao salvar documento {FileName}", file.FileName);
+                throw;
+            }
         }
 
         public async Task<bool> DeleteDocumentAsync(int id, ApplicationUser currentUser)
         {
-            var document = await GetDocumentByIdAsync(id);
-            if (document == null) return false;
-
-            var userRoles = await _userManager.GetRolesAsync(currentUser);
-            
-            // Verificar permissões
-            if (!userRoles.Contains("Admin") && document.UploaderId != currentUser.Id)
-            {
-                return false;
-            }
-
             try
             {
+                var document = await GetDocumentByIdAsync(id);
+                if (document == null) return false;
+
+                var userRoles = await _userManager.GetRolesAsync(currentUser);
+                
+                // Verificar permissões
+                if (!userRoles.Contains("Admin") && document.UploaderId != currentUser.Id)
+                {
+                    return false;
+                }
+
                 // Remover arquivo físico
                 var physicalPath = await GetDocumentPhysicalPathAsync(document);
                 if (File.Exists(physicalPath))
@@ -122,16 +144,25 @@ namespace IntranetDocumentos.Services
                 _context.Documents.Remove(document);
                 await _context.SaveChangesAsync();
 
+                _logger.LogInformation("Documento excluído: {Id} por {User}", id, currentUser.Email);
+
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao excluir documento {Id}", id);
                 return false;
             }
         }
 
         public async Task<bool> CanUserAccessDocumentAsync(int documentId, ApplicationUser user)
         {
+            if (user == null)
+            {
+                _logger.LogWarning("Usuário nulo ao verificar acesso a documento {Id}", documentId);
+                return false;
+            }
+
             var document = await GetDocumentByIdAsync(documentId);
             if (document == null) return false;
 
@@ -178,6 +209,12 @@ namespace IntranetDocumentos.Services
 
         public async Task<List<Department>> GetDepartmentsForUserAsync(ApplicationUser user)
         {
+            if (user == null)
+            {
+                _logger.LogWarning("Usuário nulo ao buscar departamentos disponíveis.");
+                return new List<Department>();
+            }
+
             var userRoles = await _userManager.GetRolesAsync(user);
 
             if (userRoles.Contains("Admin") || userRoles.Contains("Gestor"))

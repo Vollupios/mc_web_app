@@ -21,13 +21,20 @@ namespace IntranetDocumentos.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Exibe tela de login.
+        /// </summary>
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
             ViewBag.ReturnUrl = returnUrl;
+            _logger.LogInformation("Acessando tela de login.");
             return View();
         }
 
+        /// <summary>
+        /// Realiza login do usuário.
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
@@ -44,22 +51,24 @@ namespace IntranetDocumentos.Controllers
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("Usuário logado.");
+                    _logger.LogInformation("Usuário {Email} logado com sucesso.", model.Email);
                     return LocalRedirect(returnUrl ?? "/Documents");
                 }
 
                 if (result.RequiresTwoFactor)
                 {
+                    _logger.LogInformation("Login requer autenticação de dois fatores para {Email}.", model.Email);
                     return RedirectToAction(nameof(LoginWith2fa), new { returnUrl, model.RememberMe });
                 }
 
                 if (result.IsLockedOut)
                 {
-                    _logger.LogWarning("Conta do usuário bloqueada.");
+                    _logger.LogWarning("Conta bloqueada para {Email}.", model.Email);
                     return RedirectToAction(nameof(Lockout));
                 }
                 else
                 {
+                    _logger.LogWarning("Tentativa de login inválida para {Email}.", model.Email);
                     ModelState.AddModelError(string.Empty, "Tentativa de login inválida.");
                     return View(model);
                 }
@@ -81,6 +90,9 @@ namespace IntranetDocumentos.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Realiza logout do usuário.
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
@@ -90,9 +102,13 @@ namespace IntranetDocumentos.Controllers
             return RedirectToAction("Login");
         }
 
+        /// <summary>
+        /// Exibe tela de acesso negado.
+        /// </summary>
         [HttpGet]
         public IActionResult AccessDenied()
         {
+            _logger.LogWarning("Acesso negado a recurso protegido.");
             return View();
         }
     }
