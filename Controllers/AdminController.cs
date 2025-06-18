@@ -28,8 +28,12 @@ namespace IntranetDocumentos.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Lista todos os usuários e seus papéis.
+        /// </summary>
         public async Task<IActionResult> Index()
         {
+            _logger.LogInformation("Acessando lista de usuários.");
             var users = await _userManager.Users
                 .Include(u => u.Department)
                 .ToListAsync();
@@ -43,7 +47,10 @@ namespace IntranetDocumentos.Controllers
             }
 
             return View(usersWithRoles);
-        }        [HttpGet]
+        }        /// <summary>
+        /// Exibe formulário para criação de usuário.
+        /// </summary>
+        [HttpGet]
         public async Task<IActionResult> CreateUser()
         {
             var departments = await _context.Departments.OrderBy(d => d.Name).ToListAsync();
@@ -58,6 +65,9 @@ namespace IntranetDocumentos.Controllers
             return View(viewModel);
         }
 
+        /// <summary>
+        /// Cria um novo usuário.
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateUser(CreateUserViewModel model)
@@ -84,8 +94,10 @@ namespace IntranetDocumentos.Controllers
                     _logger.LogInformation("Usuário {Email} criado com sucesso.", model.Email);
                     TempData["Success"] = "Usuário criado com sucesso!";
                     return RedirectToAction(nameof(Index));
-                }                foreach (var error in result.Errors)
+                }
+                foreach (var error in result.Errors)
                 {
+                    _logger.LogWarning("Erro ao criar usuário: {Error}", error.Description);
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
@@ -137,12 +149,13 @@ namespace IntranetDocumentos.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
+                _logger.LogWarning("Id de usuário nulo ou vazio ao editar usuário.");
                 return NotFound();
             }
-
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
+                _logger.LogWarning("Usuário não encontrado ao editar: {Id}", id);
                 return NotFound();
             }
 
@@ -156,6 +169,7 @@ namespace IntranetDocumentos.Controllers
                 var updateResult = await _userManager.UpdateAsync(user);
                 if (updateResult.Succeeded)
                 {
+                    _logger.LogInformation("Usuário {Email} atualizado com sucesso.", model.Email);
                     // Atualizar roles
                     var currentRoles = await _userManager.GetRolesAsync(user);
                     await _userManager.RemoveFromRolesAsync(user, currentRoles);
@@ -175,10 +189,11 @@ namespace IntranetDocumentos.Controllers
                     TempData["Success"] = "Usuário atualizado com sucesso!";
                     return RedirectToAction(nameof(Index));
                 }
-
                 foreach (var error in updateResult.Errors)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);                }
+                    _logger.LogWarning("Erro ao atualizar usuário: {Error}", error.Description);
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
 
             // Recarregar listas em caso de erro
@@ -195,25 +210,26 @@ namespace IntranetDocumentos.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
+                _logger.LogWarning("Id de usuário nulo ou vazio ao excluir usuário.");
                 return NotFound();
             }
-
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
+                _logger.LogWarning("Usuário não encontrado ao excluir: {Id}", id);
                 return NotFound();
             }
-
             var result = await _userManager.DeleteAsync(user);
             if (result.Succeeded)
             {
+                _logger.LogInformation("Usuário {Email} excluído com sucesso.", user.Email);
                 TempData["Success"] = "Usuário excluído com sucesso!";
             }
             else
             {
+                _logger.LogError("Erro ao excluir usuário {Email}", user.Email);
                 TempData["Error"] = "Erro ao excluir usuário.";
             }
-
             return RedirectToAction(nameof(Index));
         }
 
