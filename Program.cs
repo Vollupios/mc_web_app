@@ -132,9 +132,11 @@ public static class SeedData
         RoleManager<IdentityRole> roleManager,
         IConfiguration config,
         ILogger logger)
-    {
-        // Ensure database is created
+    {        // Ensure database is created
         await context.Database.EnsureCreatedAsync();
+
+        // Create Ramais table if it doesn't exist
+        await CreateRamaisTableIfNotExists(context);
 
         // Create roles if they don't exist
         string[] roleNames = { "Admin", "Gestor", "Usuario" };
@@ -176,8 +178,43 @@ public static class SeedData
             }
             await userManager.AddToRoleAsync(adminUser, "Admin");
             // Não precisa de SaveChangesAsync aqui, pois Identity já salva.
+        }        await context.SaveChangesAsync();
+    }    /// <summary>
+    /// Cria a tabela Ramais se ela não existir
+    /// </summary>
+    private static async Task CreateRamaisTableIfNotExists(ApplicationDbContext context)
+    {
+        var connection = context.Database.GetDbConnection();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS Ramais (
+                Id INTEGER NOT NULL CONSTRAINT PK_Ramais PRIMARY KEY AUTOINCREMENT,
+                Numero TEXT NOT NULL,
+                Nome TEXT NOT NULL,
+                TipoFuncionario INTEGER NOT NULL DEFAULT 0,
+                DepartmentId INTEGER NULL,
+                FotoPath TEXT NULL,
+                Observacoes TEXT NULL,
+                DataCriacao TEXT NOT NULL,
+                Ativo INTEGER NOT NULL,
+                CONSTRAINT FK_Ramais_Departments_DepartmentId FOREIGN KEY (DepartmentId) REFERENCES Departments (Id) ON DELETE SET NULL
+            )";
+        await command.ExecuteNonQueryAsync();
+
+        // Adicionar campo TipoFuncionario se a tabela já existir mas não tiver este campo
+        try
+        {
+            using var alterCommand = connection.CreateCommand();
+            alterCommand.CommandText = "ALTER TABLE Ramais ADD COLUMN TipoFuncionario INTEGER NOT NULL DEFAULT 0";
+            await alterCommand.ExecuteNonQueryAsync();
+        }
+        catch
+        {
+            // Campo já existe, ignora o erro
         }
 
-        await context.SaveChangesAsync();
+        await connection.CloseAsync();
     }
 }

@@ -1,0 +1,175 @@
+@model IEnumerable<IntranetDocumentos.Models.Ramal>
+
+@{
+    ViewData["Title"] = "Ramais Telefônicos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">
+            <i class="bi bi-telephone"></i> Ramais Telefônicos
+        </h1>
+        <p class="text-muted mb-0">Lista de ramais do escritório</p>
+    </div>
+    @if (User.IsInRole("Admin"))
+    {
+        <div>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Novo Ramal
+            </a>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info text-center">
+        <i class="bi bi-info-circle"></i>
+        <h5>Nenhum ramal cadastrado</h5>
+        <p class="mb-0">
+            @if (User.IsInRole("Admin"))
+            {
+                <text>Clique no botão "Novo Ramal" para adicionar o primeiro ramal.</text>
+            }
+            else
+            {
+                <text>Não há ramais cadastrados no momento.</text>
+            }
+        </p>
+    </div>
+}
+else
+{
+    <div class="row">
+        @foreach (var ramal in Model)
+        {
+            <div class="col-md-6 col-lg-4 col-xl-3 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <!-- Foto do funcionário -->
+                        <div class="mb-3">
+                            @if (!string.IsNullOrEmpty(ramal.FotoPath))
+                            {
+                                <img src="@ramal.FotoPath" alt="@ramal.Nome" 
+                                     class="rounded-circle img-fluid ramal-foto" 
+                                     style="width: 80px; height: 80px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center ramal-foto-placeholder"
+                                     style="width: 80px; height: 80px;">
+                                    <i class="bi bi-person text-white" style="font-size: 2rem;"></i>
+                                </div>
+                            }
+                        </div>                        <!-- Nome -->
+                        <h5 class="card-title mb-1">@ramal.Nome</h5>                        <!-- Tipo de Funcionário -->
+                        @if (ramal.TipoFuncionario != TipoFuncionario.Normal)
+                        {
+                            <p class="text-muted small mb-2">
+                                <span class="badge @(ramal.TipoFuncionario == TipoFuncionario.LicencaMaternidade ? "bg-info" : "bg-secondary")">
+                                    @if (ramal.TipoFuncionario == TipoFuncionario.LicencaMaternidade)
+                                    {
+                                        <i class="bi bi-baby me-1"></i>
+                                    }
+                                    @(ramal.TipoFuncionario == TipoFuncionario.LicencaMaternidade ? "Licença Maternidade" : "Externo")
+                                </span>
+                            </p>
+                        }
+
+                        <!-- Número do Ramal ou Status -->
+                        <div class="alert mb-3" 
+                             style="@(ramal.TipoFuncionario == TipoFuncionario.Normal ? 
+                                     "background-color: var(--primary-color); border-color: var(--primary-color); color: white;" : 
+                                     ramal.TipoFuncionario == TipoFuncionario.LicencaMaternidade ?
+                                     "background-color: #17a2b8; border-color: #17a2b8; color: white;" :
+                                     "background-color: var(--secondary-color); border-color: var(--secondary-color); color: white;")">
+                            <div class="d-flex align-items-center justify-content-center">
+                                @if (ramal.TipoFuncionario == TipoFuncionario.Normal)
+                                {
+                                    <i class="bi bi-telephone-fill me-2"></i>
+                                }
+                                else if (ramal.TipoFuncionario == TipoFuncionario.LicencaMaternidade)
+                                {
+                                    <i class="bi bi-baby me-2"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-person-badge me-2"></i>
+                                }
+                                <strong style="font-size: 1.1rem;">@ramal.RamalDisplay</strong>
+                            </div>
+                        </div><!-- Departamento -->
+                        @if (ramal.Department != null)
+                        {
+                            <p class="mb-2">
+                                <i class="bi bi-building text-muted"></i>
+                                <small class="text-muted">@ramal.Department.Name</small>
+                            </p>
+                        }
+
+                        <!-- Observações -->
+                        @if (!string.IsNullOrEmpty(ramal.Observacoes))
+                        {
+                            <p class="text-muted small">
+                                <i class="bi bi-info-circle"></i>
+                                @ramal.Observacoes
+                            </p>
+                        }
+                    </div>
+
+                    <!-- Ações do Admin -->
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <div class="card-footer bg-transparent border-top-0">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a asp-action="Edit" asp-route-id="@ramal.Id" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@ramal.Id" method="post" 
+                                      class="d-inline" 
+                                      onsubmit="return confirm('Tem certeza que deseja remover este ramal?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash"></i> Remover
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <style>
+        .ramal-foto {
+            border: 3px solid var(--primary-color);
+            transition: transform 0.2s ease;
+        }
+        
+        .ramal-foto:hover {
+            transform: scale(1.05);
+        }
+
+        .ramal-foto-placeholder {
+            border: 3px solid var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+        }
+
+        .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+        }
+
+        .alert-primary {
+            color: white !important;
+        }
+    </style>
+}

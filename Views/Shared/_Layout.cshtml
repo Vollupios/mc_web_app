@@ -20,8 +20,7 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     @if (User.Identity?.IsAuthenticated == true)
-                    {
-                        <ul class="navbar-nav flex-grow-1">
+                    {                        <ul class="navbar-nav flex-grow-1">
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Documents" asp-action="Index">
                                     <i class="bi bi-file-text"></i> Documentos
@@ -30,6 +29,11 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Documents" asp-action="Upload">
                                     <i class="bi bi-cloud-upload"></i> Enviar Documento
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Ramais" asp-action="Index">
+                                    <i class="bi bi-telephone"></i> Ramais
                                 </a>
                             </li>
                             @if (User.IsInRole("Admin"))

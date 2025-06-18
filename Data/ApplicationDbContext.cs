@@ -9,10 +9,9 @@ namespace IntranetDocumentos.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-        }
-
-        public DbSet<Department> Departments { get; set; }
+        }        public DbSet<Department> Departments { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<Ramal> Ramais { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -29,12 +28,17 @@ namespace IntranetDocumentos.Data
                 .HasOne(d => d.Uploader)
                 .WithMany(u => u.UploadedDocuments)
                 .HasForeignKey(d => d.UploaderId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<Document>()
+                .OnDelete(DeleteBehavior.Restrict);            builder.Entity<Document>()
                 .HasOne(d => d.Department)
                 .WithMany(dep => dep.Documents)
                 .HasForeignKey(d => d.DepartmentId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Configuração das relações para Ramal
+            builder.Entity<Ramal>()
+                .HasOne(r => r.Department)
+                .WithMany()
+                .HasForeignKey(r => r.DepartmentId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             // Seed data para departamentos

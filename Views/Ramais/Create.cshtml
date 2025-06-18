@@ -1,0 +1,131 @@
+@model IntranetDocumentos.Models.ViewModels.RamalViewModel
+
+@{
+    ViewData["Title"] = "Novo Ramal";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-telephone-plus"></i> Novo Ramal
+                </h4>
+                <small class="text-light">Cadastre um novo ramal telefônico</small>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Numero" class="form-control" placeholder="Número do Ramal" />
+                                <label asp-for="Numero"></label>
+                                <span asp-validation-for="Numero" class="text-danger"></span>                                <div class="form-text">
+                                    Para funcionários externos ou em licença, digite qualquer número ou deixe vazio
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Nome" class="form-control" placeholder="Nome" />
+                                <label asp-for="Nome"></label>
+                                <span asp-validation-for="Nome" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <select asp-for="TipoFuncionario" class="form-select">
+                                    <option value="0">Normal</option>
+                                    <option value="1">Licença Maternidade</option>
+                                    <option value="2">Externo</option>
+                                </select>
+                                <label asp-for="TipoFuncionario"></label>
+                                <span asp-validation-for="TipoFuncionario" class="text-danger"></span>                                <div class="form-text">
+                                    Funcionários externos mostrarão "Externo", em licença maternidade mostrarão "Indisponível"
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <select asp-for="DepartmentId" class="form-select">
+                                    <option value="">Selecione um departamento</option>
+                                    @foreach (var department in Model.AvailableDepartments)
+                                    {
+                                        <option value="@department.Id">@department.Name</option>
+                                    }
+                                </select>
+                                <label asp-for="DepartmentId"></label>
+                                <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FotoFile" class="form-label">
+                            <i class="bi bi-camera"></i> Foto do Funcionário
+                        </label>
+                        <input asp-for="FotoFile" type="file" class="form-control" 
+                               accept="image/*" id="fotoInput" />
+                        <div class="form-text">
+                            Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 2MB
+                        </div>
+                        <span asp-validation-for="FotoFile" class="text-danger"></span>
+                        
+                        <!-- Preview da imagem -->
+                        <div id="imagePreview" class="mt-2" style="display: none;">
+                            <img id="previewImg" src="" alt="Preview" 
+                                 class="img-thumbnail" style="max-width: 150px; max-height: 150px;" />
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <textarea asp-for="Observacoes" class="form-control" 
+                                  placeholder="Observações" style="height: 100px;"></textarea>
+                        <label asp-for="Observacoes"></label>
+                        <span asp-validation-for="Observacoes" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input asp-for="Ativo" class="form-check-input" />
+                        <label asp-for="Ativo" class="form-check-label">
+                            Ramal ativo
+                        </label>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Voltar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Salvar Ramal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Preview da imagem
+        document.getElementById('fotoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById('imagePreview').style.display = 'none';
+            }
+        });
+    </script>
+}
