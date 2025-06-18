@@ -4,6 +4,17 @@ using IntranetDocumentos.Data;
 using IntranetDocumentos.Models;
 using IntranetDocumentos.Services;
 
+// ...existing code...
+
+// Inicialização assíncrona do banco e seed
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await SeedAsync(services, app.Configuration);
+}
+
+app.Run();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
