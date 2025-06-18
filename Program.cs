@@ -100,25 +100,28 @@ app.MapControllerRoute(
     pattern: "{controller=Documents}/{action=Index}/{id?}");
 
 // Inicialização assíncrona do banco e seed
-async Task SeedAsync(IServiceProvider services, IConfiguration config)
+// Inicializa o banco de dados e cria os roles
+using (var scope = app.Services.CreateScope())
 {
-    var context = services.GetRequiredService<ApplicationDbContext>();
-    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var services = scope.ServiceProvider;
+    var config = app.Configuration;
     var logger = services.GetRequiredService<ILogger<Program>>();
+    
     try
     {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        
         await SeedData.Initialize(context, userManager, roleManager, config, logger);
+        logger.LogInformation("Seed da base de dados concluído com sucesso");
     }
     catch (Exception ex)
     {
         logger.LogError(ex, "Erro ao inicializar o banco de dados.");
-        throw;
+        // Não relançamos a exceção aqui para permitir que a aplicação continue mesmo se o seed falhar
     }
 }
-
-// Inicializa o banco de dados e cria os roles
-await SeedAsync(app.Services, app.Configuration);
 
 app.Run();
 
