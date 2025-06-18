@@ -3,17 +3,12 @@ using Microsoft.AspNetCore.Identity;
 using IntranetDocumentos.Data;
 using IntranetDocumentos.Models;
 using IntranetDocumentos.Services;
-
-// ...existing code...
-
-// Inicialização assíncrona do banco e seed
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    await SeedAsync(services, app.Configuration);
-}
-
-app.Run();
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -122,6 +117,7 @@ async Task SeedAsync(IServiceProvider services, IConfiguration config)
     }
 }
 
+// Inicializa o banco de dados e cria os roles
 await SeedAsync(app.Services, app.Configuration);
 
 app.Run();
