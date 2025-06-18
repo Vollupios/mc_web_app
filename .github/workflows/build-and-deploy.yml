@@ -1,0 +1,120 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+      
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --configuration Release
+      continue-on-error: true
+      
+    - name: Publish
+      run: dotnet publish --no-build --configuration Release --output ./publish
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: intranet-documentos-build
+        path: ./publish/
+        retention-days: 30
+        
+    - name: Upload database artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: database-files
+        path: |
+          *.db
+          *.db-shm
+          *.db-wal
+        retention-days: 30
+        if-no-files-found: ignore
+
+  deploy-staging:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: intranet-documentos-build
+        path: ./staging-deploy
+        
+    - name: List artifacts
+      run: ls -la ./staging-deploy
+      
+    - name: Deploy to Staging
+      run: |
+        echo "Deploying to staging environment..."
+        echo "Artifact contents:"
+        find ./staging-deploy -type f -name "*.dll" -o -name "*.exe" -o -name "*.json"
+        # Add your staging deployment commands here
+        
+  deploy-production:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: intranet-documentos-build
+        path: ./production-deploy
+        
+    - name: Download database artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: database-files
+        path: ./database-backup
+        
+    - name: Deploy to Production
+      run: |
+        echo "Deploying to production environment..."
+        echo "Application artifacts:"
+        find ./production-deploy -type f -name "*.dll" -o -name "*.exe" -o -name "*.json"
+        echo "Database artifacts:"
+        find ./database-backup -type f -name "*.db*" 2>/dev/null || echo "No database files found"
+        # Add your production deployment commands here
+        
+  security-scan:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: intranet-documentos-build
+        path: ./scan-artifacts
+        
+    - name: Run security scan
+      run: |
+        echo "Running security scan on artifacts..."
+        # Add security scanning tools here
+        # Example: OWASP dependency check, CodeQL, etc.

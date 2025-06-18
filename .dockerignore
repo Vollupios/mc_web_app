@@ -1,0 +1,63 @@
+# Ignore build outputs
+bin/
+obj/
+out/
+publish/
+artifacts/
+
+# Ignore development files
+*.db
+*.db-shm
+*.db-wal
+*.log
+logs/
+uploads/
+
+# Ignore Git
+.git/
+.gitignore
+.gitattributes
+
+# Ignore VS Code
+.vscode/
+*.code-workspace
+
+# Ignore documentation
+README.md
+LICENSE
+CHANGELOG.md
+*.md
+
+# Ignore test files
+tests/
+test-results/
+TestResults/
+coverage/
+
+# Ignore temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Ignore node modules if any
+node_modules/
+npm-debug.log*
+
+# Ignore IDE files
+.idea/
+.vs/
+*.swp
+*.swo
+
+# Ignore certificates
+*.pfx
+*.p12
+*.key
+*.pem
+
+# Ignore environment files
+.env
+.env.local
+.env.development
+.env.production
