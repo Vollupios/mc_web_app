@@ -2,8 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Intranet Documentos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />    <title>@ViewData["Title"] - Marcos Contabilidade</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -11,11 +10,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
+    <header>        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Documents" asp-action="Index">
-                    <i class="bi bi-folder-fill"></i> Intranet Documentos
+                    <img src="~/images/logo.png" alt="Marcos Contabilidade" class="logo-img" />
+                    <span>Marcos Contabilidade</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -83,11 +82,12 @@
             }
             @RenderBody()
         </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
+    </div>    <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - Intranet Documentos - Sistema de Gestão de Documentos
+            <div class="d-flex justify-content-between align-items-center">
+                <span>&copy; 2025 - Marcos Contabilidade - Sistema de Gestão de Documentos</span>
+                <small class="text-light">Desenvolvido para excelência em contabilidade</small>
+            </div>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

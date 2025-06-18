@@ -1,0 +1,4 @@
+<!-- Placeholder para logo.png -->
+<!-- Este arquivo deve ser substituído pela logo da Marcos Contabilidade -->
+<!-- Dimensões recomendadas: 200x80 pixels ou similar -->
+<!-- Formato: PNG com fundo transparente -->
