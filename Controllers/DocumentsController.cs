@@ -12,6 +12,7 @@ namespace IntranetDocumentos.Controllers
     {
         private readonly IDocumentService _documentService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IAnalyticsService _analyticsService;
         private readonly ILogger<DocumentsController> _logger;
 
         /// <summary>
@@ -20,9 +21,12 @@ namespace IntranetDocumentos.Controllers
         public DocumentsController(
             IDocumentService documentService,
             UserManager<ApplicationUser> userManager,
+            IAnalyticsService analyticsService,
             ILogger<DocumentsController> logger)
         {
             _documentService = documentService;
+            _userManager = userManager;
+            _analyticsService = analyticsService;
             _userManager = userManager;
             _logger = logger;
         }
@@ -147,6 +151,19 @@ namespace IntranetDocumentos.Controllers
             if (!System.IO.File.Exists(filePath))
             {
                 return NotFound("Arquivo não encontrado no servidor.");
+            }
+
+            // Registrar o download para analytics
+            try
+            {
+                var userAgent = Request.Headers["User-Agent"].ToString();
+                var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+                await _analyticsService.RegisterDocumentDownloadAsync(id, user.Id, userAgent, ipAddress);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao registrar download do documento {DocumentId}", id);
+                // Não falha o download por causa do analytics
             }
 
             var memory = new MemoryStream();

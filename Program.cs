@@ -70,6 +70,7 @@ public partial class Program
         builder.Services.AddScoped<IDatabaseBackupService, DatabaseBackupService>();
         builder.Services.AddScoped<IFileUploadService, FileUploadService>();
         builder.Services.AddScoped<IReuniaoService, ReuniaoService>();
+        builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 
         // Registrar novos serviços de documento - ISP aplicado
         builder.Services.AddScoped<IntranetDocumentos.Services.Documents.IDocumentReader, IntranetDocumentos.Services.Documents.DocumentReader>();

@@ -11,6 +11,7 @@ namespace IntranetDocumentos.Data
         {
         }        public DbSet<Department> Departments { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<DocumentDownload> DocumentDownloads { get; set; }
         public DbSet<Ramal> Ramais { get; set; }
         public DbSet<Reuniao> Reunioes { get; set; }
         public DbSet<ReuniaoParticipante> ReuniaoParticipantes { get; set; }
@@ -34,7 +35,20 @@ namespace IntranetDocumentos.Data
                 .HasOne(d => d.Department)
                 .WithMany(dep => dep.Documents)
                 .HasForeignKey(d => d.DepartmentId)
-                .OnDelete(DeleteBehavior.SetNull);            // Configuração das relações para Ramal
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Configuração das relações para DocumentDownload
+            builder.Entity<DocumentDownload>()
+                .HasOne(dd => dd.Document)
+                .WithMany()
+                .HasForeignKey(dd => dd.DocumentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<DocumentDownload>()
+                .HasOne(dd => dd.User)
+                .WithMany()
+                .HasForeignKey(dd => dd.UserId)
+                .OnDelete(DeleteBehavior.Cascade);            // Configuração das relações para Ramal
             builder.Entity<Ramal>()
                 .HasOne(r => r.Department)                .WithMany()
                 .HasForeignKey(r => r.DepartmentId)

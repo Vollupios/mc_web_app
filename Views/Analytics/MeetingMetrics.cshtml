@@ -1,0 +1,263 @@
+@model IntranetDocumentos.Models.ViewModels.ReunioesMetricsViewModel
+@{
+    ViewData["Title"] = "Métricas de Reuniões";
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="bi bi-calendar-event me-2"></i>Métricas de Reuniões
+        </h1>
+        <a href="@Url.Action("Dashboard", "Analytics")" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-1"></i>Voltar ao Dashboard
+        </a>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-event fs-1 mb-2"></i>
+                    <h4 class="card-title">@Model.TotalReunioes</h4>
+                    <p class="card-text">Total de Reuniões</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-check fs-1 mb-2"></i>
+                    <h4 class="card-title">@Model.ReunioesMesAtual</h4>
+                    <p class="card-text">Este Mês</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-clock fs-1 mb-2"></i>
+                    <h4 class="card-title">@Model.ReunioesPendentes</h4>
+                    <p class="card-text">Pendentes</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-stopwatch fs-1 mb-2"></i>
+                    <h4 class="card-title">@Model.TempoMedioReunioes.ToString("F0")'</h4>
+                    <p class="card-text">Tempo Médio</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Reuniões por Tipo -->
+        @if (Model.ReuniaoPorTipo.Any())
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="bi bi-pie-chart me-2"></i>Reuniões por Tipo
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="reunioesPorTipoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Reuniões por Status -->
+        @if (Model.ReuniaoPorStatus.Any())
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="bi bi-bar-chart me-2"></i>Status das Reuniões
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="reunioesPorStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Tabela de Departamentos -->
+    @if (Model.ReuniaoPorDepartamento.Any())
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-building me-2"></i>Reuniões por Departamento
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Departamento</th>
+                                <th class="text-center">Reuniões</th>
+                                <th class="text-center">Percentual</th>
+                                <th class="text-center">Atividade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var dept in Model.ReuniaoPorDepartamento.OrderByDescending(d => d.Count))
+                            {
+                                <tr>
+                                    <td><strong>@dept.DepartmentName</strong></td>
+                                    <td class="text-center">
+                                        <span class="badge bg-primary">@dept.Count</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-info">@dept.Percentage.ToString("F1")%</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" role="progressbar" style="width: @dept.Percentage.ToString("F1")%">
+                                                @dept.Percentage.ToString("F1")%
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Histórico Mensal -->
+    @if (Model.ReuniaoPorMes.Any())
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-graph-up me-2"></i>Histórico Mensal
+                </h6>
+            </div>
+            <div class="card-body">
+                <canvas id="reunioesPorMesChart"></canvas>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Gráfico de Reuniões por Tipo
+        @if (Model.ReuniaoPorTipo.Any())
+        {
+            <text>
+            const tipoCtx = document.getElementById('reunioesPorTipoChart');
+            const tipoData = @Html.Raw(Json.Serialize(Model.ReuniaoPorTipo));
+            
+            new Chart(tipoCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: tipoData.map(d => d.tipoReuniao),
+                    datasets: [{
+                        data: tipoData.map(d => d.count),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 205, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            </text>
+        }
+
+        // Gráfico de Reuniões por Status
+        @if (Model.ReuniaoPorStatus.Any())
+        {
+            <text>
+            const statusCtx = document.getElementById('reunioesPorStatusChart');
+            const statusData = @Html.Raw(Json.Serialize(Model.ReuniaoPorStatus));
+            
+            new Chart(statusCtx, {
+                type: 'bar',
+                data: {
+                    labels: statusData.map(d => d.status),
+                    datasets: [{
+                        label: 'Reuniões',
+                        data: statusData.map(d => d.count),
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            </text>
+        }
+
+        // Gráfico de Histórico Mensal
+        @if (Model.ReuniaoPorMes.Any())
+        {
+            <text>
+            const mesCtx = document.getElementById('reunioesPorMesChart');
+            const mesData = @Html.Raw(Json.Serialize(Model.ReuniaoPorMes));
+            
+            new Chart(mesCtx, {
+                type: 'line',
+                data: {
+                    labels: mesData.map(d => d.monthName),
+                    datasets: [{
+                        label: 'Reuniões',
+                        data: mesData.map(d => d.count),
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            </text>
+        }
+    </script>
+}

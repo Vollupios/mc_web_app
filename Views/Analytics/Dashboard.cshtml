@@ -1,0 +1,323 @@
+@model IntranetDocumentos.Models.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard de Análises";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="bi bi-bar-chart-line me-2"></i>Dashboard de Análises
+                </h1>
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="periodFilter" data-bs-toggle="dropdown">
+                        <i class="bi bi-calendar-range me-1"></i>Filtro de Período
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="?periodo=7">Últimos 7 dias</a></li>
+                        <li><a class="dropdown-item" href="?periodo=30">Últimos 30 dias</a></li>
+                        <li><a class="dropdown-item" href="?periodo=90">Últimos 90 dias</a></li>
+                        <li><a class="dropdown-item" href="?periodo=365">Último ano</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total de Documentos
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.DocumentStatistics.TotalDocuments
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-file-earmark-text fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Downloads Totais
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.DocumentStatistics.TotalDownloads
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-download fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Reuniões Agendadas
+                            </div>                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.ReunioesMetrics.TotalReunioes
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-calendar-event fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Departamentos Ativos
+                            </div>                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.DepartmentActivity.DepartmentStats.Count
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-building fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row">
+        <!-- Atividade por Departamento -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-bar-chart me-2"></i>Atividade por Departamento
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="departmentActivityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Documentos -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-trophy me-2"></i>Documentos Mais Baixados
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.DocumentStatistics.TopDownloadedDocuments.Any())
+                    {
+                        @foreach (var doc in Model.DocumentStatistics.TopDownloadedDocuments.Take(5))
+                        {                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0 small font-weight-bold" title="@doc.FileName">
+                                        @(doc.FileName.Length > 30 ? doc.FileName.Substring(0, 30) + "..." : doc.FileName)
+                                    </h6>
+                                    <small class="text-muted">@doc.DepartmentName</small>
+                                </div>
+                                <div class="text-right">
+                                    <span class="badge bg-primary">@doc.DownloadCount</span>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">Nenhum download registrado ainda.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Detalhadas -->
+    <div class="row">
+        <!-- Documentos por Departamento -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-pie-chart me-2"></i>Documentos por Departamento
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.DocumentStatistics.DocumentsByDepartment.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Departamento</th>
+                                        <th class="text-center">Documentos</th>
+                                        <th class="text-center">Downloads</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var dept in Model.DocumentStatistics.DocumentsByDepartment.OrderByDescending(d => d.DocumentCount))
+                                    {
+                                        <tr>
+                                            <td>@dept.DepartmentName</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info">@dept.DocumentCount</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-success">@dept.DownloadCount</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">Nenhum documento encontrado.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Reuniões por Tipo -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-calendar-check me-2"></i>Reuniões por Tipo
+                    </h6>
+                </div>
+                <div class="card-body">                    @if (Model.ReunioesMetrics.ReuniaoPorTipo.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo de Reunião</th>
+                                        <th class="text-center">Quantidade</th>
+                                        <th class="text-center">%</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var meeting in Model.ReunioesMetrics.ReuniaoPorTipo.OrderByDescending(m => m.Count))
+                                    {
+                                        var percentage = Model.ReunioesMetrics.TotalReunioes > 0 ? 
+                                            (meeting.Count * 100.0 / Model.ReunioesMetrics.TotalReunioes).ToString("F1") : "0";
+                                        <tr>
+                                            <td>@meeting.TipoReuniao</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary">@meeting.Count</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <small class="text-muted">@percentage%</small>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">Nenhuma reunião encontrada.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>        // Configuração do gráfico de atividade por departamento
+        const ctx = document.getElementById('departmentActivityChart');
+        const departmentData = @Html.Raw(Json.Serialize(Model.DepartmentActivity.DepartmentStats));
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: departmentData.map(d => d.departmentName),
+                datasets: [{
+                    label: 'Documentos',
+                    data: departmentData.map(d => d.documentCount),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Downloads',
+                    data: departmentData.map(d => d.downloadCount),
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Atividade por Departamento'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+}
+
+<style>
+    .border-left-primary {
+        border-left: 0.25rem solid #4e73df !important;
+    }
+    .border-left-success {
+        border-left: 0.25rem solid #1cc88a !important;
+    }
+    .border-left-info {
+        border-left: 0.25rem solid #36b9cc !important;
+    }
+    .border-left-warning {
+        border-left: 0.25rem solid #f6c23e !important;
+    }
+    .text-xs {
+        font-size: 0.7rem;
+    }
+    .text-gray-300 {
+        color: #dddfeb !important;
+    }
+    .text-gray-800 {
+        color: #5a5c69 !important;
+    }
+</style>
