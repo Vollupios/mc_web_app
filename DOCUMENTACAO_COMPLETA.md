@@ -122,7 +122,7 @@ IntranetDocumentos/
 │   ├── images/                  # Imagens
 │   └── lib/                     # Bibliotecas
 └── DocumentsStorage/     # Armazenamento de arquivos
-```
+```text
 
 ---
 
@@ -205,10 +205,9 @@ IntranetDocumentos/
   },
   "Backup": {
     "RetentionDays": 30,
-    "BackupInterval": "24:00:00"
-  }
+    "BackupInterval": "24:00:00"  }
 }
-```
+```json
 
 ---
 
@@ -450,7 +449,7 @@ Este projeto está licenciado sob a licença MIT. Veja o arquivo LICENSE para de
 
 ## Desenvolvedor
 
-**Projeto IntranetDocumentos**  
-**Desenvolvido com 💻 e ☕ por Vollupios**  
-**Status:** ✅ PRODUCTION READY  
+**Projeto IntranetDocumentos**
+**Desenvolvido com 💻 e ☕ por Vollupios**
+**Status:** ✅ PRODUCTION READY
 **Última Atualização:** 21 de Junho de 2025

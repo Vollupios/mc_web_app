@@ -56,11 +56,10 @@ public class DocumentDownload
     public int Id { get; set; }
     public int DocumentId { get; set; }
     public string UserId { get; set; }
-    public DateTime DownloadDate { get; set; }
-    public string? UserAgent { get; set; }
+    public DateTime DownloadDate { get; set; }    public string? UserAgent { get; set; }
     public string? IpAddress { get; set; }
 }
-```
+```csharp
 
 #### ViewModels
 
@@ -111,10 +110,9 @@ Modificado para registrar downloads:
 public async Task<IActionResult> Download(int id)
 {
     // ... código existente ...
-    
-    // Registrar o download para analytics
+      // Registrar o download para analytics
     await _analyticsService.RegisterDownloadAsync(document.Id, User.Identity.Name, HttpContext);
-    
+
     // ... retornar arquivo ...
 }
 ```
@@ -204,7 +202,7 @@ Views/
     DepartmentActivity.cshtml
 Migrations/
   20250621000000_AddDocumentDownloadAnalytics.cs
-```
+```text
 
 ## Extensões Futuras
 
@@ -250,7 +248,7 @@ dotnet run backup-database
 
 # Testes de analytics
 dotnet test --filter Analytics
-```
+```bash
 
 ### Troubleshooting
 
