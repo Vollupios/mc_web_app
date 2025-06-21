@@ -21,6 +21,12 @@
     <Content Remove="mc_web_app\**" />
     <EmbeddedResource Remove="mc_web_app\**" />
     <None Remove="mc_web_app\**" />
+    
+    <!-- Excluir pasta Tests do build principal -->
+    <Compile Remove="Tests\**" />
+    <Content Remove="Tests\**" />
+    <EmbeddedResource Remove="Tests\**" />
+    <None Remove="Tests\**" />
   </ItemGroup>
 
 </Project>
