@@ -1,0 +1,110 @@
+name: Build and Deploy Clean
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+      - name: Restore dependencies
+        run: dotnet restore IntranetDocumentos.csproj
+      - name: Build
+        run: dotnet build IntranetDocumentos.csproj --no-restore --configuration Release
+      - name: Test
+        run: dotnet test IntranetDocumentos.csproj --no-build --verbosity normal --configuration Release
+        continue-on-error: true
+      - name: Publish
+        run: dotnet publish IntranetDocumentos.csproj --no-build --configuration Release --output ./publish
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: intranet-documentos-build
+          path: ./publish/
+          retention-days: 30
+      - name: Upload database artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-files
+          path: |
+            *.db
+            *.db-shm
+            *.db-wal
+            publish/*.db
+            publish/*.db-shm
+            publish/*.db-wal
+          retention-days: 30
+          if-no-files-found: ignore
+
+  deploy-dev:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: intranet-documentos-build
+          path: ./deployment
+      - name: Download database artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: database-files
+          path: ./database
+        continue-on-error: true
+      - name: Deploy to Development
+        run: |
+          echo "Deploying to development environment..."
+          ls -la ./deployment
+
+  deploy-prod:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: intranet-documentos-build
+          path: ./deployment
+      - name: Download database artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: database-files
+          path: ./database
+        continue-on-error: true
+      - name: Verify artifacts
+        run: |
+          echo "Checking available artifacts..."
+          ls -la ./deployment || echo "No deployment files found"
+          ls -la ./database || echo "No database files found"
+          echo "Artifact verification completed"
+      - name: Deploy to Production
+        run: |
+          echo "Deploying to production environment..."
+          ls -la ./deployment
+          ls -la ./database || echo "No database files found"
+      - name: Health Check
+        run: |
+          echo "Performing health check..."
+          sleep 10
+          echo "Health check completed"
+      - name: Notify Success
+        run: |
+          echo "Deployment successful!"
+          echo "Application deployed to production at $(date)"

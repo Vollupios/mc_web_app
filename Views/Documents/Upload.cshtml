@@ -1,0 +1,122 @@
+@model IntranetDocumentos.Models.ViewModels.UploadViewModel
+@{
+    ViewData["Title"] = "Enviar Documento";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header">
+                <h3 class="mb-0">
+                    <i class="bi bi-cloud-upload"></i> Enviar Novo Documento
+                </h3>
+                <small class="text-light">Faça upload de documentos para a Marcos Contabilidade</small>
+            </div>
+            <div class="card-body">
+                <form asp-action="Upload" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="File" class="form-label">Arquivo</label>
+                        <input asp-for="File" class="form-control" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar" />
+                        <span asp-validation-for="File" class="text-danger"></span>
+                        <div class="form-text">
+                            Tamanho máximo: 10MB. Tipos permitidos: PDF, Word, Excel, PowerPoint, Imagens, Texto, ZIP/RAR
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="DepartmentId" class="form-label">Departamento</label>
+                        <select asp-for="DepartmentId" class="form-select">
+                            <option value="">Geral (Todos os usuários)</option>
+                            @foreach (var department in Model.AvailableDepartments)
+                            {
+                                <option value="@department.Id">@department.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                        <div class="form-text">
+                            Selecione um departamento específico ou deixe em branco para "Geral"
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label asp-for="Description" class="form-label">Descrição (Opcional)</label>
+                        <textarea asp-for="Description" class="form-control" rows="3" placeholder="Descreva brevemente o conteúdo do documento..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Voltar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-cloud-upload"></i> Enviar Documento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <div class="alert alert-info">
+                <h6><i class="bi bi-info-circle"></i> Informações importantes:</h6>
+                <ul class="mb-0">
+                    <li><strong>Permissões:</strong> @(User.IsInRole("Admin") ? "Como administrador, você pode enviar para qualquer departamento." : User.IsInRole("Gestor") ? "Como gestor, você pode enviar para qualquer departamento." : "Você pode enviar apenas para seu departamento e para a área Geral.")</li>
+                    <li><strong>Visibilidade:</strong> Documentos enviados para "Geral" são visíveis por todos os usuários.</li>
+                    <li><strong>Departamentos:</strong> Documentos específicos são visíveis apenas pelos membros do departamento, gestores e administradores.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Preview do arquivo selecionado
+        document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const fileSize = file.size;
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                
+                if (fileSize > maxSize) {
+                    alert('O arquivo é muito grande. O tamanho máximo permitido é 10MB.');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Mostrar informações do arquivo
+                const fileName = file.name;
+                const fileType = file.type;
+                const fileSizeText = formatFileSize(fileSize);
+                
+                const info = document.createElement('div');
+                info.className = 'alert alert-success mt-2';
+                info.innerHTML = `
+                    <strong>Arquivo selecionado:</strong><br>
+                    <i class="bi bi-file"></i> ${fileName}<br>
+                    <small>Tipo: ${fileType || 'Desconhecido'} | Tamanho: ${fileSizeText}</small>
+                `;
+                
+                // Remove alert anterior se existir
+                const existingAlert = e.target.parentNode.querySelector('.alert-success');
+                if (existingAlert) {
+                    existingAlert.remove();
+                }
+                
+                e.target.parentNode.appendChild(info);
+            }
+        });
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    </script>
+}

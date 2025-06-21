@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  intranet-documentos:
+    build: .
+    container_name: intranet-documentos-app
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/IntranetDocumentos.db
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - intranet-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add a reverse proxy (nginx)
+  nginx:
+    image: nginx:alpine
+    container_name: intranet-documentos-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/ssl/certs
+    depends_on:
+      - intranet-documentos
+    networks:
+      - intranet-network
+    restart: unless-stopped
+
+networks:
+  intranet-network:
+    driver: bridge
+
+volumes:
+  app_data:
+    driver: local
+  app_uploads:
+    driver: local

@@ -1,0 +1,160 @@
+@model List<IntranetDocumentos.Models.Document>
+@{
+    ViewData["Title"] = "Documentos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 style="color: var(--primary-color);">
+            <i class="bi bi-file-text" style="color: var(--secondary-color);"></i> 
+            Gestão de Documentos
+        </h2>
+        <p class="text-muted mb-0">Gerencie todos os documentos da Marcos Contabilidade</p>
+    </div>
+    <a asp-action="Upload" class="btn btn-primary btn-lg shadow-sm">
+        <i class="bi bi-cloud-upload"></i> Enviar Documento
+    </a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="text-center py-5">
+        <i class="bi bi-inbox" style="font-size: 3rem; color: #6c757d;"></i>
+        <h4 class="text-muted mt-3">Nenhum documento encontrado</h4>
+        <p class="text-muted">Comece enviando seu primeiro documento.</p>
+        <a asp-action="Upload" class="btn btn-primary">
+            <i class="bi bi-cloud-upload"></i> Enviar Documento
+        </a>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th><i class="bi bi-file"></i> Nome do Arquivo</th>
+                            <th><i class="bi bi-building"></i> Departamento</th>
+                            <th><i class="bi bi-person"></i> Enviado por</th>
+                            <th><i class="bi bi-calendar"></i> Data</th>
+                            <th><i class="bi bi-file-earmark-bar-graph"></i> Tamanho</th>
+                            <th><i class="bi bi-gear"></i> Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var document in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <i class="bi @GetFileIcon(document.ContentType)"></i>
+                                    @document.OriginalFileName
+                                </td>
+                                <td>
+                                    @if (document.Department != null)
+                                    {
+                                        <span class="badge bg-primary">@document.Department.Name</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Geral</span>
+                                    }
+                                </td>
+                                <td>@document.Uploader.Email</td>
+                                <td>@document.UploadDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@GetFileSize(document.FileSize)</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Download" asp-route-id="@document.Id" 
+                                           class="btn btn-sm btn-outline-primary" title="Download">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@document.Id" 
+                                           class="btn btn-sm btn-outline-info" title="Detalhes">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        @if (User.IsInRole("Admin") || document.UploaderId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="confirmDelete(@document.Id, '@document.OriginalFileName')" 
+                                                    title="Excluir">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal de confirmação de exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o documento <strong id="fileName"></strong>?</p>
+                <p class="text-danger"><small>Esta ação não pode ser desfeita.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="deleteForm" method="post" asp-action="Delete" class="d-inline">
+                    <input type="hidden" id="documentId" name="id" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, fileName) {
+            document.getElementById('documentId').value = id;
+            document.getElementById('fileName').textContent = fileName;
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
+}
+
+@functions {
+    private string GetFileIcon(string contentType)
+    {
+        return contentType.ToLower() switch
+        {
+            var ct when ct.Contains("pdf") => "bi-file-earmark-pdf",
+            var ct when ct.Contains("word") => "bi-file-earmark-word",
+            var ct when ct.Contains("excel") => "bi-file-earmark-excel",
+            var ct when ct.Contains("powerpoint") => "bi-file-earmark-ppt",
+            var ct when ct.Contains("image") => "bi-file-earmark-image",
+            var ct when ct.Contains("text") => "bi-file-earmark-text",
+            var ct when ct.Contains("zip") => "bi-file-earmark-zip",
+            _ => "bi-file-earmark"
+        };
+    }
+
+    private string GetFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+}

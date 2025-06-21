@@ -1,0 +1,287 @@
+@model IntranetDocumentos.Models.Reuniao
+
+@{
+    ViewData["Title"] = "Detalhes da Reunião";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4><i class="bi bi-calendar-event"></i> @Model.Titulo</h4>
+                    <span class="badge bg-@(Model.Status == IntranetDocumentos.Models.StatusReuniao.Agendada ? "primary" : 
+                                           Model.Status == IntranetDocumentos.Models.StatusReuniao.Realizada ? "success" : "danger") fs-6">
+                        @Model.Status.GetDisplayName()
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Informações Básicas -->
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2 mb-3">Informações Gerais</h5>
+                            
+                            <div class="mb-3">
+                                <strong><i class="bi bi-tag"></i> Tipo:</strong>
+                                <span class="badge bg-secondary ms-2">@Model.TipoReuniao.GetDisplayName()</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <strong><i class="bi bi-calendar3"></i> Data:</strong>
+                                <span class="ms-2">@Model.Data.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("pt-BR"))</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <strong><i class="bi bi-clock"></i> Horário:</strong>
+                                <span class="ms-2">@Model.HoraInicio.ToString(@"hh\:mm") às @Model.HoraFim.ToString(@"hh\:mm")</span>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.Empresa))
+                            {
+                                <div class="mb-3">
+                                    <strong><i class="bi bi-building"></i> Empresa:</strong>
+                                    <span class="ms-2">@Model.Empresa</span>
+                                </div>
+                            }                            <div class="mb-3">
+                                <strong><i class="bi bi-person"></i> Responsável:</strong>
+                                <span class="ms-2">@(Model.ResponsavelUser?.UserName ?? "Não informado") (@(Model.ResponsavelUser?.Department?.Name ?? "Sem departamento"))</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <strong><i class="bi bi-calendar-plus"></i> Agendado em:</strong>
+                                <span class="ms-2">@Model.DataCriacao.ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+                        </div>
+
+                        <!-- Informações Específicas -->
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2 mb-3">Localização/Acesso</h5>
+
+                            @if (Model.Sala.HasValue)
+                            {
+                                <div class="mb-3">
+                                    <strong><i class="bi bi-door-open"></i> Sala:</strong>
+                                    <span class="ms-2">@Model.Sala.Value.GetDisplayName()</span>
+                                </div>
+                            }
+
+                            @if (Model.Veiculo.HasValue)
+                            {
+                                <div class="mb-3">
+                                    <strong><i class="bi bi-car-front"></i> Veículo:</strong>
+                                    <span class="ms-2">@Model.Veiculo.Value.GetDisplayName()</span>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(Model.LinkOnline))
+                            {
+                                <div class="mb-3">
+                                    <strong><i class="bi bi-link-45deg"></i> Link:</strong>
+                                    <div class="mt-1">
+                                        <a href="@Model.LinkOnline" target="_blank" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-box-arrow-up-right"></i> Acessar Reunião
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Participantes -->
+                    @if (Model.Participantes != null && Model.Participantes.Any())
+                    {
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-people"></i> Participantes (@Model.Participantes.Count)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    @foreach (var participante in Model.Participantes)
+                                    {
+                                        <div class="col-md-6 mb-2">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-person-circle me-2"></i>
+                                                <div>
+                                                    <strong>@participante.Nome</strong>                                    @if (participante.Ramal != null)
+                                    {
+                                        <br><small class="text-muted">
+                                            <i class="bi bi-telephone"></i> @participante.Ramal.Numero
+                                        </small>
+                                    }
+                                    @if (participante.Departamento != null)
+                                    {
+                                        <br><small class="text-muted">
+                                            <i class="bi bi-building"></i> @participante.Departamento.Name
+                                        </small>
+                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Observações -->
+                    @if (!string.IsNullOrEmpty(Model.Observacoes))
+                    {
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-chat-text"></i> Observações</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-0">@Model.Observacoes</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel de Ações -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-gear"></i> Ações</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Voltar ao Calendário
+                        </a>
+
+                        @{
+                            var user = ViewContext.HttpContext.User;
+                            var canEdit = user.IsInRole("Admin") || Model.ResponsavelUserId == user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                        }
+
+                        @if (canEdit && Model.Status == IntranetDocumentos.Models.StatusReuniao.Agendada)
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#marcarRealizadaModal">
+                                <i class="bi bi-check-circle"></i> Marcar como Realizada
+                            </button>
+
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelarModal">
+                                <i class="bi bi-x-circle"></i> Cancelar Reunião
+                            </button>
+                        }
+
+                        @if (canEdit && Model.Status != IntranetDocumentos.Models.StatusReuniao.Agendada)
+                        {
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                <i class="bi bi-trash"></i> Excluir
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card de Status -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6><i class="bi bi-info-circle"></i> Status da Reunião</h6>
+                </div>
+                <div class="card-body">
+                    @switch (Model.Status)
+                    {
+                        case IntranetDocumentos.Models.StatusReuniao.Agendada:
+                            <div class="alert alert-primary mb-0">
+                                <i class="bi bi-calendar-check"></i>
+                                <strong>Agendada</strong><br>
+                                A reunião está agendada e pode ser editada ou cancelada.
+                            </div>
+                            break;
+                        case IntranetDocumentos.Models.StatusReuniao.Realizada:
+                            <div class="alert alert-success mb-0">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <strong>Realizada</strong><br>
+                                A reunião foi marcada como realizada.
+                            </div>
+                            break;
+                        case IntranetDocumentos.Models.StatusReuniao.Cancelada:
+                            <div class="alert alert-danger mb-0">
+                                <i class="bi bi-x-circle-fill"></i>
+                                <strong>Cancelada</strong><br>
+                                A reunião foi cancelada.
+                            </div>
+                            break;
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Marcar como Realizada -->
+<div class="modal fade" id="marcarRealizadaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Marcar Reunião como Realizada</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja marcar esta reunião como <strong>realizada</strong>?</p>
+                <p class="text-muted">Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form asp-action="MarcarRealizada" asp-route-id="@Model.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-success">Confirmar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cancelar Reunião -->
+<div class="modal fade" id="cancelarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancelar Reunião</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja <strong>cancelar</strong> esta reunião?</p>
+                <p class="text-muted">Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
+                <form asp-action="Cancelar" asp-route-id="@Model.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger">Sim, Cancelar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Excluir -->
+@if (ViewContext.HttpContext.User.IsInRole("Admin") || Model.ResponsavelUserId == ViewContext.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+{
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Excluir Reunião</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja <strong>excluir permanentemente</strong> esta reunião?</p>
+                    <p class="text-danger">Esta ação não pode ser desfeita!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger">Excluir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}

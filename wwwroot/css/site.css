@@ -1,0 +1,177 @@
+/* Marcos Contabilidade - Esquema de cores corporativo */
+:root {
+  --primary-color: #6c6c6c;        /* Cinza principal da logo */
+  --secondary-color: #e53e3e;      /* Vermelho da logo */
+  --accent-color: #4a4a4a;         /* Cinza mais escuro */
+  --light-gray: #f8f9fa;           /* Cinza claro para backgrounds */
+  --white: #ffffff;
+  --text-dark: #333333;
+}
+
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--secondary-color);
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-dark);
+}
+
+/* Customização da Navbar - Cores da Marcos Contabilidade */
+.navbar-dark.bg-primary {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%) !important;
+  border-bottom: 3px solid var(--secondary-color);
+}
+
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.4rem;
+  color: var(--white) !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-brand:hover {
+  color: var(--light-gray) !important;
+}
+
+.logo-img {
+  height: 40px;
+  width: auto;
+  filter: brightness(0) saturate(100%) invert(100%);
+}
+
+/* Botões personalizados */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.btn-danger {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn-danger:hover {
+  background-color: #d73027;
+  border-color: #d73027;
+}
+
+/* Cards e containers */
+.card {
+  border: none;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+  color: var(--white);
+  border-radius: 8px 8px 0 0 !important;
+  border-bottom: 2px solid var(--secondary-color);
+}
+
+/* Footer */
+.footer {
+  background-color: var(--primary-color);
+  color: var(--white);
+  text-align: center;
+  padding: 15px 0;
+}
+
+/* Alerts customizados */
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border-color: #f1aeb5;
+  color: #721c24;
+}
+
+/* Links e navegação */
+.nav-link {
+  color: var(--white) !important;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  color: var(--light-gray) !important;
+  transform: translateY(-1px);
+}
+
+/* Formulários */
+.form-control:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 0.2rem rgba(229, 62, 62, 0.25);
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+/* Tabelas */
+.table thead th {
+  background-color: var(--primary-color);
+  color: var(--white);
+  border: none;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(108, 108, 108, 0.05);
+}
+
+/* Badges */
+.badge.bg-primary {
+  background-color: var(--primary-color) !important;
+}
+
+.badge.bg-danger {
+  background-color: var(--secondary-color) !important;
+}
+
+/* Efeitos visuais */
+.shadow-sm {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Responsividade para logo */
+@media (max-width: 768px) {
+  .logo-img {
+    height: 32px;
+  }
+  
+  .navbar-brand {
+    font-size: 1.2rem;
+  }
+}

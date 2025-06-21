@@ -1,0 +1,222 @@
+@model IntranetDocumentos.Models.ViewModels.CalendarioViewModel
+@using IntranetDocumentos.Models
+@using IntranetDocumentos.Extensions
+
+@{
+    ViewData["Title"] = "Agenda de Reuniões";
+    var mesAtual = new DateTime(Model.Ano, Model.Mes, 1);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">
+            <i class="bi bi-calendar3"></i> Agenda de Reuniões
+        </h1>
+        <p class="text-muted mb-0">@mesAtual.ToString("MMMM yyyy", new System.Globalization.CultureInfo("pt-BR"))</p>
+    </div>
+    <div>
+        <a asp-action="Create" class="btn btn-primary me-2">
+            <i class="bi bi-plus-circle"></i> Nova Reunião
+        </a>
+        <div class="btn-group" role="group">
+            <a asp-action="Index" asp-route-mes="@(mesAtual.AddMonths(-1).Month)" 
+               asp-route-ano="@(mesAtual.AddMonths(-1).Year)" class="btn btn-outline-secondary">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary">Hoje</a>
+            <a asp-action="Index" asp-route-mes="@(mesAtual.AddMonths(1).Month)" 
+               asp-route-ano="@(mesAtual.AddMonths(1).Year)" class="btn btn-outline-secondary">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Calendário -->
+<div class="card">
+    <div class="card-body p-0">
+        @{
+            var firstDay = new DateTime(Model.Ano, Model.Mes, 1);
+            var lastDay = firstDay.AddMonths(1).AddDays(-1);
+            var startWeek = firstDay.AddDays(-(int)firstDay.DayOfWeek);
+            var endWeek = lastDay.AddDays(6 - (int)lastDay.DayOfWeek);
+            var currentDate = startWeek;
+        }
+
+        <!-- Cabeçalho dos dias da semana -->
+        <div class="row g-0 border-bottom bg-light">
+            @foreach (var dayName in new[] { "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb" })
+            {
+                <div class="col text-center p-2 fw-bold text-muted small">@dayName</div>
+            }
+        </div>
+
+        <!-- Dias do calendário -->
+        @while (currentDate <= endWeek)
+        {
+            <div class="row g-0 border-bottom" style="min-height: 120px;">
+                @for (int i = 0; i < 7; i++)
+                {
+                    var dayReunioes = Model.Reunioes.Where(r => r.Data.Date == currentDate.Date).OrderBy(r => r.HoraInicio).ToList();
+                    var isCurrentMonth = currentDate.Month == Model.Mes;
+                    var isToday = currentDate.Date == DateTime.Today;
+
+                    <div class="col border-end @(isCurrentMonth ? "" : "bg-light") @(isToday ? "bg-primary bg-opacity-10" : "")" style="min-height: 120px;">
+                        <div class="p-2">
+                            <!-- Número do dia -->
+                            <div class="fw-bold @(isCurrentMonth ? "text-dark" : "text-muted") @(isToday ? "text-primary" : "")">
+                                @currentDate.Day
+                            </div>
+
+                            <!-- Reuniões do dia -->                @if (dayReunioes.Any() && isCurrentMonth)
+                {
+                    @foreach (var reuniao in dayReunioes.Take(3))
+                    {
+                        var badgeClass = reuniao.Status switch
+                        {
+                            StatusReuniao.Agendada => "bg-primary",
+                            StatusReuniao.Realizada => "bg-success",
+                            StatusReuniao.Cancelada => "bg-secondary",
+                            _ => "bg-primary"
+                        };
+
+                        var iconClass = reuniao.TipoReuniao switch
+                        {
+                            TipoReuniao.Interno => "bi-building",
+                            TipoReuniao.Externo => "bi-geo-alt",
+                            TipoReuniao.Online => "bi-camera-video",
+                            _ => "bi-calendar"
+                        };
+
+                        <div class="mb-1">
+                            <a asp-action="Details" asp-route-id="@reuniao.Id" 
+                               class="text-decoration-none">
+                                <div class="badge @badgeClass text-start w-100 text-wrap small p-1" 
+                                     style="font-size: 0.65rem;">
+                                    <i class="@iconClass me-1"></i>
+                                    <div class="fw-bold">@reuniao.HoraInicio.ToString(@"hh\:mm")</div>
+                                    <div class="text-truncate" title="@reuniao.Titulo">@reuniao.Titulo</div>
+                                </div>
+                            </a>
+                        </div>
+                    }
+
+                                @if (dayReunioes.Count > 3)
+                                {
+                                    <div class="small text-muted">+@(dayReunioes.Count - 3) mais</div>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    currentDate = currentDate.AddDays(1);
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Lista de reuniões do dia selecionado (se for hoje) -->
+@if (Model.Reunioes.Any(r => r.Data.Date == DateTime.Today))
+{
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h5>
+                <i class="bi bi-calendar-day"></i> Reuniões de Hoje
+            </h5>
+            <div class="row">
+                @foreach (var reuniao in Model.Reunioes.Where(r => r.Data.Date == DateTime.Today).OrderBy(r => r.HoraInicio))
+                {
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title mb-0">@reuniao.Titulo</h6>
+                                    @{
+                                        var badgeClass = reuniao.Status switch
+                                        {
+                                            StatusReuniao.Agendada => "bg-primary",
+                                            StatusReuniao.Realizada => "bg-success",
+                                            StatusReuniao.Cancelada => "bg-secondary",
+                                            _ => "bg-primary"
+                                        };
+                                    }
+                                    <span class="badge @badgeClass">@reuniao.Status.GetDisplayName()</span>
+                                </div>
+                                  <p class="text-muted small mb-2">
+                                    <i class="bi bi-clock"></i> 
+                                    @reuniao.HoraInicio.ToString(@"hh\:mm") - @reuniao.HoraFim.ToString(@"hh\:mm")
+                                </p>
+                                
+                                <p class="text-muted small mb-2">
+                                    <i class="bi bi-building"></i> @reuniao.Empresa
+                                </p>
+
+                                @{
+                                    var tipoInfo = reuniao.TipoReuniao switch
+                                    {
+                                        TipoReuniao.Interno => $"Sala: {reuniao.Sala?.GetDisplayName()}",
+                                        TipoReuniao.Externo => $"Veículo: {reuniao.Veiculo?.GetDisplayName()}",
+                                        TipoReuniao.Online => "Reunião Online",
+                                        _ => ""
+                                    };
+                                }
+                                
+                                <p class="text-muted small mb-3">
+                                    @{
+                                        var iconClass = reuniao.TipoReuniao switch
+                                        {
+                                            TipoReuniao.Interno => "bi-building",
+                                            TipoReuniao.Externo => "bi-geo-alt",
+                                            TipoReuniao.Online => "bi-camera-video",
+                                            _ => "bi-calendar"
+                                        };
+                                    }
+                                    <i class="@iconClass"></i> @tipoInfo
+                                </p>
+
+                                <div class="d-flex justify-content-between">
+                                    <a asp-action="Details" asp-route-id="@reuniao.Id" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                    @if (reuniao.ResponsavelUserId == User.FindFirstValue(ClaimTypes.NameIdentifier) || User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@reuniao.Id" class="btn btn-outline-secondary btn-sm">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <style>
+        .calendar-day {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .calendar-day:hover {
+            background-color: rgba(0,123,255,0.1) !important;
+        }
+        
+        .badge {
+            font-size: 0.7rem;
+        }
+        
+        .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+        }
+    </style>
+}

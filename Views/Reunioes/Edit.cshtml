@@ -1,0 +1,338 @@
+@model IntranetDocumentos.Models.ViewModels.ReuniaoViewModel
+@using IntranetDocumentos.Models
+
+@{
+    ViewData["Title"] = "Editar Reunião";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-pencil-square"></i> Editar Reunião</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="Status" />
+                        <input type="hidden" asp-for="DataCriacao" />
+                        <input type="hidden" asp-for="ResponsavelUserId" />
+                        
+                        <div class="row">
+                            <!-- Informações Básicas -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Titulo" class="form-label">Título da Reunião <span class="text-danger">*</span></label>
+                                    <input asp-for="Titulo" class="form-control" />
+                                    <span asp-validation-for="Titulo" class="text-danger"></span>
+                                </div>                                <div class="mb-3">
+                                    <label asp-for="TipoReuniao" class="form-label">Tipo de Reunião <span class="text-danger">*</span></label>
+                                    <select asp-for="TipoReuniao" class="form-select" id="tipoReuniao" asp-items="Html.GetEnumSelectList<TipoReuniao>()">
+                                        <option value="">Selecione o tipo</option>
+                                    </select>
+                                    <span asp-validation-for="TipoReuniao" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Data" class="form-label">Data <span class="text-danger">*</span></label>
+                                    <input asp-for="Data" type="date" class="form-control" />
+                                    <span asp-validation-for="Data" class="text-danger"></span>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <label asp-for="HoraInicio" class="form-label">Hora Início <span class="text-danger">*</span></label>
+                                            <input asp-for="HoraInicio" type="time" class="form-control" />
+                                            <span asp-validation-for="HoraInicio" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <label asp-for="HoraFim" class="form-label">Hora Fim <span class="text-danger">*</span></label>
+                                            <input asp-for="HoraFim" type="time" class="form-control" />
+                                            <span asp-validation-for="HoraFim" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Campos Condicionais -->
+                            <div class="col-md-6">
+                                <!-- Sala (apenas para Interno/Externo) -->                                <div class="mb-3" id="salaGroup">
+                                    <label asp-for="Sala" class="form-label">Sala <span class="text-danger">*</span></label>
+                                    <select asp-for="Sala" class="form-select" asp-items="Html.GetEnumSelectList<SalaReuniao>()">
+                                        <option value="">Selecione a sala</option>
+                                    </select>
+                                    <span asp-validation-for="Sala" class="text-danger"></span>
+                                </div>                                <!-- Veículo (apenas para Externo) -->
+                                <div class="mb-3" id="veiculoGroup">
+                                    <label asp-for="Veiculo" class="form-label">Veículo</label>
+                                    <select asp-for="Veiculo" class="form-select" asp-items="Html.GetEnumSelectList<VeiculoReuniao>()">
+                                        <option value="">Nenhum</option>
+                                    </select>
+                                    <span asp-validation-for="Veiculo" class="text-danger"></span>
+                                </div>
+
+                                <!-- Link (apenas para Online) -->
+                                <div class="mb-3" id="linkGroup">
+                                    <label asp-for="LinkOnline" class="form-label">Link da Reunião <span class="text-danger">*</span></label>
+                                    <input asp-for="LinkOnline" type="url" class="form-control" placeholder="https://..." />
+                                    <span asp-validation-for="LinkOnline" class="text-danger"></span>
+                                </div>
+
+                                <!-- Empresa -->
+                                <div class="mb-3">
+                                    <label asp-for="Empresa" class="form-label">Empresa</label>
+                                    <input asp-for="Empresa" class="form-control" />
+                                    <span asp-validation-for="Empresa" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Participantes -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5><i class="bi bi-people"></i> Participantes</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="participantes-container">
+                                    @if (Model.Participantes != null && Model.Participantes.Any())
+                                    {
+                                        @for (int i = 0; i < Model.Participantes.Count; i++)
+                                        {
+                                            <div class="participant-row row align-items-end mb-3">
+                                                <input type="hidden" name="Participantes[@i].Id" value="@Model.Participantes[i].Id" />
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Nome <span class="text-danger">*</span></label>
+                                                    <input name="Participantes[@i].Nome" value="@Model.Participantes[i].Nome" class="form-control" required />
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Ramal</label>
+                                                    <select name="Participantes[@i].RamalId" class="form-select ramal-select">
+                                                        <option value="">Selecione</option>
+                                                        @if (Model.RamaisDisponiveis != null)
+                                                        {
+                                                            @foreach (var ramal in Model.RamaisDisponiveis)
+                                                            {
+                                                                <option value="@ramal.Id" selected="@(Model.Participantes[i].RamalId == ramal.Id)">
+                                                                    @ramal.Numero - @ramal.Nome
+                                                                </option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Departamento</label>
+                                                    <select name="Participantes[@i].DepartamentoId" class="form-select">
+                                                        <option value="">Selecione</option>
+                                                        @if (Model.DepartamentosDisponiveis != null)
+                                                        {
+                                                            @foreach (var dept in Model.DepartamentosDisponiveis)
+                                                            {
+                                                                <option value="@dept.Id" selected="@(Model.Participantes[i].DepartamentoId == dept.Id)">
+                                                                    @dept.Name
+                                                                </option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <button type="button" class="btn btn-danger btn-sm remove-participant" style="display: @(Model.Participantes.Count > 1 ? "inline-block" : "none")">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="participant-row row align-items-end mb-3">
+                                            <div class="col-md-4">
+                                                <label class="form-label">Nome <span class="text-danger">*</span></label>
+                                                <input name="Participantes[0].Nome" class="form-control" required />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label">Ramal</label>
+                                                <select name="Participantes[0].RamalId" class="form-select ramal-select">
+                                                    <option value="">Selecione</option>
+                                                    @if (Model.RamaisDisponiveis != null)
+                                                    {
+                                                        @foreach (var ramal in Model.RamaisDisponiveis)
+                                                        {
+                                                            <option value="@ramal.Id">@ramal.Numero - @ramal.Nome</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label">Departamento</label>
+                                                <select name="Participantes[0].DepartamentoId" class="form-select">
+                                                    <option value="">Selecione</option>
+                                                    @if (Model.DepartamentosDisponiveis != null)
+                                                    {
+                                                        @foreach (var dept in Model.DepartamentosDisponiveis)
+                                                        {
+                                                            <option value="@dept.Id">@dept.Name</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button" class="btn btn-danger btn-sm remove-participant" style="display: none;">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="add-participant">
+                                    <i class="bi bi-plus"></i> Adicionar Participante
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Observações -->
+                        <div class="mb-3 mt-4">
+                            <label asp-for="Observacoes" class="form-label">Observações</label>
+                            <textarea asp-for="Observacoes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Observacoes" class="text-danger"></span>
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check"></i> Salvar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel de Informações -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle"></i> Informações da Reunião</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <strong>Status:</strong> @Model.Status.GetDisplayName()<br>
+                            <strong>Criada em:</strong> @Model.DataCriacao.ToString("dd/MM/yyyy HH:mm")
+                        </small>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Tipos de Reunião:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><strong>Interno:</strong> Requer seleção de sala</li>
+                            <li><strong>Externo:</strong> Requer sala e pode usar veículo</li>
+                            <li><strong>Online:</strong> Requer link da reunião</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <strong>Atenção:</strong> O sistema verificará automaticamente conflitos de horário para salas e veículos.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let participantIndex = @(Model.Participantes?.Count ?? 1);
+
+        // Controla campos condicionais baseado no tipo de reunião        function updateFields() {
+            const tipo = $('#tipoReuniao').val();
+            
+            // Reset todos os campos
+            $('#salaGroup, #veiculoGroup, #linkGroup').hide();
+            $('[name="Sala"], [name="Veiculo"], [name="LinkOnline"]').removeAttr('required');
+            
+            if (tipo === '0' || tipo === '1') { // Interno (0) ou Externo (1)
+                $('#salaGroup').show();
+                $('[name="Sala"]').attr('required', true);
+                
+                if (tipo === '1') { // Externo
+                    $('#veiculoGroup').show();
+                }
+            } else if (tipo === '2') { // Online
+                $('#linkGroup').show();
+                $('[name="LinkOnline"]').attr('required', true);
+            }
+        }
+
+        // Inicializar campos na carga da página
+        $(document).ready(function() {
+            updateFields();
+        });
+
+        $('#tipoReuniao').change(updateFields);
+
+        // Adicionar participante
+        $('#add-participant').click(function() {
+            const container = $('#participantes-container');
+            const newRow = $('.participant-row:first').clone();
+            
+            // Atualizar índices
+            newRow.find('input, select').each(function() {
+                const name = $(this).attr('name');
+                if (name) {
+                    $(this).attr('name', name.replace(/\[\d+\]/, '[' + participantIndex + ']'));
+                    if ($(this).attr('type') !== 'hidden') {
+                        $(this).val('');
+                    }
+                }
+            });
+            
+            // Remover ID hidden para novos participantes
+            newRow.find('input[type="hidden"]').remove();
+            
+            // Mostrar botão de remover
+            newRow.find('.remove-participant').show();
+            
+            container.append(newRow);
+            participantIndex++;
+            
+            updateRemoveButtons();
+        });
+
+        // Remover participante
+        $(document).on('click', '.remove-participant', function() {
+            $(this).closest('.participant-row').remove();
+            updateRemoveButtons();
+        });
+
+        function updateRemoveButtons() {
+            const rows = $('.participant-row');
+            if (rows.length > 1) {
+                $('.remove-participant').show();
+            } else {
+                $('.remove-participant').hide();
+            }
+        }
+
+        // Validação de horários
+        $('[name="HoraInicio"], [name="HoraFim"]').change(function() {
+            const inicio = $('[name="HoraInicio"]').val();
+            const fim = $('[name="HoraFim"]').val();
+            
+            if (inicio && fim && inicio >= fim) {
+                alert('A hora de fim deve ser posterior à hora de início.');
+                $('[name="HoraFim"]').val('');
+            }
+        });
+
+        // Validação de data
+        $('[name="Data"]').attr('min', new Date().toISOString().split('T')[0]);
+    </script>
+}
