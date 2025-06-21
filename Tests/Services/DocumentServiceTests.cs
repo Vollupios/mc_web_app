@@ -117,10 +117,11 @@ public class DocumentServiceTests : IDisposable
         // Assert
         Assert.NotNull(result);
         Assert.Equal(fileName, result.OriginalFileName);
-        Assert.Equal(user.Id, result.UploaderId);
-        Assert.Equal(departmentId, result.DepartmentId);
+        Assert.Equal(user.Id, result.UploaderId);        Assert.Equal(departmentId, result.DepartmentId);
         _documentWriterMock.Verify(x => x.SaveDocumentAsync(mockFile.Object, user, departmentId), Times.Once);
-    }    [Fact]
+    }
+
+    [Fact]
     public async Task CanUserAccessDocumentAsync_ShouldCallDocumentSecurity()
     {
         // Arrange
@@ -134,10 +135,11 @@ public class DocumentServiceTests : IDisposable
         // Act
         var result = await _documentService.CanUserAccessDocumentAsync(documentId, user);
 
-        // Assert
-        Assert.True(result);
+        // Assert        Assert.True(result);
         _documentSecurityMock.Verify(x => x.CanUserAccessDocumentAsync(documentId, user), Times.Once);
-    }    [Fact]
+    }
+
+    [Fact]
     public async Task CanUserDeleteDocumentAsync_ShouldCallDocumentSecurity()
     {
         // Arrange
@@ -151,10 +153,11 @@ public class DocumentServiceTests : IDisposable
         // Act
         var result = await _documentService.CanUserDeleteDocumentAsync(documentId, user);
 
-        // Assert
-        Assert.True(result);
+        // Assert        Assert.True(result);
         _documentSecurityMock.Verify(x => x.CanUserDeleteDocumentAsync(documentId, user), Times.Once);
-    }    [Fact]
+    }
+
+    [Fact]
     public async Task GetDocumentStreamAsync_ShouldCallDocumentDownloader()
     {
         // Arrange
@@ -170,10 +173,11 @@ public class DocumentServiceTests : IDisposable
         var result = await _documentDownloaderMock.Object.GetDocumentStreamAsync(documentId, user);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Equal(expectedStream, result);
+        Assert.NotNull(result);        Assert.Equal(expectedStream, result);
         _documentDownloaderMock.Verify(x => x.GetDocumentStreamAsync(documentId, user), Times.Once);
-    }    [Fact]
+    }
+
+    [Fact]
     public async Task DeleteDocumentAsync_ShouldCallDocumentWriter()
     {
         // Arrange
@@ -222,13 +226,14 @@ public class DocumentServiceTests : IDisposable
     [InlineData(10485761, false)] // 10MB + 1 byte
     [InlineData(20971520, false)] // 20MB
     public async Task IsFileSizeAllowed_ShouldReturnCorrectResult(long fileSize, bool expected)
-    {
-        // Act
+    {        // Act
         var result = await _documentService.IsFileSizeAllowed(fileSize);
 
         // Assert
         Assert.Equal(expected, result);
-    }    [Fact]
+    }
+
+    [Fact]
     public async Task GetDocumentPhysicalPathAsync_ShouldReturnCorrectPath()
     {
         // Arrange
