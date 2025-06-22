@@ -27,7 +27,6 @@ namespace IntranetDocumentos.Controllers
             _documentService = documentService;
             _userManager = userManager;
             _analyticsService = analyticsService;
-            _userManager = userManager;
             _logger = logger;
         }
 
