@@ -49,7 +49,7 @@ jobs:
       
     - name: Publish application
       run: dotnet publish IntranetDocumentos.csproj --no-build --configuration Release --output ./build-output
-      
+        
     - name: Create deployment package
       run: |
         mkdir -p ./deployment-package

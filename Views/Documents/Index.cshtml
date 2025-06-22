@@ -66,14 +66,32 @@ else
                                 <td>@GetFileSize(document.FileSize)</td>
                                 <td>
                                     <div class="btn-group" role="group">
+                                        @{
+                                            var extension = System.IO.Path.GetExtension(document.OriginalFileName).ToLowerInvariant();
+                                            bool canView = extension == ".pdf" || 
+                                                         extension == ".jpg" || extension == ".jpeg" || extension == ".png" || 
+                                                         extension == ".gif" || extension == ".bmp" || extension == ".webp" ||
+                                                         extension == ".txt";
+                                        }
+                                        
+                                        @if (canView)
+                                        {
+                                            <a asp-action="View" asp-route-id="@document.Id" 
+                                               class="btn btn-sm btn-outline-success" title="Visualizar" target="_blank">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </a>
+                                        }
+                                        
                                         <a asp-action="Download" asp-route-id="@document.Id" 
                                            class="btn btn-sm btn-outline-primary" title="Download">
                                             <i class="bi bi-download"></i>
                                         </a>
+                                        
                                         <a asp-action="Details" asp-route-id="@document.Id" 
                                            class="btn btn-sm btn-outline-info" title="Detalhes">
-                                            <i class="bi bi-eye"></i>
+                                            <i class="bi bi-info-circle"></i>
                                         </a>
+                                        
                                         @if (User.IsInRole("Admin") || document.UploaderId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
                                         {
                                             <button type="button" class="btn btn-sm btn-outline-danger" 

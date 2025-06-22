@@ -37,57 +37,84 @@ namespace IntranetDocumentos.Services.Documents
 
         public async Task<Document> SaveDocumentAsync(IFormFile file, ApplicationUser uploader, int? departmentId)
         {
+            _logger.LogInformation("Iniciando SaveDocumentAsync - Arquivo: {FileName}, Usuário: {UserId}, Departamento: {DepartmentId}", 
+                file?.FileName, uploader?.Id, departmentId);
+
             if (file == null || file.Length == 0)
+            {
+                _logger.LogError("Arquivo não fornecido ou vazio");
                 throw new ArgumentException("Arquivo não fornecido ou vazio", nameof(file));
+            }
 
             if (uploader == null)
+            {
+                _logger.LogError("Uploader é nulo");
                 throw new ArgumentNullException(nameof(uploader));
+            }
 
             try
             {
+                _logger.LogInformation("Validando permissões do usuário");
                 // Validar permissões
                 if (!await _documentSecurity.CanUserUploadToDepartmentAsync(departmentId, uploader))
                 {
+                    _logger.LogWarning("Usuário {UserId} não tem permissão para fazer upload no departamento {DepartmentId}", 
+                        uploader.Id, departmentId);
                     throw new UnauthorizedAccessException("Usuário não tem permissão para fazer upload neste departamento");
                 }
 
+                _logger.LogInformation("Validando tipo de arquivo");
                 // Validar arquivo usando Factory Pattern
                 var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
                 
                 if (!IsFileTypeAllowed(fileExtension))
                 {
+                    _logger.LogError("Tipo de arquivo não permitido: {Extension}", fileExtension);
                     throw new InvalidOperationException($"Tipo de arquivo não permitido: {fileExtension}");
                 }
 
                 if (!IsFileSizeAllowed(file.Length, fileExtension))
                 {
+                    _logger.LogError("Arquivo muito grande: {Size} bytes, extensão: {Extension}", file.Length, fileExtension);
                     throw new InvalidOperationException($"Arquivo muito grande. Tamanho máximo permitido: {GetMaxFileSizeForExtension(fileExtension) / (1024 * 1024)}MB");
                 }
 
+                _logger.LogInformation("Obtendo processador para extensão: {Extension}", fileExtension);
                 // Obter processador adequado
                 var processor = _fileProcessorFactory.GetProcessor(fileExtension);
                 
                 // Gerar nome único para o arquivo
                 var storedFileName = $"{Guid.NewGuid()}{fileExtension}";
+                _logger.LogInformation("Nome do arquivo gerado: {StoredFileName}", storedFileName);
                 
                 // Determinar pasta de destino
                 var folderName = departmentId.HasValue 
                     ? (await _context.Departments.FindAsync(departmentId.Value))?.Name ?? "Geral"
                     : "Geral";
                 
+                _logger.LogInformation("Pasta de destino: {FolderName}", folderName);
+                
                 var documentsPath = Path.Combine(_environment.ContentRootPath, "DocumentsStorage", folderName);
+                _logger.LogInformation("Caminho completo: {DocumentsPath}", documentsPath);
+                
                 Directory.CreateDirectory(documentsPath);
                 
                 var filePath = Path.Combine(documentsPath, storedFileName);
+                _logger.LogInformation("Caminho do arquivo: {FilePath}", filePath);
 
+                _logger.LogInformation("Processando arquivo com {ProcessorType}", processor.GetType().Name);
                 // Processar arquivo usando Strategy Pattern
                 var processingResult = await processor.ProcessAsync(file, filePath);
                 
                 if (!processingResult.Success)
                 {
                     var errors = string.Join("; ", processingResult.Errors);
+                    _logger.LogError("Erro no processamento do arquivo: {Errors}", errors);
                     throw new InvalidOperationException($"Erro ao processar arquivo: {errors}");
-                }                // Criar registro no banco
+                }
+
+                _logger.LogInformation("Arquivo processado com sucesso, salvando no banco de dados");
+                // Criar registro no banco
                 var document = new Document
                 {
                     OriginalFileName = file.FileName,

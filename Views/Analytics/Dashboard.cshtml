@@ -1,7 +1,56 @@
+@using System.Linq
 @model IntranetDocumentos.Models.ViewModels.DashboardViewModel
 @{
     ViewData["Title"] = "Dashboard de Análises";
 }
+
+<div class="container-fluid">
+    <h1><i class="bi bi-bar-chart-line"></i> Dashboard de Análises</h1>
+    
+    @if (Model == null)
+    {
+        <div class="alert alert-danger">
+            <h4>Erro: Modelo nulo</h4>
+            <p>O modelo Dashboard não foi carregado corretamente.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5>Total de Documentos</h5>
+                        <h2 class="text-primary">@(Model.DocumentStatistics?.TotalDocuments ?? 0)</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5>Downloads Totais</h5>
+                        <h2 class="text-success">@(Model.DocumentStatistics?.TotalDownloads ?? 0)</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5>Reuniões</h5>
+                        <h2 class="text-info">@(Model.ReunioesMetrics?.TotalReunioes ?? 0)</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5>Departamentos</h5>
+                        <h2 class="text-warning">@(Model.DepartmentActivity?.DepartmentStats?.Count ?? 0)</h2>
+                    </div>
+                </div>            </div>
+        </div>
+    }
+</div>
 
 <div class="container-fluid">
     <div class="row">
@@ -23,9 +72,7 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Cards de Resumo -->
+    </div>    <!-- Cards de Resumo -->
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
@@ -36,7 +83,7 @@
                                 Total de Documentos
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                @Model.DocumentStatistics.TotalDocuments
+                                @(Model?.DocumentStatistics?.TotalDocuments ?? 0)
                             </div>
                         </div>
                         <div class="col-auto">
@@ -54,9 +101,8 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Downloads Totais
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                @Model.DocumentStatistics.TotalDownloads
+                            </div>                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @(Model?.DocumentStatistics?.TotalDownloads ?? 0)
                             </div>
                         </div>
                         <div class="col-auto">
@@ -75,7 +121,7 @@
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Reuniões Agendadas
                             </div>                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                @Model.ReunioesMetrics.TotalReunioes
+                                @(Model?.ReunioesMetrics?.TotalReunioes ?? 0)
                             </div>
                         </div>
                         <div class="col-auto">
@@ -94,7 +140,7 @@
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                 Departamentos Ativos
                             </div>                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                @Model.DepartmentActivity.DepartmentStats.Count
+                                @(Model?.DepartmentActivity?.DepartmentStats?.Count ?? 0)
                             </div>
                         </div>
                         <div class="col-auto">
@@ -131,9 +177,8 @@
                     <h6 class="m-0 font-weight-bold text-primary">
                         <i class="bi bi-trophy me-2"></i>Documentos Mais Baixados
                     </h6>
-                </div>
-                <div class="card-body">
-                    @if (Model.DocumentStatistics.TopDownloadedDocuments.Any())
+                </div>                <div class="card-body">
+                    @if (Model?.DocumentStatistics?.TopDownloadedDocuments?.Any() == true)
                     {
                         @foreach (var doc in Model.DocumentStatistics.TopDownloadedDocuments.Take(5))
                         {                            <div class="d-flex align-items-center mb-3">
@@ -167,9 +212,8 @@
                     <h6 class="m-0 font-weight-bold text-primary">
                         <i class="bi bi-pie-chart me-2"></i>Documentos por Departamento
                     </h6>
-                </div>
-                <div class="card-body">
-                    @if (Model.DocumentStatistics.DocumentsByDepartment.Any())
+                </div>                <div class="card-body">
+                    @if (Model?.DocumentStatistics?.DocumentsByDepartment?.Any() == true)
                     {
                         <div class="table-responsive">
                             <table class="table table-sm">
@@ -212,8 +256,7 @@
                     <h6 class="m-0 font-weight-bold text-primary">
                         <i class="bi bi-calendar-check me-2"></i>Reuniões por Tipo
                     </h6>
-                </div>
-                <div class="card-body">                    @if (Model.ReunioesMetrics.ReuniaoPorTipo.Any())
+                </div>                <div class="card-body">                    @if (Model?.ReunioesMetrics?.ReuniaoPorTipo?.Any() == true)
                     {
                         <div class="table-responsive">
                             <table class="table table-sm">
@@ -223,11 +266,10 @@
                                         <th class="text-center">Quantidade</th>
                                         <th class="text-center">%</th>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var meeting in Model.ReunioesMetrics.ReuniaoPorTipo.OrderByDescending(m => m.Count))
+                                </thead>                                <tbody>
+                                    @foreach (var meeting in Model.ReunioesMetrics?.ReuniaoPorTipo?.OrderByDescending(m => m.Count) ?? Enumerable.Empty<dynamic>())
                                     {
-                                        var percentage = Model.ReunioesMetrics.TotalReunioes > 0 ? 
+                                        var percentage = Model.ReunioesMetrics?.TotalReunioes > 0 ? 
                                             (meeting.Count * 100.0 / Model.ReunioesMetrics.TotalReunioes).ToString("F1") : "0";
                                         <tr>
                                             <td>@meeting.TipoReuniao</td>
@@ -255,46 +297,58 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>        // Configuração do gráfico de atividade por departamento
-        const ctx = document.getElementById('departmentActivityChart');
-        const departmentData = @Html.Raw(Json.Serialize(Model.DepartmentActivity.DepartmentStats));
-        
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: departmentData.map(d => d.departmentName),
-                datasets: [{
-                    label: 'Documentos',
-                    data: departmentData.map(d => d.documentCount),
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }, {
-                    label: 'Downloads',
-                    data: departmentData.map(d => d.downloadCount),
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Atividade por Departamento'
-                    }
+    <script>
+        // Configuração do gráfico de atividade por departamento
+        @if (Model?.DepartmentActivity?.DepartmentStats != null)
+        {
+            <text>
+            const ctx = document.getElementById('departmentActivityChart');
+            const departmentData = @Html.Raw(Json.Serialize(Model.DepartmentActivity.DepartmentStats));
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: departmentData.map(d => d.departmentName),
+                    datasets: [{
+                        label: 'Documentos',
+                        data: departmentData.map(d => d.documentCount),
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Downloads',
+                        data: departmentData.map(d => d.downloadCount),
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Atividade por Departamento'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
-            }
-        });
+            });
+            </text>
+        }
+        else
+        {
+            <text>
+            console.log('Dados de departamento não disponíveis para o gráfico');
+            </text>
+        }
     </script>
 }
 

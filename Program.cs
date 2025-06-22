@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http.Features;
 using IntranetDocumentos.Data;
 using IntranetDocumentos.Models;
 using IntranetDocumentos.Services;
@@ -71,6 +72,20 @@ public partial class Program
         builder.Services.AddScoped<IFileUploadService, FileUploadService>();
         builder.Services.AddScoped<IReuniaoService, ReuniaoService>();
         builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+
+        // Configure request size limits for file uploads
+        builder.Services.Configure<FormOptions>(options =>
+        {
+            options.MultipartBodyLengthLimit = 50 * 1024 * 1024; // 50MB
+            options.ValueLengthLimit = 50 * 1024 * 1024; // 50MB
+            options.ValueCountLimit = 1024;
+            options.KeyLengthLimit = 2048;
+        });
+
+        builder.WebHost.ConfigureKestrel(options =>
+        {
+            options.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50MB
+        });
 
         // Registrar novos serviços de documento - ISP aplicado
         builder.Services.AddScoped<IntranetDocumentos.Services.Documents.IDocumentReader, IntranetDocumentos.Services.Documents.DocumentReader>();
@@ -291,6 +306,107 @@ public static class SeedData
             context.ReuniaoParticipantes.AddRange(participantesExemplo);
         }
 
+        // Create sample documents and download logs for analytics if they don't exist
+        if (!await context.Documents.AnyAsync())
+        {
+            // Ensure departments exist
+            await EnsureDepartmentsExistAsync(context);
+            
+            var tiDepartment = await context.Departments.FirstOrDefaultAsync(d => d.Name == "TI");
+            var pessoalDepartment = await context.Departments.FirstOrDefaultAsync(d => d.Name == "Pessoal");
+            var fiscalDepartment = await context.Departments.FirstOrDefaultAsync(d => d.Name == "Fiscal");
+            var geralDepartment = await context.Departments.FirstOrDefaultAsync(d => d.Name == "Geral");
+
+            var sampleDocuments = new List<Document>
+            {
+                new Document
+                {
+                    OriginalFileName = "manual_sistema.pdf",
+                    StoredFileName = $"manual_{Guid.NewGuid()}.pdf",
+                    ContentType = "application/pdf",
+                    FileSize = 1024000,
+                    DepartmentId = tiDepartment?.Id,
+                    UploaderId = adminUser.Id,
+                    UploadDate = DateTime.Now.AddDays(-30)
+                },
+                new Document
+                {
+                    OriginalFileName = "politica_rh.pdf",
+                    StoredFileName = $"politica_{Guid.NewGuid()}.pdf",
+                    ContentType = "application/pdf",
+                    FileSize = 512000,
+                    DepartmentId = pessoalDepartment?.Id,
+                    UploaderId = adminUser.Id,
+                    UploadDate = DateTime.Now.AddDays(-20)
+                },
+                new Document
+                {
+                    OriginalFileName = "relatorio_fiscal.xlsx",
+                    StoredFileName = $"relatorio_{Guid.NewGuid()}.xlsx",
+                    ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    FileSize = 256000,
+                    DepartmentId = fiscalDepartment?.Id,
+                    UploaderId = adminUser.Id,
+                    UploadDate = DateTime.Now.AddDays(-10)
+                },
+                new Document
+                {
+                    OriginalFileName = "comunicado.pdf",
+                    StoredFileName = $"comunicado_{Guid.NewGuid()}.pdf",
+                    ContentType = "application/pdf",
+                    FileSize = 128000,
+                    DepartmentId = geralDepartment?.Id,
+                    UploaderId = adminUser.Id,
+                    UploadDate = DateTime.Now.AddDays(-5)
+                }
+            };
+
+            context.Documents.AddRange(sampleDocuments);
+            await context.SaveChangesAsync();
+
+            // Create sample download logs for analytics
+            var downloadLogs = new List<DocumentDownloadLog>();
+            
+            foreach (var doc in sampleDocuments)
+            {
+                // Add multiple downloads for each document at different dates
+                for (int i = 1; i <= 3; i++)
+                {
+                    downloadLogs.Add(new DocumentDownloadLog
+                    {
+                        DocumentId = doc.Id,
+                        UserId = adminUser.Id,
+                        DownloadDate = DateTime.Now.AddDays(-i * 3),
+                        UserAgent = $"Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.{i}",
+                        IpAddress = $"192.168.1.{100 + i}"
+                    });
+                }
+            }
+
+            context.DocumentDownloadLogs.AddRange(downloadLogs);
+            await context.SaveChangesAsync();
+            
+            logger.LogInformation("Sample documents and download logs created for analytics");
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task EnsureDepartmentsExistAsync(ApplicationDbContext context)
+    {
+        var departments = new[] { "TI", "Pessoal", "Fiscal", "Contábil", "Cadastro", "Apoio", "Geral" };
+        
+        foreach (var deptName in departments)
+        {
+            if (!await context.Departments.AnyAsync(d => d.Name == deptName))
+            {
+                context.Departments.Add(new Department 
+                {
+                    Name = deptName
+                });
+            }
+        }
+        
         await context.SaveChangesAsync();
     }
 }

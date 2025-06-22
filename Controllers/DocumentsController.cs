@@ -109,14 +109,35 @@ namespace IntranetDocumentos.Controllers
 
                 try
                 {
+                    _logger.LogInformation("Iniciando upload de documento - Arquivo: {FileName}, Tamanho: {FileSize} bytes, Usuário: {UserId}, Departamento: {DepartmentId}", 
+                        model.File.FileName, model.File.Length, user.Id, model.DepartmentId);
+                    
                     await _documentService.SaveDocumentAsync(model.File, user, model.DepartmentId);
+                    
+                    _logger.LogInformation("Upload concluído com sucesso - Arquivo: {FileName}", model.File.FileName);
                     TempData["Success"] = "Documento enviado com sucesso!";
                     return RedirectToAction(nameof(Index));
                 }
+                catch (UnauthorizedAccessException ex)
+                {
+                    _logger.LogWarning(ex, "Acesso negado ao fazer upload do documento");
+                    ModelState.AddModelError("", "Você não tem permissão para fazer upload neste departamento.");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    _logger.LogWarning(ex, "Operação inválida no upload do documento");
+                    ModelState.AddModelError("", ex.Message);
+                }
+                catch (ArgumentException ex)
+                {
+                    _logger.LogWarning(ex, "Argumento inválido no upload do documento");
+                    ModelState.AddModelError("", ex.Message);
+                }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Erro ao salvar documento");
-                    ModelState.AddModelError("", "Erro ao salvar o documento. Tente novamente.");
+                    _logger.LogError(ex, "Erro inesperado ao salvar documento - Arquivo: {FileName}, Usuário: {UserId}", 
+                        model.File?.FileName, user.Id);
+                    ModelState.AddModelError("", $"Erro ao salvar o documento: {ex.Message}");
                 }
             }
 
@@ -166,6 +187,25 @@ namespace IntranetDocumentos.Controllers
                 // Não falha o download por causa do analytics
             }
 
+            // Determinar o Content-Type correto baseado na extensão
+            var extension = Path.GetExtension(document.OriginalFileName).ToLowerInvariant();
+            var contentType = GetContentType(extension, document.ContentType);
+            
+            _logger.LogInformation("Download do documento - ID: {DocumentId}, Arquivo: {FileName}, ContentType: {ContentType}", 
+                id, document.OriginalFileName, contentType);
+
+            // Para documentos que podem ser visualizados no navegador, usar FileStreamResult para melhor performance
+            if (CanBeDisplayedInBrowser(extension))
+            {
+                var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                return new FileStreamResult(stream, contentType)
+                {
+                    FileDownloadName = document.OriginalFileName,
+                    EnableRangeProcessing = true // Permite streaming parcial
+                };
+            }
+
+            // Para outros arquivos, continuar com o método atual
             var memory = new MemoryStream();
             using (var stream = new FileStream(filePath, FileMode.Open))
             {
@@ -173,7 +213,7 @@ namespace IntranetDocumentos.Controllers
             }
             memory.Position = 0;
 
-            return File(memory, document.ContentType, document.OriginalFileName);
+            return File(memory, contentType, document.OriginalFileName);
         }
 
         /// <summary>
@@ -235,5 +275,136 @@ namespace IntranetDocumentos.Controllers
 
             return View(document);
         }
+
+        /// <summary>
+        /// Visualiza um documento inline no navegador (quando possível)
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> View(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Challenge();
+            }
+
+            if (!await _documentService.CanUserAccessDocumentAsync(id, user))
+            {
+                return Forbid();
+            }
+
+            var document = await _documentService.GetDocumentByIdAsync(id);
+            if (document == null)
+            {
+                return NotFound();
+            }
+
+            var filePath = await _documentService.GetDocumentPhysicalPathAsync(document);
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound("Arquivo não encontrado no servidor.");
+            }
+
+            // Determinar o Content-Type correto baseado na extensão
+            var extension = Path.GetExtension(document.OriginalFileName).ToLowerInvariant();
+            var contentType = GetContentType(extension, document.ContentType);
+            
+            _logger.LogInformation("Visualização do documento - ID: {DocumentId}, Arquivo: {FileName}, ContentType: {ContentType}", 
+                id, document.OriginalFileName, contentType);
+
+            // Registrar visualização para analytics (opcional)
+            try
+            {
+                var userAgent = Request.Headers["User-Agent"].ToString();
+                var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+                await _analyticsService.RegisterDocumentDownloadAsync(id, user.Id, userAgent, ipAddress);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao registrar visualização do documento {DocumentId}", id);
+            }
+
+            // Usar FileStreamResult para melhor performance e suporte a streaming
+            var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            return new FileStreamResult(stream, contentType)
+            {
+                EnableRangeProcessing = true // Permite streaming parcial para arquivos grandes
+            };
+        }
+
+        #region Métodos Auxiliares para Download
+
+        /// <summary>
+        /// Determina o Content-Type correto baseado na extensão do arquivo
+        /// </summary>
+        private static string GetContentType(string extension, string originalContentType)
+        {
+            return extension switch
+            {
+                // Documentos PDF
+                ".pdf" => "application/pdf",
+                
+                // Documentos Word
+                ".doc" => "application/msword",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                
+                // Planilhas Excel
+                ".xls" => "application/vnd.ms-excel",
+                ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                
+                // Apresentações PowerPoint
+                ".ppt" => "application/vnd.ms-powerpoint",
+                ".pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                
+                // Imagens
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".bmp" => "image/bmp",
+                ".tiff" => "image/tiff",
+                ".webp" => "image/webp",
+                
+                // Texto
+                ".txt" => "text/plain",
+                ".rtf" => "application/rtf",
+                ".csv" => "text/csv",
+                
+                // Arquivos compactados
+                ".zip" => "application/zip",
+                ".rar" => "application/x-rar-compressed",
+                ".7z" => "application/x-7z-compressed",
+                
+                // LibreOffice/OpenOffice
+                ".odt" => "application/vnd.oasis.opendocument.text",
+                ".ods" => "application/vnd.oasis.opendocument.spreadsheet",
+                ".odp" => "application/vnd.oasis.opendocument.presentation",
+                
+                // Padrão: usar o Content-Type original ou application/octet-stream
+                _ => !string.IsNullOrEmpty(originalContentType) ? originalContentType : "application/octet-stream"
+            };
+        }
+
+        /// <summary>
+        /// Verifica se o arquivo pode ser exibido diretamente no navegador
+        /// </summary>
+        private static bool CanBeDisplayedInBrowser(string extension)
+        {
+            return extension switch
+            {
+                // PDFs podem ser exibidos diretamente na maioria dos navegadores
+                ".pdf" => true,
+                
+                // Imagens podem ser exibidas diretamente
+                ".jpg" or ".jpeg" or ".png" or ".gif" or ".bmp" or ".webp" => true,
+                
+                // Texto pode ser exibido diretamente
+                ".txt" => true,
+                
+                // Outros tipos precisam ser baixados
+                _ => false
+            };
+        }
+
+        #endregion
     }
 }

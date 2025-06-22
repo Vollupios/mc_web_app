@@ -19,9 +19,7 @@ namespace IntranetDocumentos.Services
         {
             _context = context;
             _logger = logger;
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// Obtém o dashboard completo de analytics
         /// </summary>
         public async Task<DashboardViewModel> GetDashboardDataAsync()
@@ -31,31 +29,40 @@ namespace IntranetDocumentos.Services
                 _logger.LogInformation("Coletando dados para dashboard de analytics");
 
                 var documentStats = await GetDocumentStatisticsAsync();
-                var reunioesMetrics = await GetReunioesMetricsAsync();
-                var departmentActivity = await GetDepartmentActivityAsync();
+                _logger.LogInformation("Estatísticas de documentos coletadas: {TotalDocuments} documentos, {TotalDownloads} downloads", 
+                    documentStats.TotalDocuments, documentStats.TotalDownloads);
 
-                return new DashboardViewModel
+                var reunioesMetrics = await GetReunioesMetricsAsync();
+                _logger.LogInformation("Métricas de reuniões coletadas: {TotalReunioes} reuniões", 
+                    reunioesMetrics.TotalReunioes);
+
+                var departmentActivity = await GetDepartmentActivityAsync();
+                _logger.LogInformation("Atividade de departamentos coletada: {DepartmentCount} departamentos", 
+                    departmentActivity.DepartmentStats.Count);
+
+                var dashboard = new DashboardViewModel
                 {
                     DocumentStatistics = documentStats,
                     ReunioesMetrics = reunioesMetrics,
                     DepartmentActivity = departmentActivity
                 };
+
+                _logger.LogInformation("Dashboard de analytics criado com sucesso");
+                return dashboard;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao coletar dados do dashboard");
                 throw;
             }
-        }
-
-        /// <summary>
+        }/// <summary>
         /// Registra um download de documento
         /// </summary>
         public async Task RegisterDocumentDownloadAsync(int documentId, string userId, string userAgent, string ipAddress)
         {
             try
             {
-                var download = new DocumentDownload
+                var download = new DocumentDownloadLog
                 {
                     DocumentId = documentId,
                     UserId = userId,
@@ -64,7 +71,7 @@ namespace IntranetDocumentos.Services
                     IpAddress = ipAddress
                 };
 
-                _context.DocumentDownloads.Add(download);
+                _context.DocumentDownloadLogs.Add(download);
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Download registrado para documento {DocumentId} por usuário {UserId}", documentId, userId);
@@ -85,10 +92,8 @@ namespace IntranetDocumentos.Services
                 var totalDocuments = await _context.Documents.CountAsync();
                 var documentsThisMonth = await _context.Documents
                     .Where(d => d.UploadDate.Month == DateTime.Now.Month && d.UploadDate.Year == DateTime.Now.Year)
-                    .CountAsync();
-
-                var totalDownloads = await _context.DocumentDownloads.CountAsync();
-                var downloadsThisMonth = await _context.DocumentDownloads
+                    .CountAsync();                var totalDownloads = await _context.DocumentDownloadLogs.CountAsync();
+                var downloadsThisMonth = await _context.DocumentDownloadLogs
                     .Where(d => d.DownloadDate.Month == DateTime.Now.Month && d.DownloadDate.Year == DateTime.Now.Year)
                     .CountAsync();
 
@@ -205,12 +210,10 @@ namespace IntranetDocumentos.Services
                     DocumentCount = g.Count(),
                     StorageUsed = g.Sum(d => d.FileSize)
                 })
-                .ToListAsync();
-
-            // Obter contagem de downloads por departamento
+                .ToListAsync();            // Obter contagem de downloads por departamento
             foreach (var dept in query)
             {
-                var downloads = await _context.DocumentDownloads
+                var downloads = await _context.DocumentDownloadLogs
                     .Include(dd => dd.Document)
                     .ThenInclude(d => d.Department)
                     .Where(dd => dd.Document.Department != null ? dd.Document.Department.Name == dept.DepartmentName : dept.DepartmentName == "Geral")
@@ -236,11 +239,9 @@ namespace IntranetDocumentos.Services
                 })
                 .OrderByDescending(x => x.Count)
                 .ToListAsync();
-        }
-
-        private async Task<List<TopDownloadedDocumentViewModel>> GetTopDownloadedDocumentsAsync()
+        }        private async Task<List<TopDownloadedDocumentViewModel>> GetTopDownloadedDocumentsAsync()
         {
-            return await _context.DocumentDownloads
+            return await _context.DocumentDownloadLogs
                 .Include(dd => dd.Document)
                 .ThenInclude(d => d.Department)
                 .GroupBy(dd => dd.Document)
@@ -269,15 +270,14 @@ namespace IntranetDocumentos.Services
                     Year = g.Key.Year,
                     Month = g.Key.Month,
                     MonthName = cultureInfo.DateTimeFormat.GetMonthName(g.Key.Month),
-                    DocumentsUploaded = g.Count(),
-                    TotalDownloads = 0 // Será preenchido abaixo
+                    DocumentsUploaded = g.Count(),                    TotalDownloads = 0 // Será preenchido abaixo
                 })
                 .ToListAsync();
 
             // Preencher downloads mensais
             foreach (var month in monthlyUploads)
             {
-                month.TotalDownloads = await _context.DocumentDownloads
+                month.TotalDownloads = await _context.DocumentDownloadLogs
                     .Where(dd => dd.DownloadDate.Year == month.Year && dd.DownloadDate.Month == month.Month)
                     .CountAsync();
             }
@@ -364,16 +364,14 @@ namespace IntranetDocumentos.Services
         private async Task<List<DepartmentStatsViewModel>> GetDepartmentStatsAsync()
         {
             var departments = await _context.Departments.ToListAsync();
-            var departmentStats = new List<DepartmentStatsViewModel>();
-
-            foreach (var dept in departments)
+            var departmentStats = new List<DepartmentStatsViewModel>();            foreach (var dept in departments)
             {
                 var userCount = await _context.Users.Where(u => u.DepartmentId == dept.Id).CountAsync();
                 var documentCount = await _context.Documents.Where(d => d.DepartmentId == dept.Id).CountAsync();
-                var downloadCount = await _context.DocumentDownloads
+                var downloadCount = await _context.DocumentDownloadLogs
                     .Include(dd => dd.Document)
                     .Where(dd => dd.Document.DepartmentId == dept.Id)
-                    .CountAsync();                var reunioesCount = await _context.Reunioes
+                    .CountAsync();var reunioesCount = await _context.Reunioes
                     .Include(r => r.ResponsavelUser)
                     .Where(r => r.ResponsavelUser != null && r.ResponsavelUser.DepartmentId == dept.Id)
                     .CountAsync();
@@ -390,11 +388,9 @@ namespace IntranetDocumentos.Services
                     ReunioesCount = reunioesCount,
                     ActivityScore = activityScore
                 });
-            }
-
-            // Adicionar estatísticas para documentos "Geral" (sem departamento)
+            }            // Adicionar estatísticas para documentos "Geral" (sem departamento)
             var geralDocuments = await _context.Documents.Where(d => d.DepartmentId == null).CountAsync();
-            var geralDownloads = await _context.DocumentDownloads
+            var geralDownloads = await _context.DocumentDownloadLogs
                 .Include(dd => dd.Document)
                 .Where(dd => dd.Document.DepartmentId == null)
                 .CountAsync();
@@ -421,11 +417,9 @@ namespace IntranetDocumentos.Services
                 .Include(u => u.Department)
                 .ToListAsync();
 
-            var userActivities = new List<UserActivityViewModel>();
-
-            foreach (var user in users)
+            var userActivities = new List<UserActivityViewModel>();            foreach (var user in users)
             {                var documentsUploaded = await _context.Documents.Where(d => d.UploaderId == user.Id).CountAsync();
-                var documentsDownloaded = await _context.DocumentDownloads.Where(dd => dd.UserId == user.Id).CountAsync();
+                var documentsDownloaded = await _context.DocumentDownloadLogs.Where(dd => dd.UserId == user.Id).CountAsync();
                 var reunioesCreated = await _context.Reunioes.Where(r => r.ResponsavelUserId == user.Id).CountAsync();
 
                 // Cálculo de pontuação de atividade

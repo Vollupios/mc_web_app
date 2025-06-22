@@ -1,13 +1,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using IntranetDocumentos.Services;
+using IntranetDocumentos.Data;
 
 namespace IntranetDocumentos.Controllers
-{
-    /// <summary>
+{    /// <summary>
     /// Controller para analytics e dashboard de estatísticas
+    /// Acesso restrito a Administradores e Gestores
     /// </summary>
-    [Authorize]
+    [Authorize(Roles = "Admin,Gestor")]
     public class AnalyticsController : Controller
     {
         private readonly IAnalyticsService _analyticsService;
@@ -17,12 +19,9 @@ namespace IntranetDocumentos.Controllers
         {
             _analyticsService = analyticsService;
             _logger = logger;
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// Página principal do dashboard de analytics
         /// </summary>
-        [Authorize(Roles = "Admin,Gestor")]
         public async Task<IActionResult> Dashboard()
         {
             try
@@ -37,12 +36,9 @@ namespace IntranetDocumentos.Controllers
                 TempData["ErrorMessage"] = "Erro ao carregar os dados do dashboard.";
                 return RedirectToAction("Index", "Home");
             }
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// API endpoint para dados do dashboard (JSON)
         /// </summary>
-        [Authorize(Roles = "Admin,Gestor")]
         [HttpGet]
         public async Task<IActionResult> GetDashboardData()
         {
@@ -56,12 +52,9 @@ namespace IntranetDocumentos.Controllers
                 _logger.LogError(ex, "Erro ao obter dados do dashboard via API");
                 return Json(new { error = "Erro ao carregar dados" });
             }
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// Página específica para estatísticas de documentos
         /// </summary>
-        [Authorize(Roles = "Admin,Gestor")]
         public async Task<IActionResult> DocumentStatistics()
         {
             try
@@ -75,13 +68,10 @@ namespace IntranetDocumentos.Controllers
                 TempData["ErrorMessage"] = "Erro ao carregar as estatísticas de documentos.";
                 return RedirectToAction("Dashboard");
             }
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// Página específica para métricas de reuniões
         /// </summary>
-        [Authorize(Roles = "Admin,Gestor")]
-        public async Task<IActionResult> ReunioesMetrics()
+        public async Task<IActionResult> MeetingMetrics()
         {
             try
             {
@@ -94,12 +84,9 @@ namespace IntranetDocumentos.Controllers
                 TempData["ErrorMessage"] = "Erro ao carregar as métricas de reuniões.";
                 return RedirectToAction("Dashboard");
             }
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// Página específica para atividade por departamento
         /// </summary>
-        [Authorize(Roles = "Admin,Gestor")]
         public async Task<IActionResult> DepartmentActivity()
         {
             try
@@ -109,10 +96,18 @@ namespace IntranetDocumentos.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao carregar atividade por departamento");
-                TempData["ErrorMessage"] = "Erro ao carregar a atividade por departamento.";
+                _logger.LogError(ex, "Erro ao carregar atividade por departamento");                TempData["ErrorMessage"] = "Erro ao carregar a atividade por departamento.";
                 return RedirectToAction("Dashboard");
             }
+        }
+
+        /// <summary>
+        /// Endpoint para verificar a saúde da API
+        /// </summary>
+        [HttpGet("health")]
+        public IActionResult HealthCheck()
+        {
+            return Ok(new { status = "Healthy" });
         }
     }
 }
