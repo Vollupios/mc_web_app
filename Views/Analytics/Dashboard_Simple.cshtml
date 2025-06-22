@@ -1,0 +1,233 @@
+@model IntranetDocumentos.Models.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard de Análises";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="bi bi-bar-chart-line me-2"></i>Dashboard de Análises
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    @if (Model == null)
+    {
+        <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            Não foi possível carregar os dados do dashboard. Tente novamente mais tarde.
+        </div>
+    }
+    else
+    {
+        <!-- Cards de Resumo -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-start border-4 border-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                    Total de Documentos
+                                </div>
+                                <div class="h5 mb-0 fw-bold text-gray-800">
+                                    @(Model.DocumentStatistics?.TotalDocuments ?? 0)
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-file-earmark-text fs-2 text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-start border-4 border-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                    Downloads Totais
+                                </div>
+                                <div class="h5 mb-0 fw-bold text-gray-800">
+                                    @(Model.DocumentStatistics?.TotalDownloads ?? 0)
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-download fs-2 text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-start border-4 border-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                                    Reuniões Agendadas
+                                </div>
+                                <div class="h5 mb-0 fw-bold text-gray-800">
+                                    @(Model.ReunioesMetrics?.TotalReunioes ?? 0)
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-calendar-event fs-2 text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-start border-4 border-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                    Departamentos Ativos
+                                </div>
+                                <div class="h5 mb-0 fw-bold text-gray-800">
+                                    @(Model.DepartmentActivity?.DepartmentStats?.Count ?? 0)
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-building fs-2 text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de Estatísticas -->
+        <div class="row">
+            <!-- Documentos Mais Baixados -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 fw-bold text-primary">
+                            <i class="bi bi-trophy"></i> Documentos Mais Baixados
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.DocumentStatistics?.TopDownloadedDocuments?.Any() == true)
+                        {
+                            @foreach (var doc in Model.DocumentStatistics.TopDownloadedDocuments.Take(5))
+                            {
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0 small fw-bold" title="@doc.FileName">
+                                            @(doc.FileName.Length > 30 ? doc.FileName.Substring(0, 30) + "..." : doc.FileName)
+                                        </h6>
+                                        <small class="text-muted">@doc.DepartmentName</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-primary">@doc.DownloadCount</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="bi bi-file-earmark-x text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-2">Nenhum download registrado ainda.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documentos por Departamento -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 fw-bold text-primary">
+                            <i class="bi bi-pie-chart"></i> Documentos por Departamento
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.DocumentStatistics?.DocumentsByDepartment?.Any() == true)
+                        {
+                            @foreach (var dept in Model.DocumentStatistics.DocumentsByDepartment.Take(8))
+                            {
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0 small fw-bold">@dept.DepartmentName</h6>
+                                        <div class="progress progress-sm">
+                                            <div class="progress-bar bg-primary" role="progressbar" 
+                                                 style="width: @(Model.DocumentStatistics.TotalDocuments > 0 ? (dept.DocumentCount * 100.0 / Model.DocumentStatistics.TotalDocuments) : 0)%">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end ms-3">
+                                        <span class="small fw-bold">@dept.DocumentCount</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-2">Nenhum documento por departamento ainda.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões de Navegação -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 fw-bold text-primary">
+                            <i class="bi bi-graph-up"></i> Relatórios Detalhados
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <a href="@Url.Action("DocumentStatistics", "Analytics")" class="btn btn-outline-primary w-100">
+                                    <i class="bi bi-file-earmark-bar-graph"></i>
+                                    Estatísticas de Documentos
+                                </a>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <a href="@Url.Action("MeetingMetrics", "Analytics")" class="btn btn-outline-success w-100">
+                                    <i class="bi bi-calendar-event"></i>
+                                    Métricas de Reuniões
+                                </a>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <a href="@Url.Action("DepartmentActivity", "Analytics")" class="btn btn-outline-info w-100">
+                                    <i class="bi bi-building"></i>
+                                    Atividade por Departamento
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+.border-left-primary { border-left: 0.25rem solid #4e73df !important; }
+.border-left-success { border-left: 0.25rem solid #1cc88a !important; }
+.border-left-info { border-left: 0.25rem solid #36b9cc !important; }
+.border-left-warning { border-left: 0.25rem solid #f6c23e !important; }
+.text-gray-800 { color: #5a5c69 !important; }
+.text-gray-300 { color: #dddfeb !important; }
+.progress-sm { height: 0.5rem; }
+</style>
