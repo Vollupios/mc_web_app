@@ -43,11 +43,39 @@ namespace IntranetDocumentos.Controllers
 
             if (ModelState.IsValid)
             {
+                _logger.LogInformation("Tentativa de login para: {Email}", model.Email);
+                
+                // Verificar se o usuário existe
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    _logger.LogWarning("Usuário não encontrado: {Email}", model.Email);
+                    ModelState.AddModelError(string.Empty, "Email ou senha inválidos.");
+                    return View(model);
+                }
+                
+                _logger.LogInformation("Usuário encontrado: {Email}, EmailConfirmed: {EmailConfirmed}, LockoutEnabled: {LockoutEnabled}", 
+                    user.Email, user.EmailConfirmed, user.LockoutEnabled);
+                
+                // Verificar senha
+                var passwordCheck = await _userManager.CheckPasswordAsync(user, model.Password);
+                _logger.LogInformation("Verificação de senha para {Email}: {IsValid}", model.Email, passwordCheck);
+                
+                if (!passwordCheck)
+                {
+                    _logger.LogWarning("Senha inválida para: {Email}", model.Email);
+                    ModelState.AddModelError(string.Empty, "Email ou senha inválidos.");
+                    return View(model);
+                }
+                
                 var result = await _signInManager.PasswordSignInAsync(
                     model.Email, 
                     model.Password, 
                     model.RememberMe, 
                     lockoutOnFailure: false);
+
+                _logger.LogInformation("Resultado do SignIn para {Email}: Succeeded={Succeeded}, IsLockedOut={IsLockedOut}, RequiresTwoFactor={RequiresTwoFactor}, IsNotAllowed={IsNotAllowed}", 
+                    model.Email, result.Succeeded, result.IsLockedOut, result.RequiresTwoFactor, result.IsNotAllowed);
 
                 if (result.Succeeded)
                 {

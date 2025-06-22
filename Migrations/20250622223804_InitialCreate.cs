@@ -94,6 +94,32 @@ namespace IntranetDocumentos.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Ramais",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Numero = table.Column<string>(type: "TEXT", maxLength: 10, nullable: false),
+                    Nome = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    TipoFuncionario = table.Column<int>(type: "INTEGER", nullable: false),
+                    DepartmentId = table.Column<int>(type: "INTEGER", nullable: true),
+                    FotoPath = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
+                    Observacoes = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
+                    DataCriacao = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Ativo = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Ramais", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Ramais_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
@@ -209,6 +235,98 @@ namespace IntranetDocumentos.Migrations
                         onDelete: ReferentialAction.SetNull);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Reunioes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Titulo = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    Data = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    HoraInicio = table.Column<TimeSpan>(type: "TEXT", nullable: false),
+                    HoraFim = table.Column<TimeSpan>(type: "TEXT", nullable: false),
+                    TipoReuniao = table.Column<int>(type: "INTEGER", nullable: false),
+                    Sala = table.Column<int>(type: "INTEGER", nullable: true),
+                    Veiculo = table.Column<int>(type: "INTEGER", nullable: true),
+                    LinkOnline = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
+                    Empresa = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    Observacoes = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    DataCriacao = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ResponsavelUserId = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reunioes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Reunioes_AspNetUsers_ResponsavelUserId",
+                        column: x => x.ResponsavelUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DocumentDownloadLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    DocumentId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    DownloadDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UserAgent = table.Column<string>(type: "TEXT", nullable: true),
+                    IpAddress = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DocumentDownloadLogs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DocumentDownloadLogs_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_DocumentDownloadLogs_Documents_DocumentId",
+                        column: x => x.DocumentId,
+                        principalTable: "Documents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ReuniaoParticipantes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ReuniaoId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Nome = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    RamalId = table.Column<int>(type: "INTEGER", nullable: true),
+                    DepartamentoId = table.Column<int>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReuniaoParticipantes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReuniaoParticipantes_Departments_DepartamentoId",
+                        column: x => x.DepartamentoId,
+                        principalTable: "Departments",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ReuniaoParticipantes_Ramais_RamalId",
+                        column: x => x.RamalId,
+                        principalTable: "Ramais",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ReuniaoParticipantes_Reunioes_ReuniaoId",
+                        column: x => x.ReuniaoId,
+                        principalTable: "Reunioes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "Departments",
                 columns: new[] { "Id", "Name" },
@@ -265,6 +383,16 @@ namespace IntranetDocumentos.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_DocumentDownloadLogs_DocumentId",
+                table: "DocumentDownloadLogs",
+                column: "DocumentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DocumentDownloadLogs_UserId",
+                table: "DocumentDownloadLogs",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Documents_DepartmentId",
                 table: "Documents",
                 column: "DepartmentId");
@@ -273,6 +401,31 @@ namespace IntranetDocumentos.Migrations
                 name: "IX_Documents_UploaderId",
                 table: "Documents",
                 column: "UploaderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Ramais_DepartmentId",
+                table: "Ramais",
+                column: "DepartmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReuniaoParticipantes_DepartamentoId",
+                table: "ReuniaoParticipantes",
+                column: "DepartamentoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReuniaoParticipantes_RamalId",
+                table: "ReuniaoParticipantes",
+                column: "RamalId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReuniaoParticipantes_ReuniaoId",
+                table: "ReuniaoParticipantes",
+                column: "ReuniaoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reunioes_ResponsavelUserId",
+                table: "Reunioes",
+                column: "ResponsavelUserId");
         }
 
         /// <inheritdoc />
@@ -294,10 +447,22 @@ namespace IntranetDocumentos.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Documents");
+                name: "DocumentDownloadLogs");
+
+            migrationBuilder.DropTable(
+                name: "ReuniaoParticipantes");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Documents");
+
+            migrationBuilder.DropTable(
+                name: "Ramais");
+
+            migrationBuilder.DropTable(
+                name: "Reunioes");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

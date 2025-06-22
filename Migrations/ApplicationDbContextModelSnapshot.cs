@@ -177,6 +177,37 @@ namespace IntranetDocumentos.Migrations
                     b.ToTable("Documents");
                 });
 
+            modelBuilder.Entity("IntranetDocumentos.Models.DocumentDownloadLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DownloadDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DocumentDownloadLogs");
+                });
+
             modelBuilder.Entity("IntranetDocumentos.Models.Ramal", b =>
                 {
                     b.Property<int>("Id")
@@ -464,6 +495,25 @@ namespace IntranetDocumentos.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("Uploader");
+                });
+
+            modelBuilder.Entity("IntranetDocumentos.Models.DocumentDownloadLog", b =>
+                {
+                    b.HasOne("IntranetDocumentos.Models.Document", "Document")
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("IntranetDocumentos.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("IntranetDocumentos.Models.Ramal", b =>

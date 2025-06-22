@@ -147,11 +147,16 @@ public partial class Program
                 var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
                 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-                await SeedData.Initialize(context, userManager, roleManager, config, logger);                logger.LogInformation("Seed da base de dados concluído com sucesso");
+                // Aplicar migrações e executar seeding
+                await context.Database.MigrateAsync();
+                await SeedData.Initialize(context, userManager, roleManager, config, logger);
+                
+                logger.LogInformation("Sistema inicializado com sucesso.");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Erro ao inicializar o banco de dados.");
+                logger.LogError(ex, "Erro ao inicializar o sistema: {Message}", ex.Message);
+                throw;
             }
         }
 
@@ -178,11 +183,14 @@ public static class SeedData
             if (!await roleManager.RoleExistsAsync(roleName))
             {
                 await roleManager.CreateAsync(new IdentityRole(roleName));
+                logger.LogInformation("Role {RoleName} criada.", roleName);
             }
         }        // Create default admin user if it doesn't exist
         var adminEmail = config["AdminUser:Email"] ?? "admin@intranet.com";
         var adminPassword = config["AdminUser:Password"] ?? "Admin123!";
+        
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
+        
         if (adminUser == null)
         {
             // Find TI department
@@ -208,7 +216,9 @@ public static class SeedData
                 logger.LogError("Falha ao criar usuário admin: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
                 throw new Exception("Falha ao criar usuário admin");
             }
+            
             await userManager.AddToRoleAsync(adminUser, "Admin");
+            logger.LogInformation("Usuário admin criado com sucesso.");
         }
 
         // Criar reuniões de exemplo se não existirem

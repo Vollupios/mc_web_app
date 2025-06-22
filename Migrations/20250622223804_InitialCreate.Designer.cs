@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IntranetDocumentos.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250618174412_AddRamais")]
-    partial class AddRamais
+    [Migration("20250622223804_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -180,6 +180,37 @@ namespace IntranetDocumentos.Migrations
                     b.ToTable("Documents");
                 });
 
+            modelBuilder.Entity("IntranetDocumentos.Models.DocumentDownloadLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DownloadDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DocumentDownloadLogs");
+                });
+
             modelBuilder.Entity("IntranetDocumentos.Models.Ramal", b =>
                 {
                     b.Property<int>("Id")
@@ -189,19 +220,11 @@ namespace IntranetDocumentos.Migrations
                     b.Property<bool>("Ativo")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Cargo")
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("DepartmentId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(150)
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("FotoPath")
                         .HasMaxLength(200)
@@ -221,11 +244,103 @@ namespace IntranetDocumentos.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("TipoFuncionario")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
 
                     b.ToTable("Ramais");
+                });
+
+            modelBuilder.Entity("IntranetDocumentos.Models.Reuniao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Data")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Empresa")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeSpan>("HoraFim")
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeSpan>("HoraInicio")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LinkOnline")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Observacoes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ResponsavelUserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Sala")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TipoReuniao")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Veiculo")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResponsavelUserId");
+
+                    b.ToTable("Reunioes");
+                });
+
+            modelBuilder.Entity("IntranetDocumentos.Models.ReuniaoParticipante", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("DepartamentoId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("RamalId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ReuniaoId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartamentoId");
+
+                    b.HasIndex("RamalId");
+
+                    b.HasIndex("ReuniaoId");
+
+                    b.ToTable("ReuniaoParticipantes");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -385,6 +500,25 @@ namespace IntranetDocumentos.Migrations
                     b.Navigation("Uploader");
                 });
 
+            modelBuilder.Entity("IntranetDocumentos.Models.DocumentDownloadLog", b =>
+                {
+                    b.HasOne("IntranetDocumentos.Models.Document", "Document")
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("IntranetDocumentos.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("IntranetDocumentos.Models.Ramal", b =>
                 {
                     b.HasOne("IntranetDocumentos.Models.Department", "Department")
@@ -393,6 +527,40 @@ namespace IntranetDocumentos.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("IntranetDocumentos.Models.Reuniao", b =>
+                {
+                    b.HasOne("IntranetDocumentos.Models.ApplicationUser", "ResponsavelUser")
+                        .WithMany()
+                        .HasForeignKey("ResponsavelUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ResponsavelUser");
+                });
+
+            modelBuilder.Entity("IntranetDocumentos.Models.ReuniaoParticipante", b =>
+                {
+                    b.HasOne("IntranetDocumentos.Models.Department", "Departamento")
+                        .WithMany()
+                        .HasForeignKey("DepartamentoId");
+
+                    b.HasOne("IntranetDocumentos.Models.Ramal", "Ramal")
+                        .WithMany()
+                        .HasForeignKey("RamalId");
+
+                    b.HasOne("IntranetDocumentos.Models.Reuniao", "Reuniao")
+                        .WithMany("Participantes")
+                        .HasForeignKey("ReuniaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Departamento");
+
+                    b.Navigation("Ramal");
+
+                    b.Navigation("Reuniao");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -456,6 +624,11 @@ namespace IntranetDocumentos.Migrations
                     b.Navigation("Documents");
 
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("IntranetDocumentos.Models.Reuniao", b =>
+                {
+                    b.Navigation("Participantes");
                 });
 #pragma warning restore 612, 618
         }
