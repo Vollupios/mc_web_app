@@ -1,0 +1,176 @@
+@model IEnumerable<IntranetDocumentos.Models.Department>
+
+@{
+    ViewData["Title"] = "Gerenciar Departamentos";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-building"></i> Gerenciar Departamentos</h2>
+                <a href="@Url.Action("Index", "Admin")" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+            </div>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-list-ul"></i> Lista de Departamentos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nome</th>
+                                        <th>Usuários</th>
+                                        <th>Documentos</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var department in Model)
+                                    {
+                                        <tr>
+                                            <td>@department.Id</td>
+                                            <td>
+                                                <strong>@department.Name</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">
+                                                    @department.Users.Count usuários
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">
+                                                    @department.Documents.Count documentos
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-outline-info" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#departmentModal-@department.Id">
+                                                        <i class="bi bi-eye"></i> Detalhes
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> Nenhum departamento encontrado.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals for Department Details -->
+@foreach (var department in Model)
+{
+    <div class="modal fade" id="departmentModal-@department.Id" tabindex="-1" 
+         aria-labelledby="departmentModalLabel-@department.Id" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="departmentModalLabel-@department.Id">
+                        <i class="bi bi-building"></i> Detalhes do Departamento: @department.Name
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-people"></i> Usuários (@department.Users.Count)</h6>
+                            @if (department.Users.Any())
+                            {
+                                <ul class="list-group list-group-flush">
+                                    @foreach (var user in department.Users)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            @user.Email
+                                            <span class="badge bg-secondary rounded-pill">
+                                                @user.UserName
+                                            </span>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p class="text-muted">Nenhum usuário neste departamento.</p>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-file-earmark"></i> Documentos (@department.Documents.Count)</h6>
+                            @if (department.Documents.Any())
+                            {
+                                <ul class="list-group list-group-flush">
+                                    @foreach (var doc in department.Documents.Take(10))
+                                    {
+                                        <li class="list-group-item">
+                                            <small class="text-muted">@doc.UploadDate.ToString("dd/MM/yyyy")</small><br>
+                                            @doc.FileName
+                                        </li>
+                                    }
+                                    @if (department.Documents.Count > 10)
+                                    {
+                                        <li class="list-group-item text-center">
+                                            <small class="text-muted">... e mais @(department.Documents.Count - 10) documentos</small>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p class="text-muted">Nenhum documento neste departamento.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').alert('close');
+        }, 5000);
+    </script>
+}
