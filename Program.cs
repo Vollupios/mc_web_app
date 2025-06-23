@@ -74,6 +74,13 @@ public partial class Program
         builder.Services.AddScoped<IReuniaoService, ReuniaoService>();
         builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 
+        // Add notification services
+        builder.Services.AddScoped<IntranetDocumentos.Services.Notifications.IEmailService, IntranetDocumentos.Services.Notifications.EmailService>();
+        builder.Services.AddScoped<IntranetDocumentos.Services.Notifications.INotificationService, IntranetDocumentos.Services.Notifications.NotificationService>();
+
+        // Add background services
+        builder.Services.AddHostedService<IntranetDocumentos.Services.Background.MeetingReminderBackgroundService>();
+
         // Configure request size limits for file uploads
         builder.Services.Configure<FormOptions>(options =>
         {

@@ -1,6 +1,7 @@
 using IntranetDocumentos.Data;
 using IntranetDocumentos.Models;
 using IntranetDocumentos.Services.FileProcessing;
+using IntranetDocumentos.Services.Notifications;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +19,7 @@ namespace IntranetDocumentos.Services.Documents
         private readonly ILogger<DocumentWriter> _logger;
         private readonly FileProcessorFactory _fileProcessorFactory;
         private readonly IDocumentSecurity _documentSecurity;
+        private readonly INotificationService? _notificationService;
 
         public DocumentWriter(
             ApplicationDbContext context,
@@ -25,7 +27,8 @@ namespace IntranetDocumentos.Services.Documents
             IWebHostEnvironment environment,
             ILogger<DocumentWriter> logger,
             FileProcessorFactory fileProcessorFactory,
-            IDocumentSecurity documentSecurity)
+            IDocumentSecurity documentSecurity,
+            INotificationService? notificationService = null)
         {
             _context = context;
             _userManager = userManager;
@@ -33,6 +36,7 @@ namespace IntranetDocumentos.Services.Documents
             _logger = logger;
             _fileProcessorFactory = fileProcessorFactory;
             _documentSecurity = documentSecurity;
+            _notificationService = notificationService;
         }
 
         public async Task<Document> SaveDocumentAsync(IFormFile file, ApplicationUser uploader, int? departmentId)
@@ -131,6 +135,38 @@ namespace IntranetDocumentos.Services.Documents
 
                 _logger.LogInformation("Documento salvo com sucesso: {FileName} por {UserId} usando {ProcessorType}", 
                     file.FileName, uploader.Id, processor.GetType().Name);
+
+                // Enviar notificação de novo documento (assíncrono, não bloqueia o processo)
+                if (_notificationService != null)
+                {
+                    try
+                    {
+                        // Recarregar documento com relacionamentos para notificação
+                        var documentWithRelations = await _context.Documents
+                            .Include(d => d.Department)
+                            .Include(d => d.Uploader)
+                            .FirstOrDefaultAsync(d => d.Id == document.Id);
+
+                        if (documentWithRelations != null)
+                        {
+                            _ = Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    await _notificationService.NotifyNewDocumentAsync(documentWithRelations, uploader);
+                                }
+                                catch (Exception notificationEx)
+                                {
+                                    _logger.LogWarning(notificationEx, "Erro ao enviar notificação de novo documento {DocumentId}", document.Id);
+                                }
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Erro ao preparar notificação de novo documento {DocumentId}", document.Id);
+                    }
+                }
 
                 return document;
             }

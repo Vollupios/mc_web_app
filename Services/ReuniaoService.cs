@@ -2,6 +2,7 @@ using IntranetDocumentos.Data;
 using IntranetDocumentos.Models;
 using IntranetDocumentos.Models.ViewModels;
 using IntranetDocumentos.Services.Validation;
+using IntranetDocumentos.Services.Notifications;
 using Microsoft.EntityFrameworkCore;
 
 namespace IntranetDocumentos.Services
@@ -16,15 +17,18 @@ namespace IntranetDocumentos.Services
         private readonly ApplicationDbContext _context;
         private readonly ILogger<ReuniaoService> _logger;
         private readonly IReuniaoValidatorFactory _validatorFactory;
+        private readonly INotificationService? _notificationService;
 
         public ReuniaoService(
             ApplicationDbContext context, 
             ILogger<ReuniaoService> logger,
-            IReuniaoValidatorFactory validatorFactory)
+            IReuniaoValidatorFactory validatorFactory,
+            INotificationService? notificationService = null)
         {
             _context = context;
             _logger = logger;
             _validatorFactory = validatorFactory;
+            _notificationService = notificationService;
         }
 
         public async Task<List<Reuniao>> GetReunioesPorPeriodoAsync(DateTime inicio, DateTime fim, CalendarioFiltros? filtros = null)
@@ -98,6 +102,40 @@ namespace IntranetDocumentos.Services
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Reunião criada: {Id} - {Titulo}", reuniao.Id, reuniao.Titulo);
+
+                // Enviar notificação de nova reunião (assíncrono, não bloqueia o processo)
+                if (_notificationService != null)
+                {
+                    try
+                    {
+                        // Recarregar reunião com relacionamentos para notificação
+                        var reuniaoComRelacoes = await _context.Reunioes
+                            .Include(r => r.ResponsavelUser)
+                            .Include(r => r.Participantes)
+                            .ThenInclude(p => p.Departamento)
+                            .FirstOrDefaultAsync(r => r.Id == reuniao.Id);
+
+                        if (reuniaoComRelacoes?.ResponsavelUser != null)
+                        {
+                            _ = Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    await _notificationService.NotifyNewMeetingAsync(reuniaoComRelacoes, reuniaoComRelacoes.ResponsavelUser);
+                                }
+                                catch (Exception notificationEx)
+                                {
+                                    _logger.LogWarning(notificationEx, "Erro ao enviar notificação de nova reunião {ReuniaoId}", reuniao.Id);
+                                }
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Erro ao preparar notificação de nova reunião {ReuniaoId}", reuniao.Id);
+                    }
+                }
+
                 return reuniao;
             }
             catch (Exception ex)
@@ -146,6 +184,40 @@ namespace IntranetDocumentos.Services
 
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Reunião atualizada: {Id} - {Titulo}", reuniao.Id, reuniao.Titulo);
+
+                // Enviar notificação de reunião atualizada (assíncrono, não bloqueia o processo)
+                if (_notificationService != null)
+                {
+                    try
+                    {
+                        // Recarregar reunião com relacionamentos para notificação
+                        var reuniaoComRelacoes = await _context.Reunioes
+                            .Include(r => r.ResponsavelUser)
+                            .Include(r => r.Participantes)
+                            .ThenInclude(p => p.Departamento)
+                            .FirstOrDefaultAsync(r => r.Id == reuniao.Id);
+
+                        if (reuniaoComRelacoes?.ResponsavelUser != null)
+                        {
+                            _ = Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    await _notificationService.NotifyMeetingUpdateAsync(reuniaoComRelacoes, reuniaoComRelacoes.ResponsavelUser);
+                                }
+                                catch (Exception notificationEx)
+                                {
+                                    _logger.LogWarning(notificationEx, "Erro ao enviar notificação de atualização de reunião {ReuniaoId}", reuniao.Id);
+                                }
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Erro ao preparar notificação de atualização de reunião {ReuniaoId}", reuniao.Id);
+                    }
+                }
+
                 return true;
             }
             catch (Exception ex)
@@ -160,14 +232,34 @@ namespace IntranetDocumentos.Services
             try
             {
                 var reuniao = await _context.Reunioes
+                    .Include(r => r.ResponsavelUser)
                     .Include(r => r.Participantes)
+                    .ThenInclude(p => p.Departamento)
                     .FirstOrDefaultAsync(r => r.Id == id);
 
                 if (reuniao == null) return false;
 
                 // Verificar permissões
                 if (!await PodeEditarReuniaoAsync(id, userId, false))
-                    throw new UnauthorizedAccessException("Usuário não tem permissão para remover esta reunião");                _context.ReuniaoParticipantes.RemoveRange(reuniao.Participantes);
+                    throw new UnauthorizedAccessException("Usuário não tem permissão para remover esta reunião");
+
+                // Enviar notificação de cancelamento antes de remover (assíncrono, não bloqueia o processo)
+                if (_notificationService != null && reuniao.ResponsavelUser != null)
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await _notificationService.NotifyMeetingCancellationAsync(reuniao, reuniao.ResponsavelUser);
+                        }
+                        catch (Exception notificationEx)
+                        {
+                            _logger.LogWarning(notificationEx, "Erro ao enviar notificação de remoção de reunião {ReuniaoId}", reuniao.Id);
+                        }
+                    });
+                }
+
+                _context.ReuniaoParticipantes.RemoveRange(reuniao.Participantes);
                 _context.Reunioes.Remove(reuniao);
                 await _context.SaveChangesAsync();
 
@@ -250,7 +342,12 @@ namespace IntranetDocumentos.Services
         {
             try
             {
-                var reuniao = await _context.Reunioes.FindAsync(reuniaoId);
+                var reuniao = await _context.Reunioes
+                    .Include(r => r.ResponsavelUser)
+                    .Include(r => r.Participantes)
+                    .ThenInclude(p => p.Departamento)
+                    .FirstOrDefaultAsync(r => r.Id == reuniaoId);
+                    
                 if (reuniao == null) return false;
 
                 if (!await PodeEditarReuniaoAsync(reuniaoId, userId, isAdmin))
@@ -262,6 +359,23 @@ namespace IntranetDocumentos.Services
                     await _context.SaveChangesAsync();
                     
                     _logger.LogInformation("Reunião cancelada: {Id} - {Titulo}", reuniao.Id, reuniao.Titulo);
+
+                    // Enviar notificação de cancelamento (assíncrono, não bloqueia o processo)
+                    if (_notificationService != null && reuniao.ResponsavelUser != null)
+                    {
+                        _ = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await _notificationService.NotifyMeetingCancellationAsync(reuniao, reuniao.ResponsavelUser);
+                            }
+                            catch (Exception notificationEx)
+                            {
+                                _logger.LogWarning(notificationEx, "Erro ao enviar notificação de cancelamento de reunião {ReuniaoId}", reuniao.Id);
+                            }
+                        });
+                    }
+
                     return true;
                 }
 
