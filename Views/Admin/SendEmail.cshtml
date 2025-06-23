@@ -1,0 +1,307 @@
+@model SendEmailViewModel
+@{
+    ViewData["Title"] = "Enviar Email";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-envelope-fill"></i> Enviar Email</h2>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model?.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model?.EmailSent == true)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> 
+            Email enviado com sucesso para <strong>@Model.TotalRecipients</strong> destinatários!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-envelope-paper"></i> Compor Email
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="SendEmail" method="post" id="emailForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="RecipientType" class="form-label">Destinatários</label>
+                                <select asp-for="RecipientType" class="form-select" id="recipientType">
+                                    <option value="1">Todos os usuários</option>
+                                    <option value="2">Usuários de um departamento</option>
+                                    <option value="3">Emails específicos</option>
+                                    <option value="4">Apenas administradores</option>
+                                    <option value="5">Apenas gestores</option>
+                                </select>
+                                <span asp-validation-for="RecipientType" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Destinatários Estimados</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-people-fill"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="recipientCount" value="Calculando..." readonly>
+                                    <button type="button" class="btn btn-outline-secondary" id="refreshCount">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3" id="departmentSelect" style="display: none;">
+                            <div class="col-md-6">
+                                <label asp-for="DepartmentId" class="form-label">Departamento</label>
+                                <select asp-for="DepartmentId" class="form-select">
+                                    <option value="">Selecione um departamento</option>
+                                    @if (Model?.Departments != null)
+                                    {
+                                        foreach (var dept in Model.Departments)
+                                        {
+                                            <option value="@dept.Id">@dept.Name</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="specificEmails" style="display: none;">
+                            <label asp-for="SpecificEmails" class="form-label">Emails Específicos</label>
+                            <textarea asp-for="SpecificEmails" class="form-control" rows="3" 
+                                      placeholder="Digite os emails separados por vírgula, ponto e vírgula ou quebra de linha&#10;Exemplo: usuario1@empresa.com, usuario2@empresa.com"></textarea>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i> 
+                                Separe múltiplos emails por vírgula, ponto e vírgula ou quebra de linha
+                            </div>
+                            <span asp-validation-for="SpecificEmails" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Subject" class="form-label">Assunto</label>
+                            <input asp-for="Subject" class="form-control" placeholder="Digite o assunto do email">
+                            <span asp-validation-for="Subject" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Message" class="form-label">Mensagem</label>
+                            <textarea asp-for="Message" class="form-control" rows="8" 
+                                      placeholder="Digite a mensagem do email"></textarea>
+                            <span asp-validation-for="Message" class="text-danger"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input asp-for="IsHtml" class="form-check-input" type="checkbox" checked>
+                                    <label asp-for="IsHtml" class="form-check-label">
+                                        Usar formatação HTML
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-primary" id="previewBtn">
+                                <i class="bi bi-eye"></i> Pré-visualizar
+                            </button>
+                            <div>
+                                <button type="button" class="btn btn-outline-secondary me-2" onclick="clearForm()">
+                                    <i class="bi bi-x-circle"></i> Limpar
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="sendBtn">
+                                    <i class="bi bi-send"></i> Enviar Email
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-info-circle"></i> Dicas de Uso
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="bi bi-people"></i> Tipos de Destinatários:</h6>
+                        <ul class="list-unstyled small">
+                            <li><strong>Todos:</strong> Todos os usuários cadastrados</li>
+                            <li><strong>Departamento:</strong> Usuários de um departamento específico</li>
+                            <li><strong>Específicos:</strong> Lista personalizada de emails</li>
+                            <li><strong>Admins:</strong> Apenas administradores</li>
+                            <li><strong>Gestores:</strong> Apenas gestores</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-code-slash"></i> Formatação HTML:</h6>
+                        <ul class="list-unstyled small">
+                            <li><code>&lt;b&gt;Negrito&lt;/b&gt;</code></li>
+                            <li><code>&lt;i&gt;Itálico&lt;/i&gt;</code></li>
+                            <li><code>&lt;br&gt;</code> para quebra de linha</li>
+                            <li><code>&lt;a href="..."&gt;Link&lt;/a&gt;</code></li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-warning small">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Atenção:</strong> Verifique sempre os destinatários antes de enviar.
+                        Emails enviados não podem ser cancelados.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Pré-visualização -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-eye"></i> Pré-visualização do Email
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <strong>Assunto:</strong> <span id="previewSubject"></span>
+                </div>
+                <div class="mb-3">
+                    <strong>Destinatários:</strong> <span id="previewRecipients"></span>
+                </div>
+                <hr>
+                <div id="previewMessage"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="$('#sendBtn').click()">
+                    <i class="bi bi-send"></i> Enviar Agora
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Controlar exibição de campos baseado no tipo de destinatário
+            $('#recipientType').change(function() {
+                var selectedType = $(this).val();
+                
+                $('#departmentSelect').hide();
+                $('#specificEmails').hide();
+                
+                if (selectedType == '2') { // Department
+                    $('#departmentSelect').show();
+                } else if (selectedType == '3') { // Specific
+                    $('#specificEmails').show();
+                }
+                
+                updateRecipientCount();
+            });
+
+            // Atualizar contagem quando campos relevantes mudarem
+            $('#recipientType, select[name="DepartmentId"], textarea[name="SpecificEmails"]').change(updateRecipientCount);
+            $('#refreshCount').click(updateRecipientCount);
+
+            // Pré-visualização
+            $('#previewBtn').click(function() {
+                var subject = $('input[name="Subject"]').val() || '(Sem assunto)';
+                var message = $('textarea[name="Message"]').val() || '(Mensagem vazia)';
+                var isHtml = $('input[name="IsHtml"]').prop('checked');
+                var recipientCount = $('#recipientCount').val();
+                
+                $('#previewSubject').text(subject);
+                $('#previewRecipients').text(recipientCount + ' destinatários');
+                
+                if (isHtml) {
+                    $('#previewMessage').html(message);
+                } else {
+                    $('#previewMessage').text(message);
+                }
+                
+                $('#previewModal').modal('show');
+            });
+
+            // Carregar contagem inicial
+            updateRecipientCount();
+        });
+
+        function updateRecipientCount() {
+            $('#recipientCount').val('Calculando...');
+            
+            var formData = {
+                RecipientType: $('#recipientType').val(),
+                DepartmentId: $('select[name="DepartmentId"]').val() || null,
+                SpecificEmails: $('textarea[name="SpecificEmails"]').val() || null
+            };
+
+            $.ajax({
+                url: '@Url.Action("GetRecipientsCount")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    if (response.success) {
+                        $('#recipientCount').val(response.count + ' destinatários');
+                    } else {
+                        $('#recipientCount').val('Erro ao calcular');
+                    }
+                },
+                error: function() {
+                    $('#recipientCount').val('Erro ao calcular');
+                }
+            });
+        }
+
+        function clearForm() {
+            if (confirm('Tem certeza que deseja limpar todos os campos?')) {
+                $('#emailForm')[0].reset();
+                $('#recipientType').val('1').change();
+                updateRecipientCount();
+            }
+        }
+
+        // Confirmação antes de enviar
+        $('#emailForm').submit(function(e) {
+            var recipientCount = $('#recipientCount').val();
+            if (!confirm('Tem certeza que deseja enviar este email para ' + recipientCount + '?')) {
+                e.preventDefault();
+                return false;
+            }
+            
+            $('#sendBtn').prop('disabled', true).html('<i class="bi bi-hourglass-split"></i> Enviando...');
+        });
+    </script>
+}

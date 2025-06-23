@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using IntranetDocumentos.Models;
 using IntranetDocumentos.Models.ViewModels;
 using IntranetDocumentos.Data;
+using IntranetDocumentos.Services.Notifications;
 
 namespace IntranetDocumentos.Controllers
 {
@@ -15,17 +16,20 @@ namespace IntranetDocumentos.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _context;
         private readonly ILogger<AdminController> _logger;
+        private readonly IEmailService _emailService;
 
         public AdminController(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
             ApplicationDbContext context,
-            ILogger<AdminController> logger)
+            ILogger<AdminController> logger,
+            IEmailService emailService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _context = context;
             _logger = logger;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -242,6 +246,167 @@ namespace IntranetDocumentos.Controllers
                 .ToListAsync();
 
             return View(departments);
+        }
+
+        /// <summary>
+        /// Exibe a página de envio de emails para administradores
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> SendEmail()
+        {
+            var model = new SendEmailViewModel
+            {
+                Departments = await _context.Departments.OrderBy(d => d.Name).ToListAsync()
+            };
+
+            return View(model);
+        }
+
+        /// <summary>
+        /// Processa o envio de emails
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendEmail(SendEmailViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.Departments = await _context.Departments.OrderBy(d => d.Name).ToListAsync();
+                return View(model);
+            }
+
+            try
+            {
+                var recipients = await GetEmailRecipientsAsync(model);
+                
+                if (!recipients.Any())
+                {
+                    model.ErrorMessage = "Nenhum destinatário encontrado com os critérios selecionados.";
+                    model.Departments = await _context.Departments.OrderBy(d => d.Name).ToListAsync();
+                    return View(model);
+                }
+
+                var emailAddresses = recipients.Where(e => !string.IsNullOrEmpty(e)).ToList();
+                model.TotalRecipients = emailAddresses.Count;
+
+                if (!emailAddresses.Any())
+                {
+                    model.ErrorMessage = "Nenhum email válido encontrado para os destinatários selecionados.";
+                    model.Departments = await _context.Departments.OrderBy(d => d.Name).ToListAsync();
+                    return View(model);
+                }
+
+                // Enviar email
+                var success = await _emailService.SendEmailToMultipleAsync(
+                    emailAddresses,
+                    model.Subject,
+                    model.Message,
+                    model.IsHtml
+                );
+
+                if (success)
+                {
+                    model.EmailSent = true;
+                    _logger.LogInformation("Email enviado pelo admin para {Count} destinatários. Assunto: {Subject}", 
+                        emailAddresses.Count, model.Subject);
+                    TempData["Success"] = $"Email enviado com sucesso para {emailAddresses.Count} destinatários!";
+                }
+                else
+                {
+                    model.ErrorMessage = "Erro ao enviar o email. Verifique as configurações SMTP.";
+                    _logger.LogWarning("Falha ao enviar email pelo admin. Assunto: {Subject}", model.Subject);
+                }
+            }
+            catch (Exception ex)
+            {
+                model.ErrorMessage = "Erro interno ao enviar email. Tente novamente.";
+                _logger.LogError(ex, "Erro ao enviar email pelo admin. Assunto: {Subject}", model.Subject);
+            }
+
+            model.Departments = await _context.Departments.OrderBy(d => d.Name).ToListAsync();
+            return View(model);
+        }
+
+        /// <summary>
+        /// API para obter contagem de destinatários em tempo real
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> GetRecipientsCount([FromBody] SendEmailViewModel model)
+        {
+            try
+            {
+                var recipients = await GetEmailRecipientsAsync(model);
+                var validEmails = recipients.Where(e => !string.IsNullOrEmpty(e)).Count();
+                
+                return Json(new { count = validEmails, success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao contar destinatários");
+                return Json(new { count = 0, success = false, error = "Erro ao contar destinatários" });
+            }
+        }
+
+        /// <summary>
+        /// Obtém lista de emails baseada nos critérios selecionados
+        /// </summary>
+        private async Task<List<string>> GetEmailRecipientsAsync(SendEmailViewModel model)
+        {
+            var emails = new List<string>();
+
+            switch (model.RecipientType)
+            {
+                case EmailRecipientType.AllUsers:
+                    var allUsers = await _userManager.Users
+                        .Where(u => !string.IsNullOrEmpty(u.Email))
+                        .Select(u => u.Email!)
+                        .ToListAsync();
+                    emails.AddRange(allUsers);
+                    break;
+
+                case EmailRecipientType.Department:
+                    if (model.DepartmentId.HasValue)
+                    {
+                        var departmentUsers = await _userManager.Users
+                            .Where(u => u.DepartmentId == model.DepartmentId.Value && !string.IsNullOrEmpty(u.Email))
+                            .Select(u => u.Email!)
+                            .ToListAsync();
+                        emails.AddRange(departmentUsers);
+                    }
+                    break;
+
+                case EmailRecipientType.Specific:
+                    if (!string.IsNullOrEmpty(model.SpecificEmails))
+                    {
+                        var specificEmails = model.SpecificEmails
+                            .Split(new[] { ',', ';', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(e => e.Trim())
+                            .Where(e => !string.IsNullOrEmpty(e))
+                            .ToList();
+                        emails.AddRange(specificEmails);
+                    }
+                    break;
+
+                case EmailRecipientType.AdminOnly:
+                    var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+                    var adminEmails = adminUsers
+                        .Where(u => !string.IsNullOrEmpty(u.Email))
+                        .Select(u => u.Email!)
+                        .ToList();
+                    emails.AddRange(adminEmails);
+                    break;
+
+                case EmailRecipientType.ManagersOnly:
+                    var managerUsers = await _userManager.GetUsersInRoleAsync("Gestor");
+                    var managerEmails = managerUsers
+                        .Where(u => !string.IsNullOrEmpty(u.Email))
+                        .Select(u => u.Email!)
+                        .ToList();
+                    emails.AddRange(managerEmails);
+                    break;
+            }
+
+            return emails.Distinct().ToList();
         }
     }
 }
