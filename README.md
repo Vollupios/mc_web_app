@@ -5,6 +5,7 @@ Sistema web desenvolvido em ASP.NET Core MVC para gestão de documentos corporat
 ## 🚀 Funcionalidades
 
 ### 📄 Gestão de Documentos
+
 - Upload de documentos por departamento
 - Controle de acesso baseado em roles e departamentos
 - Download seguro de arquivos
@@ -12,18 +13,21 @@ Sistema web desenvolvido em ASP.NET Core MVC para gestão de documentos corporat
 - Limite de 10MB por arquivo
 
 ### 🤝 Sistema de Reuniões
+
 - Agendamento de reuniões internas e externas
 - Controle de salas e veículos
 - Gestão de participantes
 - Status de reuniões (Agendada, Em Andamento, Concluída, Cancelada)
 
 ### 📞 Lista de Ramais
+
 - Cadastro de ramais corporativos
 - Organização por departamentos
 - Fotos dos funcionários
 - Status ativo/inativo
 
 ### 👥 Controle de Usuários
+
 - Sistema de autenticação com ASP.NET Core Identity
 - Três níveis de acesso: Admin, Gestor, Usuario
 - Controle por departamentos
@@ -80,6 +84,7 @@ IntranetDocumentos/
 - Visualização de relatórios
 
 ### Usuario
+
 - Acesso ao próprio departamento
 - Acesso à área Geral
 - Upload e download de documentos
@@ -87,12 +92,14 @@ IntranetDocumentos/
 ## 🚀 Como Executar
 
 ### Pré-requisitos
+
 - .NET 9.0 SDK
 - Visual Studio Code ou Visual Studio
 
 ### Passos
 
 1. **Clone o repositório**
+
    ```bash
    git clone <repository-url>
    cd mc_web_app-main
@@ -120,6 +127,7 @@ IntranetDocumentos/
 O sistema utiliza SQLite com Entity Framework Core. O banco é criado automaticamente na primeira execução com dados de exemplo.
 
 ### Scripts Disponíveis
+
 - `run-app.ps1` - Inicia a aplicação
 - `backup-database.ps1` - Backup manual do banco
 - `recreate-database.ps1` - Recria o banco (desenvolvimento)
@@ -136,6 +144,7 @@ O sistema utiliza SQLite com Entity Framework Core. O banco é criado automatica
 ## 📋 CI/CD
 
 O projeto inclui workflows do GitHub Actions para:
+
 - Build automático
 - Testes unitários
 - Análise de segurança
