@@ -59,11 +59,11 @@ jobs:
         
     - name: Run security scan
       run: |
-        dotnet list package --vulnerable --include-transitive
-        dotnet list package --deprecated
+        dotnet list mc_web_app.sln package --vulnerable --include-transitive
+        dotnet list mc_web_app.sln package --deprecated
         
     - name: Check for outdated packages
-      run: dotnet list package --outdated
+      run: dotnet list mc_web_app.sln package --outdated
 
   quality-check:
     name: Code Quality Check
@@ -85,7 +85,7 @@ jobs:
         dotnet tool install --global security-scan
         
     - name: Run code formatting check
-      run: dotnet format ${{ env.PROJECT_PATH }} --verify-no-changes --verbosity diagnostic
+      run: dotnet format mc_web_app.sln --verify-no-changes --verbosity diagnostic
       
     - name: Static code analysis
       run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release /p:TreatWarningsAsErrors=true
