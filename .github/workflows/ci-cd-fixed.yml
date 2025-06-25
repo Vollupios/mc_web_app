@@ -85,7 +85,7 @@ jobs:
         dotnet tool install --global security-scan
         
     - name: Run code formatting check
-      run: dotnet format --verify-no-changes --verbosity diagnostic
+      run: dotnet format ${{ env.PROJECT_PATH }} --verify-no-changes --verbosity diagnostic
       
     - name: Static code analysis
       run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release /p:TreatWarningsAsErrors=true
