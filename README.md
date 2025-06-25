@@ -26,7 +26,39 @@ Sistema web desenvolvido em ASP.NET Core MVC para gestão de documentos corporat
 - Fotos dos funcionários
 - Status ativo/inativo
 
-### 👥 Controle de Usuários
+# IntranetDocumentos - Sistema de Gestão de Documentos
+
+Sistema web desenvolvido em ASP.NET Core MVC para gestão de documentos corporativos.
+
+## 🚀 Funcionalidades Principais
+
+### 📄 **Gestão de Documentos**
+- Upload de documentos por departamento
+- Controle de acesso baseado em roles e departamentos  
+- Download seguro de arquivos
+- Tipos suportados: PDF, Office, imagens, texto, ZIP
+- Limite de 10MB por arquivo
+
+### 🤝 **Sistema de Reuniões**
+- Agendamento de reuniões internas e externas
+- Controle de salas e veículos
+- Gestão de participantes
+- Status de reuniões (Agendada, Em Andamento, Concluída, Cancelada)
+
+### 📞 **Lista de Ramais**
+- Cadastro de ramais corporativos
+- Organização por departamentos
+- Fotos dos funcionários
+- Status ativo/inativo
+
+### 📧 **Sistema de Email e Notificações**
+- Configuração SMTP para diferentes provedores (Gmail, Outlook, Office365)
+- Envio de emails administrativos para grupos de usuários
+- Notificações automáticas para novos documentos
+- Lembretes de reuniões
+- Pré-visualização de emails antes do envio
+
+### 👥 **Controle de Usuários**
 
 - Sistema de autenticação com ASP.NET Core Identity
 - Três níveis de acesso: Admin, Gestor, Usuario

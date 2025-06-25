@@ -23,6 +23,12 @@ namespace IntranetDocumentos.Services.Notifications
         Task<bool> SendTemplateEmailAsync(string to, string templateName, object model);
 
         /// <summary>
+        /// Testa o envio de email com configurações personalizadas
+        /// </summary>
+        Task<bool> TestEmailWithConfigAsync(string smtpHost, int smtpPort, string username, string password, 
+            bool enableSsl, string fromEmail, string fromName, string to, string subject, string body, bool isHtml = true);
+
+        /// <summary>
         /// Verifica se o serviço de email está configurado
         /// </summary>
         bool IsConfigured { get; }

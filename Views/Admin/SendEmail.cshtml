@@ -70,6 +70,12 @@
                                         <i class="bi bi-arrow-clockwise"></i>
                                     </button>
                                 </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle"></i> 
+                                        <span id="recipientEmails">Carregando lista de emails...</span>
+                                    </small>
+                                </div>
                             </div>
                         </div>
 
@@ -255,33 +261,58 @@
                 $('#previewModal').modal('show');
             });
 
-            // Carregar contagem inicial
-            updateRecipientCount();
+            // Carregar contagem inicial após a página carregar
+            setTimeout(function() {
+                updateRecipientCount();
+            }, 500);
         });
 
         function updateRecipientCount() {
             $('#recipientCount').val('Calculando...');
+            $('#recipientEmails').text('Carregando lista de emails...');
+            
+            var recipientType = parseInt($('#recipientType').val()) || 1;
+            var departmentId = $('select[name="DepartmentId"]').val();
+            var specificEmails = $('textarea[name="SpecificEmails"]').val();
             
             var formData = {
-                RecipientType: $('#recipientType').val(),
-                DepartmentId: $('select[name="DepartmentId"]').val() || null,
-                SpecificEmails: $('textarea[name="SpecificEmails"]').val() || null
+                RecipientType: recipientType,
+                DepartmentId: departmentId ? parseInt(departmentId) : null,
+                SpecificEmails: specificEmails || null,
+                Subject: "", // Campos obrigatórios mas não usados para contagem
+                Message: ""
             };
 
+            console.log('Enviando dados:', formData); // Debug
+
             $.ajax({
-                url: '@Url.Action("GetRecipientsCount")',
+                url: '@Url.Action("GetRecipientsDetails")',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(formData),
                 success: function(response) {
+                    console.log('Resposta recebida:', response); // Debug
                     if (response.success) {
                         $('#recipientCount').val(response.count + ' destinatários');
+                        
+                        if (response.emails && response.emails.length > 0) {
+                            var emailText = response.emails.length <= 10 
+                                ? response.emails.join(', ')
+                                : response.emails.slice(0, 10).join(', ') + '... e mais ' + (response.emails.length - 10);
+                            $('#recipientEmails').text(emailText);
+                        } else {
+                            $('#recipientEmails').text('Nenhum email encontrado');
+                        }
                     } else {
                         $('#recipientCount').val('Erro ao calcular');
+                        $('#recipientEmails').text(response.error || 'Erro ao carregar emails');
+                        console.error('Erro na resposta:', response.error);
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('Erro AJAX:', status, error);
                     $('#recipientCount').val('Erro ao calcular');
+                    $('#recipientEmails').text('Erro de conexão');
                 }
             });
         }

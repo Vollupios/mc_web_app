@@ -18,9 +18,62 @@
         <a asp-action="SendEmail" class="btn btn-primary shadow-sm me-2">
             <i class="bi bi-envelope"></i> Enviar Email
         </a>
+        <a asp-action="EmailConfig" class="btn btn-warning shadow-sm me-2">
+            <i class="bi bi-gear"></i> Config. Email
+        </a>
         <a asp-action="Departments" class="btn btn-info shadow-sm">
             <i class="bi bi-building"></i> Departamentos
         </a>
+    </div>
+</div>
+
+<!-- Cards de Status -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <i class="bi bi-people-fill text-primary" style="font-size: 2rem;"></i>
+                <h5 class="mt-2">@Model.Count</h5>
+                <small class="text-muted">Usuários Total</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <i class="bi bi-envelope-fill text-success" style="font-size: 2rem;"></i>
+                <h5 class="mt-2">
+                    @* Aqui pode ser implementado contagem de emails enviados *@
+                    <a asp-action="SendEmail" class="text-decoration-none">Enviar</a>
+                </h5>
+                <small class="text-muted">Comunicação</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <i class="bi bi-gear-fill text-warning" style="font-size: 2rem;"></i>
+                <h5 class="mt-2">
+                    <a asp-action="EmailConfig" class="text-decoration-none">Config</a>
+                </h5>
+                <small class="text-muted">Email SMTP</small>
+                <div id="emailStatus" class="mt-1">
+                    <small class="text-warning">Verificando...</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <i class="bi bi-building-fill text-info" style="font-size: 2rem;"></i>
+                <h5 class="mt-2">
+                    <a asp-action="Departments" class="text-decoration-none">Gerenciar</a>
+                </h5>
+                <small class="text-muted">Departamentos</small>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -137,6 +190,33 @@ else
             var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
             modal.show();
         }
+
+        function showDeleteModal(userId, userEmail) {
+            document.getElementById('deleteUserId').value = userId;
+            document.getElementById('deleteUserEmail').textContent = userEmail;
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+
+        // Verificar status do sistema de email
+        $(document).ready(function() {
+            $.get('@Url.Action("GetSystemStatus")', function(data) {
+                if (data.success) {
+                    var statusHtml = data.emailConfigured 
+                        ? '<small class="text-success">✅ Configurado</small>'
+                        : '<small class="text-danger">❌ Não configurado</small>';
+                    $('#emailStatus').html(statusHtml);
+                    
+                    // Debug info no console
+                    console.log('Status do sistema:', data);
+                } else {
+                    $('#emailStatus').html('<small class="text-danger">❌ Erro</small>');
+                    console.error('Erro ao verificar status:', data.error);
+                }
+            }).fail(function() {
+                $('#emailStatus').html('<small class="text-danger">❌ Erro de conexão</small>');
+            });
+        });
     </script>
 }
 

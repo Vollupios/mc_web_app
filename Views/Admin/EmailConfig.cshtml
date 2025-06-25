@@ -1,0 +1,288 @@
+@using IntranetDocumentos.Models.ViewModels
+@model EmailConfigViewModel
+@{
+    ViewData["Title"] = "Configuração de Email";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-gear-fill"></i> Configuração de Email</h2>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model?.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-envelope-gear"></i> Configurações SMTP
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EmailConfig" method="post" id="emailConfigForm">
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label asp-for="SmtpHost" class="form-label">Servidor SMTP</label>
+                                <input asp-for="SmtpHost" class="form-control" placeholder="Ex: smtp.gmail.com">
+                                <span asp-validation-for="SmtpHost" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="SmtpPort" class="form-label">Porta</label>
+                                <input asp-for="SmtpPort" class="form-control" placeholder="587">
+                                <span asp-validation-for="SmtpPort" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="SmtpUser" class="form-label">Usuário SMTP</label>
+                                <input asp-for="SmtpUser" class="form-control" placeholder="usuario@gmail.com">
+                                <span asp-validation-for="SmtpUser" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="SmtpPassword" class="form-label">Senha SMTP</label>
+                                <div class="input-group">
+                                    <input asp-for="SmtpPassword" class="form-control" type="password" placeholder="••••••••">
+                                    <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                                        <i class="bi bi-eye" id="toggleIcon"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle"></i>
+                                    Para Gmail, use uma senha de aplicativo
+                                </div>
+                                <span asp-validation-for="SmtpPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="FromEmail" class="form-label">Email de Origem</label>
+                                <input asp-for="FromEmail" class="form-control" placeholder="noreply@empresa.com">
+                                <span asp-validation-for="FromEmail" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="FromName" class="form-label">Nome de Origem</label>
+                                <input asp-for="FromName" class="form-control" placeholder="Sistema Intranet">
+                                <span asp-validation-for="FromName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input asp-for="EnableSsl" class="form-check-input" type="checkbox">
+                                    <label asp-for="EnableSsl" class="form-check-label">
+                                        Usar SSL/TLS
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input asp-for="NotificationsEnabled" class="form-check-input" type="checkbox">
+                                    <label asp-for="NotificationsEnabled" class="form-check-label">
+                                        Habilitar Notificações
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <h6><i class="bi bi-bell"></i> Configurações de Lembretes</h6>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="ReminderIntervalMinutes" class="form-label">Intervalo de Lembretes</label>
+                                <div class="input-group">
+                                    <input asp-for="ReminderIntervalMinutes" class="form-control">
+                                    <span class="input-group-text">minutos</span>
+                                </div>
+                                <div class="form-text">Frequência de verificação de reuniões</div>
+                                <span asp-validation-for="ReminderIntervalMinutes" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ReminderLeadTimeMinutes" class="form-label">Antecedência dos Lembretes</label>
+                                <div class="input-group">
+                                    <input asp-for="ReminderLeadTimeMinutes" class="form-control">
+                                    <span class="input-group-text">minutos</span>
+                                </div>
+                                <div class="form-text">Tempo antes da reunião para enviar lembrete</div>
+                                <span asp-validation-for="ReminderLeadTimeMinutes" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                @if (Model?.ConfigurationExists == true)
+                                {
+                                    <button type="submit" formaction="@Url.Action("TestEmail")" class="btn btn-outline-primary me-2">
+                                        <i class="bi bi-envelope-check"></i> Testar Email
+                                    </button>
+                                }
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-outline-secondary me-2" onclick="resetForm()">
+                                    <i class="bi bi-arrow-clockwise"></i> Resetar
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Salvar Configurações
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-info-circle"></i> Guia de Configuração
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="bi bi-google"></i> Gmail</h6>
+                        <ul class="list-unstyled small">
+                            <li><strong>Servidor:</strong> smtp.gmail.com</li>
+                            <li><strong>Porta:</strong> 587</li>
+                            <li><strong>SSL:</strong> Habilitado</li>
+                            <li><strong>Senha:</strong> Use senha de aplicativo</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-microsoft"></i> Outlook/Hotmail</h6>
+                        <ul class="list-unstyled small">
+                            <li><strong>Servidor:</strong> smtp-mail.outlook.com</li>
+                            <li><strong>Porta:</strong> 587</li>
+                            <li><strong>SSL:</strong> Habilitado</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-shield-check"></i> Segurança</h6>
+                        <ul class="list-unstyled small">
+                            <li>• Use senhas de aplicativo quando possível</li>
+                            <li>• Habilite autenticação de 2 fatores</li>
+                            <li>• Mantenha credenciais seguras</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="bi bi-gear"></i> Configurações no Sistema</h6>
+                        <ul class="list-unstyled small">
+                            <li>• Configurações atuais em <code>appsettings.json</code></li>
+                            <li>• Teste antes de salvar</li>
+                            <li>• Reinicie o sistema após mudanças</li>
+                        </ul>
+                    </div>
+
+                    @if (Model?.ConfigurationExists == true)
+                    {
+                        <div class="alert alert-success small">
+                            <i class="bi bi-check-circle"></i>
+                            <strong>Configuração ativa</strong><br>
+                            O sistema está configurado para enviar emails.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning small">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Configuração necessária</strong><br>
+                            Configure o SMTP para habilitar o envio de emails e notificações.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (Model?.TestEmailSent == true)
+            {
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="bi bi-envelope-check"></i> Resultado do Teste
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info small mb-0">
+                            @Model.TestResult
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Toggle password visibility
+            $('#togglePassword').click(function() {
+                var passwordField = $('#SmtpPassword');
+                var toggleIcon = $('#toggleIcon');
+                
+                if (passwordField.attr('type') === 'password') {
+                    passwordField.attr('type', 'text');
+                    toggleIcon.removeClass('bi-eye').addClass('bi-eye-slash');
+                } else {
+                    passwordField.attr('type', 'password');
+                    toggleIcon.removeClass('bi-eye-slash').addClass('bi-eye');
+                }
+            });
+        });
+
+        function resetForm() {
+            if (confirm('Tem certeza que deseja resetar todas as configurações?')) {
+                $('#emailConfigForm')[0].reset();
+            }
+        }
+
+        // Validação adicional no cliente
+        $('#emailConfigForm').submit(function(e) {
+            var isTestEmail = $(document.activeElement).attr('formaction');
+            
+            if (!isTestEmail) {
+                var smtpHost = $('#SmtpHost').val();
+                var smtpUser = $('#SmtpUser').val();
+                var fromEmail = $('#FromEmail').val();
+                
+                if (!smtpHost || !smtpUser || !fromEmail) {
+                    alert('Por favor, preencha todos os campos obrigatórios.');
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+    </script>
+}

@@ -77,6 +77,36 @@ namespace IntranetDocumentos.Services.Notifications
             return await SendEmailAsync(to, template.Subject, template.Body, true);
         }
 
+        /// <summary>
+        /// Testa o envio de email com configurações personalizadas
+        /// </summary>
+        public async Task<bool> TestEmailWithConfigAsync(string smtpHost, int smtpPort, string username, string password, 
+            bool enableSsl, string fromEmail, string fromName, string to, string subject, string body, bool isHtml = true)
+        {
+            try
+            {
+                using var client = new SmtpClient(smtpHost, smtpPort);
+                client.Credentials = new NetworkCredential(username, password);
+                client.EnableSsl = enableSsl;
+
+                using var message = new MailMessage();
+                message.From = new MailAddress(fromEmail, fromName);
+                message.To.Add(to);
+                message.Subject = subject;
+                message.Body = body;
+                message.IsBodyHtml = isHtml;
+
+                await client.SendMailAsync(message);
+                _logger.LogInformation("Email de teste enviado com sucesso para {To} usando configurações personalizadas", to);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao enviar email de teste com configurações personalizadas para {To}", to);
+                return false;
+            }
+        }
+
         private SmtpClient? ConfigureSmtpClient()
         {
             try

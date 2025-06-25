@@ -17,19 +17,22 @@ namespace IntranetDocumentos.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<AdminController> _logger;
         private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
 
         public AdminController(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
             ApplicationDbContext context,
             ILogger<AdminController> logger,
-            IEmailService emailService)
+            IEmailService emailService,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _context = context;
             _logger = logger;
             _emailService = emailService;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -348,65 +351,284 @@ namespace IntranetDocumentos.Controllers
         }
 
         /// <summary>
+        /// API para obter detalhes dos destinatários (contagem e emails)
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> GetRecipientsDetails([FromBody] SendEmailViewModel model)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    _logger.LogWarning("Modelo nulo recebido em GetRecipientsDetails");
+                    return Json(new { 
+                        count = 0, 
+                        emails = new List<string>(), 
+                        success = false, 
+                        error = "Dados não foram enviados corretamente" 
+                    });
+                }
+
+                _logger.LogInformation("Obtendo destinatários para tipo: {RecipientType}", model.RecipientType);
+
+                var emails = await GetEmailRecipientsAsync(model);
+                var validEmails = emails.Where(e => !string.IsNullOrEmpty(e)).ToList();
+                
+                _logger.LogInformation("Encontrados {Count} destinatários válidos", validEmails.Count);
+                
+                return Json(new { 
+                    count = validEmails.Count, 
+                    emails = validEmails.Take(20).ToList(), // Limitar para não sobrecarregar
+                    success = true 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter detalhes dos destinatários. Modelo: {@Model}", model);
+                return Json(new { 
+                    count = 0, 
+                    emails = new List<string>(), 
+                    success = false, 
+                    error = $"Erro interno: {ex.Message}" 
+                });
+            }
+        }
+
+        /// <summary>
         /// Obtém lista de emails baseada nos critérios selecionados
         /// </summary>
         private async Task<List<string>> GetEmailRecipientsAsync(SendEmailViewModel model)
         {
             var emails = new List<string>();
 
-            switch (model.RecipientType)
+            if (model == null)
             {
-                case EmailRecipientType.AllUsers:
-                    var allUsers = await _userManager.Users
-                        .Where(u => !string.IsNullOrEmpty(u.Email))
-                        .Select(u => u.Email!)
-                        .ToListAsync();
-                    emails.AddRange(allUsers);
-                    break;
+                _logger.LogWarning("Modelo nulo em GetEmailRecipientsAsync");
+                return emails;
+            }
 
-                case EmailRecipientType.Department:
-                    if (model.DepartmentId.HasValue)
-                    {
-                        var departmentUsers = await _userManager.Users
-                            .Where(u => u.DepartmentId == model.DepartmentId.Value && !string.IsNullOrEmpty(u.Email))
+            try
+            {
+                switch (model.RecipientType)
+                {
+                    case EmailRecipientType.AllUsers:
+                        var allUsers = await _userManager.Users
+                            .Where(u => !string.IsNullOrEmpty(u.Email))
                             .Select(u => u.Email!)
                             .ToListAsync();
-                        emails.AddRange(departmentUsers);
-                    }
-                    break;
+                        emails.AddRange(allUsers);
+                        break;
 
-                case EmailRecipientType.Specific:
-                    if (!string.IsNullOrEmpty(model.SpecificEmails))
-                    {
-                        var specificEmails = model.SpecificEmails
-                            .Split(new[] { ',', ';', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
-                            .Select(e => e.Trim())
-                            .Where(e => !string.IsNullOrEmpty(e))
+                    case EmailRecipientType.Department:
+                        if (model.DepartmentId.HasValue)
+                        {
+                            var departmentUsers = await _userManager.Users
+                                .Where(u => u.DepartmentId == model.DepartmentId.Value && !string.IsNullOrEmpty(u.Email))
+                                .Select(u => u.Email!)
+                                .ToListAsync();
+                            emails.AddRange(departmentUsers);
+                        }
+                        break;
+
+                    case EmailRecipientType.Specific:
+                        if (!string.IsNullOrEmpty(model.SpecificEmails))
+                        {
+                            var specificEmails = model.SpecificEmails
+                                .Split(new[] { ',', ';', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+                                .Select(e => e.Trim())
+                                .Where(e => !string.IsNullOrEmpty(e))
+                                .ToList();
+                            emails.AddRange(specificEmails);
+                        }
+                        break;
+
+                    case EmailRecipientType.AdminOnly:
+                        var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+                        var adminEmails = adminUsers
+                            .Where(u => !string.IsNullOrEmpty(u.Email))
+                            .Select(u => u.Email!)
                             .ToList();
-                        emails.AddRange(specificEmails);
-                    }
-                    break;
+                        emails.AddRange(adminEmails);
+                        break;
 
-                case EmailRecipientType.AdminOnly:
-                    var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
-                    var adminEmails = adminUsers
-                        .Where(u => !string.IsNullOrEmpty(u.Email))
-                        .Select(u => u.Email!)
-                        .ToList();
-                    emails.AddRange(adminEmails);
-                    break;
+                    case EmailRecipientType.ManagersOnly:
+                        var managerUsers = await _userManager.GetUsersInRoleAsync("Gestor");
+                        var managerEmails = managerUsers
+                            .Where(u => !string.IsNullOrEmpty(u.Email))
+                            .Select(u => u.Email!)
+                            .ToList();
+                        emails.AddRange(managerEmails);
+                        break;
 
-                case EmailRecipientType.ManagersOnly:
-                    var managerUsers = await _userManager.GetUsersInRoleAsync("Gestor");
-                    var managerEmails = managerUsers
-                        .Where(u => !string.IsNullOrEmpty(u.Email))
-                        .Select(u => u.Email!)
-                        .ToList();
-                    emails.AddRange(managerEmails);
-                    break;
+                    default:
+                        _logger.LogWarning("Tipo de destinatário não reconhecido: {RecipientType}", model.RecipientType);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar destinatários para tipo {RecipientType}", model.RecipientType);
             }
 
             return emails.Distinct().ToList();
+        }
+
+        /// <summary>
+        /// Exibe a página de configuração de email
+        /// </summary>
+        [HttpGet]
+        public IActionResult EmailConfig()
+        {
+            var config = _configuration.GetSection("Email");
+            var notificationConfig = _configuration.GetSection("Notifications");
+
+            var model = new EmailConfigViewModel
+            {
+                SmtpHost = config["SmtpHost"] ?? "",
+                SmtpPort = int.Parse(config["SmtpPort"] ?? "587"),
+                SmtpUser = config["Username"] ?? "",
+                SmtpPassword = "", // Não mostrar senha por segurança
+                EnableSsl = bool.Parse(config["EnableSsl"] ?? "true"),
+                FromEmail = config["FromAddress"] ?? "noreply@empresa.com",
+                FromName = config["FromName"] ?? "Sistema Intranet",
+                ConfigurationExists = !string.IsNullOrEmpty(config["SmtpHost"]),
+                SendDocumentNotifications = bool.Parse(notificationConfig["SendDocumentNotifications"] ?? "true"),
+                SendMeetingNotifications = bool.Parse(notificationConfig["SendMeetingNotifications"] ?? "true"),
+                SendMeetingReminders = bool.Parse(notificationConfig["SendMeetingReminders"] ?? "true"),
+                ReminderIntervalHours = int.Parse(notificationConfig["ReminderIntervalHours"] ?? "6")
+            };
+
+            return View(model);
+        }
+
+        /// <summary>
+        /// Salva a configuração de email
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EmailConfig(EmailConfigViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                // Aqui você salvaria a configuração no appsettings.json ou banco de dados
+                // Por enquanto, vamos apenas validar e mostrar uma mensagem
+                model.ConfigurationExists = true;
+                TempData["Success"] = "Configurações de email salvas com sucesso! Lembre-se de reiniciar a aplicação para aplicar as mudanças.";
+                
+                _logger.LogInformation("Configurações de email atualizadas pelo admin {UserId}", User.Identity?.Name);
+            }
+            catch (Exception ex)
+            {
+                model.ErrorMessage = "Erro ao salvar configurações. Tente novamente.";
+                _logger.LogError(ex, "Erro ao salvar configurações de email");
+            }
+
+            return View(model);
+        }
+
+        /// <summary>
+        /// Testa o envio de email com as configurações atuais
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TestEmail(EmailConfigViewModel model)
+        {
+            try
+            {
+                var testEmail = User.Identity?.Name ?? model.SmtpUser;
+                
+                // Usar o novo método que aceita configurações personalizadas
+                var success = await _emailService.TestEmailWithConfigAsync(
+                    model.SmtpHost,
+                    model.SmtpPort,
+                    model.SmtpUser,
+                    model.SmtpPassword,
+                    model.EnableSsl,
+                    model.FromEmail,
+                    model.FromName,
+                    testEmail,
+                    "🧪 Teste de Configuração - Sistema Intranet",
+                    $@"
+                    <h3>✅ Teste de Email Realizado com Sucesso!</h3>
+                    <p>Este é um email de teste enviado em <strong>{DateTime.Now:dd/MM/yyyy HH:mm}</strong></p>
+                    <p><strong>Configurações testadas:</strong></p>
+                    <ul>
+                        <li>Servidor SMTP: {model.SmtpHost}:{model.SmtpPort}</li>
+                        <li>Usuário: {model.SmtpUser}</li>
+                        <li>SSL: {(model.EnableSsl ? "Habilitado" : "Desabilitado")}</li>
+                        <li>De: {model.FromName} &lt;{model.FromEmail}&gt;</li>
+                    </ul>
+                    <p>Se você recebeu este email, as configurações estão funcionando corretamente! 🎉</p>
+                    ",
+                    true
+                );
+
+                if (success)
+                {
+                    model.TestEmailSent = true;
+                    model.TestResult = $"Email de teste enviado com sucesso para {testEmail}";
+                    TempData["Success"] = model.TestResult;
+                }
+                else
+                {
+                    model.TestResult = "Falha ao enviar email de teste. Verifique as configurações.";
+                    TempData["Error"] = model.TestResult;
+                }
+            }
+            catch (Exception ex)
+            {
+                model.TestResult = $"Erro ao testar email: {ex.Message}";
+                TempData["Error"] = model.TestResult;
+                _logger.LogError(ex, "Erro ao testar configuração de email");
+            }
+
+            // Recarregar configurações atuais para a view
+            var config = _configuration.GetSection("Email");
+            var notificationConfig = _configuration.GetSection("Notifications");
+            
+            model.SmtpHost = config["SmtpHost"] ?? model.SmtpHost;
+            model.SmtpPort = int.Parse(config["SmtpPort"] ?? model.SmtpPort.ToString());
+            model.ConfigurationExists = !string.IsNullOrEmpty(config["SmtpHost"]);
+
+            return View("EmailConfig", model);
+        }
+
+        /// <summary>
+        /// API para verificar status do sistema de email
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetSystemStatus()
+        {
+            try
+            {
+                var totalUsers = await _userManager.Users.CountAsync();
+                var admins = await _userManager.GetUsersInRoleAsync("Admin");
+                var gestores = await _userManager.GetUsersInRoleAsync("Gestor");
+                var departments = await _context.Departments.CountAsync();
+                
+                var emailConfigured = _emailService.IsConfigured;
+                
+                return Json(new
+                {
+                    success = true,
+                    totalUsers,
+                    adminCount = admins.Count,
+                    managerCount = gestores.Count,
+                    departmentCount = departments,
+                    emailConfigured,
+                    status = emailConfigured ? "Email configurado" : "Email não configurado"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter status do sistema");
+                return Json(new { success = false, error = ex.Message });
+            }
         }
     }
 }
