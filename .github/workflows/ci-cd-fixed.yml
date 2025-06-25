@@ -8,7 +8,7 @@ on:
 
 env:
   DOTNET_VERSION: '9.0.x'
-  PROJECT_PATH: './IntranetDocumentos.csproj'
+  PROJECT_PATH: './mc_web_app/IntranetDocumentos.csproj'
 
 jobs:
   build-and-test:
