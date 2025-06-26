@@ -193,9 +193,9 @@ namespace IntranetDocumentos.Services.Documents
                 if (!string.IsNullOrWhiteSpace(contentType))
                     query = query.Where(d => d.ContentType.Contains(contentType));
                 if (startDate.HasValue)
-                    query = query.Where(d => d.UploadDate >= startDate.Value);
+                    query = query.Where(d => d.UploadDate.Date >= startDate.Value.Date);
                 if (endDate.HasValue)
-                    query = query.Where(d => d.UploadDate <= endDate.Value);
+                    query = query.Where(d => d.UploadDate.Date <= endDate.Value.Date);
 
                 return await query.OrderByDescending(d => d.UploadDate).ToListAsync();
             }

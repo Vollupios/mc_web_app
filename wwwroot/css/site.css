@@ -8,6 +8,69 @@
   --text-dark: #333333;
 }
 
+/* Padronização de ícones */
+.navbar .bi,
+.dropdown-menu .bi,
+.nav-link .bi,
+.dropdown-item .bi {
+  font-size: 1rem;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  display: inline-block;
+  width: 1.2em;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Ícones em botões */
+.btn .bi {
+  font-size: 1rem;
+  margin-right: 0.4rem;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* Ícones em tabelas e cabeçalhos */
+.table th .bi,
+.table td .bi {
+  font-size: 1rem;
+  margin-right: 0.3rem;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* Ícones em badges e elementos pequenos */
+.badge .bi {
+  font-size: 0.875rem;
+  margin-right: 0.25rem;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* Alinhamento dos itens do menu */
+.navbar-nav .nav-link,
+.dropdown-item {
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-item {
+  padding: 0.5rem 1rem;
+}
+
+/* Ícones grandes em títulos */
+h1 .bi, h2 .bi, h3 .bi {
+  font-size: 1.2em;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+/* Correção para btn-group com ícones */
+.btn-group .btn .bi {
+  margin-right: 0;
+  font-size: 0.875rem;
+}
+
 html {
   font-size: 14px;
 }

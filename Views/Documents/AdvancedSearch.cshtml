@@ -13,69 +13,159 @@
     </a>
 </div>
 
-<form asp-action="AdvancedSearch" method="post" class="row g-3 mb-4">
-    <div class="col-md-4">
-        <label for="searchTerm" class="form-label">Termo de busca</label>
-        <input type="text" class="form-control" id="searchTerm" name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Nome, conteúdo, etc">
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtros de Busca</h5>
     </div>
-    <div class="col-md-2">
-        <label for="departmentId" class="form-label">Departamento</label>
-        <select class="form-select" id="departmentId" name="departmentId">
-            <option value="">Todos</option>
-            @if (departamentos != null)
-            {
-                foreach (var dep in departamentos)
-                {
-                    var selected = (ViewBag.DepartmentId != null && (int)ViewBag.DepartmentId == dep.Id) ? "selected" : null;
-                    <option value="@dep.Id" selected="@selected">@dep.Name</option>
-                }
-            }
-        </select>
+    <div class="card-body">
+        <form asp-action="AdvancedSearch" method="post" class="row g-3">
+            <div class="col-md-4">
+                <label for="searchTerm" class="form-label">
+                    <i class="bi bi-search"></i> Termo de busca
+                </label>
+                <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                       value="@ViewBag.SearchTerm" placeholder="Nome do arquivo, conteúdo...">
+                <div class="form-text">Busca no nome do arquivo e conteúdo indexado</div>
+            </div>
+            <div class="col-md-2">
+                <label for="departmentId" class="form-label">
+                    <i class="bi bi-building"></i> Departamento
+                </label>
+                <select class="form-select" id="departmentId" name="departmentId">
+                    <option value="">Todos</option>
+                    @if (departamentos != null)
+                    {
+                        foreach (var dep in departamentos)
+                        {
+                            var selected = (ViewBag.DepartmentId != null && (int)ViewBag.DepartmentId == dep.Id) ? "selected" : null;
+                            <option value="@dep.Id" selected="@selected">@dep.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="contentType" class="form-label">
+                    <i class="bi bi-file-earmark"></i> Tipo de arquivo
+                </label>
+                <select class="form-select" id="contentType" name="contentType">
+                    <option value="">Todos os tipos</option>
+                    @{
+                        var selectedContentType = ViewBag.ContentType as string;
+                    }
+                    <option value="pdf" selected="@(selectedContentType == "pdf")">PDF</option>
+                    <option value="word" selected="@(selectedContentType == "word")">Word</option>
+                    <option value="excel" selected="@(selectedContentType == "excel")">Excel</option>
+                    <option value="image" selected="@(selectedContentType == "image")">Imagem</option>
+                    <option value="text" selected="@(selectedContentType == "text")">Texto</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="startDate" class="form-label">
+                    <i class="bi bi-calendar-event"></i> Data inicial
+                </label>
+                <input type="date" class="form-control" id="startDate" name="startDate" 
+                       value="@(ViewBag.StartDate != null ? ((DateTime)ViewBag.StartDate).ToString("yyyy-MM-dd") : "")">
+            </div>
+            <div class="col-md-2">
+                <label for="endDate" class="form-label">
+                    <i class="bi bi-calendar-check"></i> Data final
+                </label>
+                <input type="date" class="form-control" id="endDate" name="endDate" 
+                       value="@(ViewBag.EndDate != null ? ((DateTime)ViewBag.EndDate).ToString("yyyy-MM-dd") : "")">
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Buscar Documentos
+                </button>
+                <button type="button" class="btn btn-outline-secondary ms-2" onclick="clearForm()">
+                    <i class="bi bi-x-circle"></i> Limpar Filtros
+                </button>
+                <a asp-action="Index" class="btn btn-outline-primary ms-2">
+                    <i class="bi bi-arrow-left"></i> Voltar para Lista
+                </a>
+            </div>
+        </form>
     </div>
-    <div class="col-md-2">
-        <label for="contentType" class="form-label">Tipo</label>
-        <input type="text" class="form-control" id="contentType" name="contentType" value="@ViewBag.ContentType" placeholder="Ex: pdf, docx">
-    </div>
-    <div class="col-md-2">
-        <label for="startDate" class="form-label">Data inicial</label>
-        <input type="date" class="form-control" id="startDate" name="startDate" value="@(ViewBag.StartDate != null ? ((DateTime)ViewBag.StartDate).ToString("yyyy-MM-dd") : "")">
-    </div>
-    <div class="col-md-2">
-        <label for="endDate" class="form-label">Data final</label>
-        <input type="date" class="form-control" id="endDate" name="endDate" value="@(ViewBag.EndDate != null ? ((DateTime)ViewBag.EndDate).ToString("yyyy-MM-dd") : "")">
-    </div>
-    <div class="col-12">
-        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Buscar</button>
-        <a asp-action="Index" class="btn btn-secondary ms-2">Voltar</a>
-    </div>
-</form>
+</div>
 
 @if (Model != null && Model.Count > 0)
 {
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> 
+        Encontrado(s) <strong>@Model.Count</strong> documento(s) com os filtros aplicados.
+    </div>
+    
     <div class="table-responsive">
         <table class="table table-striped table-hover align-middle">
             <thead class="table-light">
                 <tr>
-                    <th>Nome</th>
-                    <th>Departamento</th>
-                    <th>Tipo</th>
-                    <th>Data</th>
-                    <th>Tamanho</th>
-                    <th></th>
+                    <th><i class="bi bi-file-text"></i> Nome</th>
+                    <th><i class="bi bi-building"></i> Departamento</th>
+                    <th><i class="bi bi-file-earmark"></i> Tipo</th>
+                    <th><i class="bi bi-calendar"></i> Data/Hora</th>
+                    <th><i class="bi bi-hdd"></i> Tamanho</th>
+                    <th><i class="bi bi-person"></i> Enviado por</th>
+                    <th><i class="bi bi-gear"></i> Ações</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var doc in Model)
                 {
                     <tr>
-                        <td>@doc.OriginalFileName</td>
-                        <td>@doc.Department?.Name ?? "Geral"</td>
-                        <td>@doc.ContentType</td>
-                        <td>@doc.UploadDate.ToString("dd/MM/yyyy")</td>
-                        <td>@(doc.FileSize / 1024) KB</td>
                         <td>
-                            <a asp-action="Details" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i> Detalhes</a>
-                            <a asp-action="Download" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-success ms-1"><i class="bi bi-download"></i> Baixar</a>
+                            <i class="bi @GetFileIcon(doc.ContentType)"></i>
+                            @doc.OriginalFileName
+                        </td>
+                        <td>
+                            @if (doc.Department != null)
+                            {
+                                <span class="badge bg-primary">@doc.Department.Name</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Geral</span>
+                            }
+                        </td>
+                        <td>
+                            <small class="text-muted">@doc.ContentType</small>
+                        </td>
+                        <td>
+                            <div>
+                                <strong>@doc.UploadDate.ToString("dd/MM/yyyy")</strong>
+                                <br>
+                                <small class="text-muted">@doc.UploadDate.ToString("HH:mm")</small>
+                            </div>
+                        </td>
+                        <td>@GetFileSize(doc.FileSize)</td>
+                        <td>
+                            <small>@doc.Uploader?.Email</small>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                @{
+                                    var extension = System.IO.Path.GetExtension(doc.OriginalFileName).ToLowerInvariant();
+                                    bool canView = extension == ".pdf" || 
+                                                 extension == ".jpg" || extension == ".jpeg" || extension == ".png" || 
+                                                 extension == ".gif" || extension == ".bmp" || extension == ".webp" ||
+                                                 extension == ".txt";
+                                }
+                                
+                                @if (canView)
+                                {
+                                    <a asp-action="View" asp-route-id="@doc.Id" 
+                                       class="btn btn-sm btn-outline-success" title="Visualizar" target="_blank">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </a>
+                                }
+                                
+                                <a asp-action="Download" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-primary" title="Download">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                                
+                                <a asp-action="Details" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-info" title="Detalhes">
+                                    <i class="bi bi-info-circle"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 }
@@ -85,5 +175,64 @@
 }
 else if (Model != null)
 {
-    <div class="alert alert-warning">Nenhum documento encontrado para os filtros informados.</div>
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> 
+        Nenhum documento encontrado para os filtros informados.
+    </div>
+}
+
+@functions {
+    private string GetFileIcon(string contentType)
+    {
+        return contentType.ToLower() switch
+        {
+            var ct when ct.Contains("pdf") => "bi-file-earmark-pdf-fill text-danger",
+            var ct when ct.Contains("word") || ct.Contains("document") => "bi-file-earmark-word-fill text-primary",
+            var ct when ct.Contains("excel") || ct.Contains("spreadsheet") => "bi-file-earmark-excel-fill text-success",
+            var ct when ct.Contains("powerpoint") || ct.Contains("presentation") => "bi-file-earmark-ppt-fill text-warning",
+            var ct when ct.Contains("image") => "bi-file-earmark-image-fill text-info",
+            var ct when ct.Contains("text") => "bi-file-earmark-text-fill text-secondary",
+            var ct when ct.Contains("zip") || ct.Contains("compressed") => "bi-file-earmark-zip-fill text-dark",
+            _ => "bi-file-earmark-fill text-muted"
+        };
+    }
+
+    private string GetFileSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024:N0} KB";
+        if (bytes < 1024 * 1024 * 1024) return $"{bytes / (1024 * 1024):N1} MB";
+        return $"{bytes / (1024 * 1024 * 1024):N1} GB";
+    }
+}
+
+@section Scripts {
+    <script>
+        function clearForm() {
+            document.getElementById('searchTerm').value = '';
+            document.getElementById('departmentId').value = '';
+            document.getElementById('contentType').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+        }
+        
+        // Validação de datas
+        document.getElementById('startDate').addEventListener('change', function() {
+            var startDate = this.value;
+            var endDateInput = document.getElementById('endDate');
+            if (startDate && endDateInput.value && startDate > endDateInput.value) {
+                alert('A data inicial não pode ser maior que a data final.');
+                this.value = '';
+            }
+        });
+        
+        document.getElementById('endDate').addEventListener('change', function() {
+            var endDate = this.value;
+            var startDateInput = document.getElementById('startDate');
+            if (endDate && startDateInput.value && endDate < startDateInput.value) {
+                alert('A data final não pode ser menor que a data inicial.');
+                this.value = '';
+            }
+        });
+    </script>
 }
