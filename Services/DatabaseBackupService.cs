@@ -57,17 +57,24 @@ namespace IntranetDocumentos.Services
                 var backupFileName = $"IntranetDocumentos_Backup_{timestamp}.db";
                 var backupPath = Path.Combine(_backupDirectory, backupFileName);
 
-                // Força o flush de todas as transações pendentes
+                // Força o flush de todas as transações pendentes e fecha conexões
                 await _context.Database.ExecuteSqlRawAsync("PRAGMA wal_checkpoint(FULL);");
+                
+                // Fecha temporariamente as conexões do pool
+                await _context.Database.CloseConnectionAsync();
+                
+                // Aguarda um pouco para garantir que o arquivo não está sendo usado
+                await Task.Delay(100);
                 
                 // Copia o arquivo do banco
                 File.Copy(_databasePath, backupPath, overwrite: true);
 
-                // Cria também um backup comprimido
+                // Cria também um backup comprimido usando a cópia já criada
                 var zipPath = Path.Combine(_backupDirectory, $"IntranetDocumentos_Backup_{timestamp}.zip");
                 using (var zip = ZipFile.Open(zipPath, ZipArchiveMode.Create))
                 {
-                    zip.CreateEntryFromFile(_databasePath, "IntranetDocumentos.db");
+                    // Usa a cópia do backup em vez do arquivo original
+                    zip.CreateEntryFromFile(backupPath, "IntranetDocumentos.db");
                     
                     // Adiciona informações do backup
                     var infoEntry = zip.CreateEntry("backup_info.txt");
@@ -107,8 +114,12 @@ namespace IntranetDocumentos.Services
                     Directory.CreateDirectory(autoBackupDir);
                 }
 
-                // Força checkpoint do WAL
+                // Força checkpoint do WAL e fecha conexões
                 await _context.Database.ExecuteSqlRawAsync("PRAGMA wal_checkpoint(FULL);");
+                await _context.Database.CloseConnectionAsync();
+                
+                // Aguarda um pouco para garantir que o arquivo não está sendo usado
+                await Task.Delay(50);
                 
                 File.Copy(_databasePath, backupPath, overwrite: true);
                 

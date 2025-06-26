@@ -28,6 +28,9 @@ namespace IntranetDocumentos.Models
         // Se DepartmentId for nulo, o documento é do setor "Geral"
         public int? DepartmentId { get; set; }
         
+        // Texto extraído via OCR para indexação e busca
+        public string? ContentText { get; set; }
+        
         // Navigation properties
         public virtual ApplicationUser Uploader { get; set; } = null!;
         public virtual Department? Department { get; set; }

@@ -31,6 +31,17 @@ namespace IntranetDocumentos.Services.Documents
         /// Obtém estatísticas de documentos
         /// </summary>
         Task<DocumentStatistics> GetDocumentStatisticsAsync(ApplicationUser user);
+
+        /// <summary>
+        /// Busca avançada de documentos com múltiplos filtros
+        /// </summary>
+        Task<List<Document>> AdvancedSearchAsync(
+            string? searchTerm,
+            int? departmentId,
+            string? contentType,
+            DateTime? startDate,
+            DateTime? endDate,
+            ApplicationUser user);
     }
 
     /// <summary>

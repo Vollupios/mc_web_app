@@ -331,6 +331,38 @@ namespace IntranetDocumentos.Controllers
             };
         }
 
+        /// <summary>
+        /// Busca avançada de documentos (OCR, filtros, global)
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> AdvancedSearch()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Challenge();
+            var departments = await _documentService.GetDepartmentsForUserAsync(user);
+            ViewBag.Departments = departments;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AdvancedSearch(string? searchTerm, int? departmentId, string? contentType, DateTime? startDate, DateTime? endDate)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Challenge();
+            var results = await (_documentService as IntranetDocumentos.Services.Documents.IDocumentReader)!.AdvancedSearchAsync(
+                searchTerm, departmentId, contentType, startDate, endDate, user);
+            var departments = await _documentService.GetDepartmentsForUserAsync(user);
+            ViewBag.Departments = departments;
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.DepartmentId = departmentId;
+            ViewBag.ContentType = contentType;
+            ViewBag.StartDate = startDate;
+            ViewBag.EndDate = endDate;
+            return View(results);
+        }
+
         #region Métodos Auxiliares para Download
 
         /// <summary>

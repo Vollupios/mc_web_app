@@ -197,6 +197,11 @@ namespace IntranetDocumentos.Services
             return await _documentDownloader.GetDocumentPhysicalPathAsync(documentId);
         }
 
+        public async Task<List<Document>> AdvancedSearchAsync(string? searchTerm, int? departmentId, string? contentType, DateTime? startDate, DateTime? endDate, ApplicationUser user)
+        {
+            return await _documentReader.AdvancedSearchAsync(searchTerm, departmentId, contentType, startDate, endDate, user);
+        }
+
         #endregion
     }
 }

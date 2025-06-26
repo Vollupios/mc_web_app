@@ -158,6 +158,54 @@ namespace IntranetDocumentos.Services.Documents
             }
         }
 
+        public async Task<List<Document>> AdvancedSearchAsync(
+            string? searchTerm,
+            int? departmentId,
+            string? contentType,
+            DateTime? startDate,
+            DateTime? endDate,
+            ApplicationUser user)
+        {
+            try
+            {
+                var query = _context.Documents
+                    .Include(d => d.Uploader)
+                    .Include(d => d.Department)
+                    .AsQueryable();
+
+                // Permissões
+                if (!await IsUserAdminAsync(user))
+                {
+                    query = query.Where(d => d.DepartmentId == user.DepartmentId || d.DepartmentId == null);
+                }
+
+                // Filtros
+                if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    query = query.Where(d =>
+                        d.OriginalFileName.Contains(searchTerm) ||
+                        d.StoredFileName.Contains(searchTerm) ||
+                        (d.ContentText != null && d.ContentText.Contains(searchTerm))
+                    );
+                }
+                if (departmentId.HasValue)
+                    query = query.Where(d => d.DepartmentId == departmentId);
+                if (!string.IsNullOrWhiteSpace(contentType))
+                    query = query.Where(d => d.ContentType.Contains(contentType));
+                if (startDate.HasValue)
+                    query = query.Where(d => d.UploadDate >= startDate.Value);
+                if (endDate.HasValue)
+                    query = query.Where(d => d.UploadDate <= endDate.Value);
+
+                return await query.OrderByDescending(d => d.UploadDate).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro na busca avançada de documentos para usuário {UserId}", user.Id);
+                throw;
+            }
+        }
+
         private async Task<bool> IsUserAdminAsync(ApplicationUser user)
         {
             try
