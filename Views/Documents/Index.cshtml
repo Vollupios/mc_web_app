@@ -11,9 +11,14 @@
         </h2>
         <p class="text-muted mb-0">Gerencie todos os documentos da Marcos Contabilidade</p>
     </div>
-    <a asp-action="Upload" class="btn btn-primary btn-lg shadow-sm">
-        <i class="bi bi-cloud-upload"></i> Enviar Documento
-    </a>
+    <div class="d-flex gap-2">
+        <a asp-action="AdvancedSearch" class="btn btn-outline-primary">
+            <i class="bi bi-search"></i> Busca Avançada
+        </a>
+        <a asp-action="Upload" class="btn btn-primary btn-lg shadow-sm">
+            <i class="bi bi-cloud-upload"></i> Enviar Documento
+        </a>
+    </div>
 </div>
 
 @if (Model.Count == 0)
