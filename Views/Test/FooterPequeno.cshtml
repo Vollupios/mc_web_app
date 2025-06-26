@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "Teste Footer - Conteúdo Pequeno";
+}
+
+<div class="container">
+    <h1><i class="bi bi-bug"></i> Teste do Footer - Conteúdo Pequeno</h1>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="bi bi-info-circle"></i> Teste de Layout</h3>
+        </div>
+        <div class="card-body">
+            <p>Esta página tem pouco conteúdo para testar se o footer fica no final da página mesmo com pouco conteúdo.</p>
+            <p>O footer deve ficar sempre no final da viewport, não no meio da tela.</p>
+            
+            <div class="alert alert-info">
+                <i class="bi bi-lightbulb"></i> <strong>Comportamento esperado:</strong>
+                <ul>
+                    <li>Footer deve estar no final da viewport quando há pouco conteúdo</li>
+                    <li>Footer deve vir após o conteúdo quando há muito conteúdo (com rolagem)</li>
+                    <li>Não deve haver sobreposição do footer com o conteúdo</li>
+                </ul>
+            </div>
+            
+            <a href="/Test/FooterLongo" class="btn btn-primary">
+                <i class="bi bi-arrow-right"></i> Testar com Conteúdo Longo
+            </a>
+        </div>
+    </div>
+</div>

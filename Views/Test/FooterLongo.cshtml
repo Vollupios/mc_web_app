@@ -1,0 +1,68 @@
+@{
+    ViewData["Title"] = "Teste Footer - Conteúdo Longo";
+}
+
+<div class="container">
+    <h1><i class="bi bi-bug"></i> Teste do Footer - Conteúdo Longo</h1>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="bi bi-info-circle"></i> Teste de Layout com Conteúdo Extenso</h3>
+        </div>
+        <div class="card-body">
+            <p>Esta página tem muito conteúdo para testar se o footer funciona corretamente com rolagem.</p>
+            
+            @for (int i = 1; i <= 50; i++)
+            {
+                <div class="alert alert-@(i % 3 == 0 ? "primary" : i % 3 == 1 ? "secondary" : "info") mb-3">
+                    <h5><i class="bi bi-@(i % 5 == 0 ? "star" : i % 5 == 1 ? "heart" : i % 5 == 2 ? "lightning" : i % 5 == 3 ? "fire" : "sun")"></i> Item @i</h5>
+                    <p>Este é o item número @i. O footer deve aparecer após todo este conteúdo, não sobrepor o conteúdo. 
+                    Quando há muito conteúdo, deve ser possível rolar a página para ver o footer no final.</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                    
+                    @if (i % 10 == 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Coluna 1</th>
+                                        <th>Coluna 2</th>
+                                        <th>Coluna 3</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int j = 1; j <= 5; j++)
+                                    {
+                                        <tr>
+                                            <td>Dados @j.1</td>
+                                            <td>Dados @j.2</td>
+                                            <td>Dados @j.3</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></button>
+                                                    <button class="btn btn-sm btn-secondary"><i class="bi bi-pencil"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            }
+            
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle"></i> <strong>Final do conteúdo!</strong>
+                <p>Se você consegue ver esta mensagem e o footer logo abaixo, o layout está funcionando corretamente.</p>
+                <a href="/Test/FooterPequeno" class="btn btn-primary">
+                    <i class="bi bi-arrow-left"></i> Voltar para Conteúdo Pequeno
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

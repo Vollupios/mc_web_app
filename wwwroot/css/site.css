@@ -85,15 +85,25 @@ html {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--secondary-color);
 }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
-
 body {
-  margin-bottom: 60px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: var(--text-dark);
+}
+
+/* Container principal */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* Footer simples - sem regras de posicionamento */
+.footer {
+  background-color: var(--primary-color);
+  color: var(--white);
+  text-align: center;
+  padding: 15px 0;
 }
 
 /* Customização da Navbar - Cores da Marcos Contabilidade */
@@ -156,12 +166,31 @@ body {
   border-bottom: 2px solid var(--secondary-color);
 }
 
-/* Footer */
-.footer {
-  background-color: var(--primary-color);
-  color: var(--white);
-  text-align: center;
-  padding: 15px 0;
+/* Garantir que o footer fique sempre no fundo */
+.footer .container {
+  max-width: 1200px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.footer .d-flex {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Responsividade do footer */
+@media (max-width: 768px) {
+  .footer .d-flex {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  
+  .footer {
+    padding: 20px 0;
+  }
 }
 
 /* Alerts customizados */
@@ -208,10 +237,23 @@ body {
   background-color: var(--primary-color);
   color: var(--white);
   border: none;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
   background-color: rgba(108, 108, 108, 0.05);
+}
+
+/* Melhorar a rolagem das tabelas */
+.table-responsive {
+  overflow-x: auto;
+}
+
+/* Garantir que os botões de ação sejam sempre visíveis */
+.table .btn-group {
+  white-space: nowrap;
 }
 
 /* Badges */
@@ -237,4 +279,104 @@ body {
   .navbar-brand {
     font-size: 1.2rem;
   }
+  
+  .navbar-nav {
+    width: 100%;
+  }
+  
+  .nav-link {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* Correções para redimensionamento da janela */
+@media (min-width: 769px) {
+  .navbar-expand-sm .navbar-nav {
+    flex-direction: row;
+  }
+  
+  .navbar-expand-sm .navbar-collapse {
+    display: flex !important;
+    flex-basis: auto;
+  }
+}
+
+/* Melhorar visualização das ações dos documentos */
+.table .btn-group .btn {
+  margin-right: 2px;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Garantir que a coluna de ações seja sempre visível */
+.documents-table {
+  min-width: 800px;
+}
+
+.documents-table .actions-column {
+  min-width: 150px;
+  white-space: nowrap;
+}
+
+/* Responsividade específica para tabela de documentos */
+@media (max-width: 768px) {
+  .table-responsive {
+    max-height: 60vh;
+  }
+  
+  .table .btn-group .btn {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.8rem;
+  }
+  
+  .documents-table .actions-column {
+    min-width: 120px;
+  }
+}
+
+/* Barra de rolagem personalizada */
+.table-responsive::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}
+
+/* Evitar quebras de layout */
+* {
+  box-sizing: border-box;
+}
+
+.container-fluid {
+  width: 100%;
+  padding-right: var(--bs-gutter-x, 0.75rem);
+  padding-left: var(--bs-gutter-x, 0.75rem);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+/* Garantir que a navbar mantenha formatação */
+.navbar > .container,
+.navbar > .container-fluid,
+.navbar > .container-lg,
+.navbar > .container-md,
+.navbar > .container-sm,
+.navbar > .container-xl,
+.navbar > .container-xxl {
+  display: flex;
+  flex-wrap: inherit;
+  align-items: center;
+  justify-content: space-between;
 }

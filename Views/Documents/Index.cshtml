@@ -35,9 +35,9 @@
 else
 {
     <div class="card">
-        <div class="card-body">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover documents-table mb-0">
                     <thead>
                         <tr>
                             <th><i class="bi bi-file"></i> Nome do Arquivo</th>
@@ -45,7 +45,7 @@ else
                             <th><i class="bi bi-person"></i> Enviado por</th>
                             <th><i class="bi bi-calendar"></i> Data</th>
                             <th><i class="bi bi-file-earmark-bar-graph"></i> Tamanho</th>
-                            <th><i class="bi bi-gear"></i> Ações</th>
+                            <th class="actions-column"><i class="bi bi-gear"></i> Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -69,7 +69,7 @@ else
                                 <td>@document.Uploader.Email</td>
                                 <td>@document.UploadDate.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td>@GetFileSize(document.FileSize)</td>
-                                <td>
+                                <td class="actions-column">
                                     <div class="btn-group" role="group">
                                         @{
                                             var extension = System.IO.Path.GetExtension(document.OriginalFileName).ToLowerInvariant();
