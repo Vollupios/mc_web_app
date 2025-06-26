@@ -4,7 +4,7 @@
 }
 
 <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="col-12 col-md-8 col-lg-6">
         <div class="card shadow">
             <div class="card-header">
                 <h3 class="mb-0">
@@ -13,59 +13,134 @@
                 <small class="text-light">Faça upload de documentos para a Marcos Contabilidade</small>
             </div>
             <div class="card-body">
-                <form asp-action="Upload" method="post" enctype="multipart/form-data">
+                <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                     
-                    <div class="form-group mb-3">
-                        <label asp-for="File" class="form-label">Arquivo</label>
-                        <input asp-for="File" class="form-control" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar" />
+                    <!-- File Upload com preview mobile-friendly -->
+                    <div class="form-group mb-4">
+                        <label asp-for="File" class="form-label fw-bold">
+                            <i class="bi bi-paperclip"></i> Arquivo
+                        </label>
+                        <div class="position-relative">
+                            <input asp-for="File" class="form-control form-control-lg" type="file" 
+                                   accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar"
+                                   id="fileInput" />
+                            <div class="invalid-feedback" id="fileError"></div>
+                        </div>
                         <span asp-validation-for="File" class="text-danger"></span>
                         <div class="form-text">
+                            <i class="bi bi-info-circle"></i>
                             Tamanho máximo: 10MB. Tipos permitidos: PDF, Word, Excel, PowerPoint, Imagens, Texto, ZIP/RAR
+                        </div>
+                        <!-- Preview do arquivo -->
+                        <div id="filePreview" class="mt-3" style="display: none;">
+                            <div class="alert alert-success">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-file-check fs-4 me-2"></i>
+                                    <div class="flex-grow-1">
+                                        <strong id="fileName"></strong>
+                                        <br><small id="fileDetails"></small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="clearFile()">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                                <!-- Progress bar -->
+                                <div class="progress mt-2" id="uploadProgress" style="display: none; height: 6px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" style="width: 0%"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="form-group mb-3">
-                        <label asp-for="DepartmentId" class="form-label">Departamento</label>
-                        <select asp-for="DepartmentId" class="form-select">
-                            <option value="">Geral (Todos os usuários)</option>
+                    <!-- Departamento com ícone e melhor UX -->
+                    <div class="form-group mb-4">
+                        <label asp-for="DepartmentId" class="form-label fw-bold">
+                            <i class="bi bi-building"></i> Departamento
+                        </label>
+                        <select asp-for="DepartmentId" class="form-select form-select-lg">
+                            <option value="">🌐 Geral (Todos os usuários)</option>
                             @foreach (var department in Model.AvailableDepartments)
                             {
-                                <option value="@department.Id">@department.Name</option>
+                                <option value="@department.Id">🏢 @department.Name</option>
                             }
                         </select>
                         <span asp-validation-for="DepartmentId" class="text-danger"></span>
                         <div class="form-text">
+                            <i class="bi bi-info-circle"></i>
                             Selecione um departamento específico ou deixe em branco para "Geral"
                         </div>
                     </div>
                     
+                    <!-- Descrição com contador de caracteres -->
                     <div class="form-group mb-4">
-                        <label asp-for="Description" class="form-label">Descrição (Opcional)</label>
-                        <textarea asp-for="Description" class="form-control" rows="3" placeholder="Descreva brevemente o conteúdo do documento..."></textarea>
+                        <label asp-for="Description" class="form-label fw-bold">
+                            <i class="bi bi-text-left"></i> Descrição (Opcional)
+                        </label>
+                        <textarea asp-for="Description" class="form-control" rows="4" 
+                                  placeholder="Descreva brevemente o conteúdo do documento..."
+                                  id="descriptionInput" maxlength="500"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
+                        <div class="d-flex justify-content-between">
+                            <small class="form-text text-muted">
+                                <i class="bi bi-lightbulb"></i> Dica: Uma boa descrição ajuda outros usuários a encontrar o documento
+                            </small>
+                            <small class="text-muted" id="charCount">0/500</small>
+                        </div>
                     </div>
                     
-                    <div class="d-flex justify-content-between">
-                        <a asp-action="Index" class="btn btn-secondary">
+                    <!-- Botões otimizados para mobile -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
                             <i class="bi bi-arrow-left"></i> Voltar
                         </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-cloud-upload"></i> Enviar Documento
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                            <i class="bi bi-cloud-upload"></i> 
+                            <span class="d-none d-sm-inline">Enviar Documento</span>
+                            <span class="d-inline d-sm-none">Enviar</span>
                         </button>
                     </div>
                 </form>
             </div>
         </div>
         
+        <!-- Card de informações colapsável para economizar espaço -->
         <div class="mt-4">
-            <div class="alert alert-info">
-                <h6><i class="bi bi-info-circle"></i> Informações importantes:</h6>
-                <ul class="mb-0">
-                    <li><strong>Permissões:</strong> @(User.IsInRole("Admin") ? "Como administrador, você pode enviar para qualquer departamento." : User.IsInRole("Gestor") ? "Como gestor, você pode enviar para qualquer departamento." : "Você pode enviar apenas para seu departamento e para a área Geral.")</li>
-                    <li><strong>Visibilidade:</strong> Documentos enviados para "Geral" são visíveis por todos os usuários.</li>
-                    <li><strong>Departamentos:</strong> Documentos específicos são visíveis apenas pelos membros do departamento, gestores e administradores.</li>
-                </ul>
+            <div class="card">
+                <div class="card-header">
+                    <button class="btn btn-link w-100 text-start p-0" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#infoCollapse">
+                        <i class="bi bi-info-circle"></i> Informações importantes
+                        <i class="bi bi-chevron-down float-end"></i>
+                    </button>
+                </div>
+                <div class="collapse" id="infoCollapse">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <h6><i class="bi bi-shield-check"></i> Permissões:</h6>
+                                <p class="small">
+                                    @(User.IsInRole("Admin") ? "Como administrador, você pode enviar para qualquer departamento." : 
+                                      User.IsInRole("Gestor") ? "Como gestor, você pode enviar para qualquer departamento." : 
+                                      "Você pode enviar apenas para seu departamento e para a área Geral.")
+                                </p>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <h6><i class="bi bi-eye"></i> Visibilidade:</h6>
+                                <p class="small">
+                                    Documentos enviados para "Geral" são visíveis por todos os usuários.
+                                </p>
+                            </div>
+                            <div class="col-12">
+                                <h6><i class="bi bi-building"></i> Departamentos:</h6>
+                                <p class="small">
+                                    Documentos específicos são visíveis apenas pelos membros do departamento, gestores e administradores.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -75,48 +150,270 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
     <script>
+        // Mobile-first file upload com preview aprimorado
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
+        const fileName = document.getElementById('fileName');
+        const fileDetails = document.getElementById('fileDetails');
+        const fileError = document.getElementById('fileError');
+        const descriptionInput = document.getElementById('descriptionInput');
+        const charCount = document.getElementById('charCount');
+        const submitBtn = document.getElementById('submitBtn');
+        const uploadProgress = document.getElementById('uploadProgress');
+
         // Preview do arquivo selecionado
-        document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+        fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                const fileSize = file.size;
-                const maxSize = 10 * 1024 * 1024; // 10MB
-                
-                if (fileSize > maxSize) {
-                    alert('O arquivo é muito grande. O tamanho máximo permitido é 10MB.');
-                    e.target.value = '';
-                    return;
-                }
-                
-                // Mostrar informações do arquivo
-                const fileName = file.name;
-                const fileType = file.type;
-                const fileSizeText = formatFileSize(fileSize);
-                
-                const info = document.createElement('div');
-                info.className = 'alert alert-success mt-2';
-                info.innerHTML = `
-                    <strong>Arquivo selecionado:</strong><br>
-                    <i class="bi bi-file"></i> ${fileName}<br>
-                    <small>Tipo: ${fileType || 'Desconhecido'} | Tamanho: ${fileSizeText}</small>
-                `;
-                
-                // Remove alert anterior se existir
-                const existingAlert = e.target.parentNode.querySelector('.alert-success');
-                if (existingAlert) {
-                    existingAlert.remove();
-                }
-                
-                e.target.parentNode.appendChild(info);
+                validateAndPreviewFile(file);
+            } else {
+                hideFilePreview();
             }
         });
-        
+
+        function validateAndPreviewFile(file) {
+            // Reset error state
+            fileInput.classList.remove('is-invalid');
+            fileError.textContent = '';
+            
+            const fileSize = file.size;
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            
+            // Validar tamanho
+            if (fileSize > maxSize) {
+                showFileError('O arquivo é muito grande. O tamanho máximo permitido é 10MB.');
+                clearFile();
+                return;
+            }
+            
+            // Validar tipo
+            const allowedTypes = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.jpg', '.jpeg', '.png', '.gif', '.zip', '.rar'];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedTypes.includes(fileExtension)) {
+                showFileError('Tipo de arquivo não permitido. Tipos aceitos: PDF, Word, Excel, PowerPoint, Imagens, Texto, ZIP/RAR.');
+                clearFile();
+                return;
+            }
+            
+            // Mostrar preview
+            showFilePreview(file);
+        }
+
+        function showFilePreview(file) {
+            const fileSizeText = formatFileSize(file.size);
+            const fileType = getFileType(file.name);
+            const fileIcon = getFileIcon(file.name);
+            
+            fileName.innerHTML = `${fileIcon} ${file.name}`;
+            fileDetails.textContent = `Tipo: ${fileType} | Tamanho: ${fileSizeText}`;
+            
+            filePreview.style.display = 'block';
+            
+            // Vibração em dispositivos móveis
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+            
+            // Notificação PWA
+            if (window.pwaManager) {
+                pwaManager.showToast('Arquivo selecionado com sucesso!', 'success');
+            }
+        }
+
+        function hideFilePreview() {
+            filePreview.style.display = 'none';
+        }
+
+        function clearFile() {
+            fileInput.value = '';
+            hideFilePreview();
+        }
+
+        function showFileError(message) {
+            fileInput.classList.add('is-invalid');
+            fileError.textContent = message;
+            
+            if (window.pwaManager) {
+                pwaManager.showToast(message, 'danger');
+            }
+        }
+
+        function getFileIcon(fileName) {
+            const extension = fileName.split('.').pop().toLowerCase();
+            const icons = {
+                'pdf': '<i class="bi bi-file-earmark-pdf text-danger"></i>',
+                'doc': '<i class="bi bi-file-earmark-word text-primary"></i>',
+                'docx': '<i class="bi bi-file-earmark-word text-primary"></i>',
+                'xls': '<i class="bi bi-file-earmark-excel text-success"></i>',
+                'xlsx': '<i class="bi bi-file-earmark-excel text-success"></i>',
+                'ppt': '<i class="bi bi-file-earmark-ppt text-warning"></i>',
+                'pptx': '<i class="bi bi-file-earmark-ppt text-warning"></i>',
+                'txt': '<i class="bi bi-file-earmark-text text-secondary"></i>',
+                'jpg': '<i class="bi bi-file-earmark-image text-info"></i>',
+                'jpeg': '<i class="bi bi-file-earmark-image text-info"></i>',
+                'png': '<i class="bi bi-file-earmark-image text-info"></i>',
+                'gif': '<i class="bi bi-file-earmark-image text-info"></i>',
+                'zip': '<i class="bi bi-file-earmark-zip text-dark"></i>',
+                'rar': '<i class="bi bi-file-earmark-zip text-dark"></i>'
+            };
+            return icons[extension] || '<i class="bi bi-file-earmark text-secondary"></i>';
+        }
+
+        function getFileType(fileName) {
+            const extension = fileName.split('.').pop().toLowerCase();
+            const types = {
+                'pdf': 'PDF Document',
+                'doc': 'Word Document',
+                'docx': 'Word Document',
+                'xls': 'Excel Spreadsheet',
+                'xlsx': 'Excel Spreadsheet',
+                'ppt': 'PowerPoint Presentation',
+                'pptx': 'PowerPoint Presentation',
+                'txt': 'Text Document',
+                'jpg': 'JPEG Image',
+                'jpeg': 'JPEG Image',
+                'png': 'PNG Image',
+                'gif': 'GIF Image',
+                'zip': 'ZIP Archive',
+                'rar': 'RAR Archive'
+            };
+            return types[extension] || 'Unknown';
+        }
+
         function formatFileSize(bytes) {
             if (bytes === 0) return '0 Bytes';
             const k = 1024;
             const sizes = ['Bytes', 'KB', 'MB', 'GB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Contador de caracteres para descrição
+        if (descriptionInput && charCount) {
+            descriptionInput.addEventListener('input', function() {
+                const length = this.value.length;
+                charCount.textContent = `${length}/500`;
+                
+                if (length > 450) {
+                    charCount.classList.add('text-warning');
+                } else if (length > 480) {
+                    charCount.classList.remove('text-warning');
+                    charCount.classList.add('text-danger');
+                } else {
+                    charCount.classList.remove('text-warning', 'text-danger');
+                }
+            });
+        }
+
+        // Upload com progress bar
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            const file = fileInput.files[0];
+            if (!file) {
+                e.preventDefault();
+                showFileError('Por favor, selecione um arquivo.');
+                return;
+            }
+            
+            // Mostrar loading state
+            if (window.pwaManager) {
+                pwaManager.addLoading(submitBtn);
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
+            }
+            
+            // Simular progress (em produção, usar XMLHttpRequest para upload real)
+            showUploadProgress();
+            
+            // Salvar offline se necessário
+            if (!navigator.onLine && window.pwaManager) {
+                e.preventDefault();
+                saveForOfflineUpload();
+            }
+        });
+
+        function showUploadProgress() {
+            uploadProgress.style.display = 'block';
+            const progressBar = uploadProgress.querySelector('.progress-bar');
+            let progress = 0;
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                }
+                progressBar.style.width = progress + '%';
+            }, 200);
+        }
+
+        function saveForOfflineUpload() {
+            const formData = new FormData(document.getElementById('uploadForm'));
+            const file = fileInput.files[0];
+            
+            // Converter arquivo para base64 para armazenamento offline
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const offlineData = {
+                    type: 'fileUpload',
+                    url: '/Documents/Upload',
+                    method: 'POST',
+                    fileName: file.name,
+                    fileData: e.target.result,
+                    departmentId: formData.get('DepartmentId'),
+                    description: formData.get('Description')
+                };
+                
+                pwaManager.saveOfflineData(offlineData);
+                pwaManager.showToast('Upload salvo para sincronização quando voltar online', 'info');
+                
+                // Reset form
+                document.getElementById('uploadForm').reset();
+                clearFile();
+                pwaManager.removeLoading(submitBtn);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Drag and drop para mobile
+        let dragCounter = 0;
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            document.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileInput.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileInput.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            fileInput.classList.add('border-primary');
+        }
+
+        function unhighlight(e) {
+            fileInput.classList.remove('border-primary');
+        }
+
+        fileInput.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                fileInput.files = files;
+                validateAndPreviewFile(files[0]);
+            }
         }
     </script>
 }

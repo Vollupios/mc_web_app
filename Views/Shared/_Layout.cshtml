@@ -2,7 +2,28 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />    <title>@ViewData["Title"] - Marcos Contabilidade</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=1.0, maximum-scale=5.0" />
+    <title>@ViewData["Title"] - Marcos Contabilidade</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Sistema de gestão de documentos para Marcos Contabilidade" />
+    <meta name="theme-color" content="#6c6c6c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Marcos Docs" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Marcos Docs" />
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="~/images/icons/icon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="~/images/icons/icon-16x16.png" />
+    <link rel="apple-touch-icon" href="~/images/icons/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="~/images/icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="~/images/icons/icon-180x180.png" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="~/manifest.json" />
+    
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -153,6 +174,84 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/pwa.js" asp-append-version="true"></script>
+    
+    <!-- PWA Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration.scope);
+                        
+                        // Verificar atualizações
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Nova versão disponível
+                                    showUpdateAvailable();
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.log('Falha ao registrar Service Worker:', error);
+                    });
+            });
+        }
+
+        // Mostrar notificação de atualização disponível
+        function showUpdateAvailable() {
+            const updateBanner = document.createElement('div');
+            updateBanner.className = 'alert alert-info alert-dismissible fade show position-fixed';
+            updateBanner.style.cssText = 'top: 70px; left: 50%; transform: translateX(-50%); z-index: 9999; max-width: 400px;';
+            updateBanner.innerHTML = `
+                <i class="bi bi-cloud-download"></i> <strong>Nova versão disponível!</strong>
+                <br><small>Atualize para obter as últimas melhorias.</small>
+                <div class="mt-2">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="updateApp()">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                    <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.body.appendChild(updateBanner);
+        }
+
+        // Atualizar aplicação
+        function updateApp() {
+            window.location.reload();
+        }
+
+        // Detectar quando app está offline/online
+        window.addEventListener('online', () => {
+            showNetworkStatus('Conectado', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            showNetworkStatus('Modo Offline', 'warning');
+        });
+
+        function showNetworkStatus(message, type) {
+            const statusBanner = document.createElement('div');
+            statusBanner.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            statusBanner.style.cssText = 'top: 10px; right: 10px; z-index: 9999; max-width: 300px;';
+            statusBanner.innerHTML = `
+                <i class="bi bi-wifi${type === 'warning' ? '-off' : ''}"></i> <strong>${message}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(statusBanner);
+            
+            // Auto-remover após 3 segundos
+            setTimeout(() => {
+                if (statusBanner.parentNode) {
+                    statusBanner.remove();
+                }
+            }, 3000);
+        }
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
