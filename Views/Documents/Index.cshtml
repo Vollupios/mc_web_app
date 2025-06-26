@@ -45,6 +45,8 @@ else
                             <th><i class="bi bi-person"></i> Enviado por</th>
                             <th><i class="bi bi-calendar"></i> Data</th>
                             <th><i class="bi bi-file-earmark-bar-graph"></i> Tamanho</th>
+                            <th><i class="bi bi-check-circle"></i> Status</th>
+                            <th><i class="bi bi-git"></i> Workflow</th>
                             <th class="actions-column"><i class="bi bi-gear"></i> Ações</th>
                         </tr>
                     </thead>
@@ -69,6 +71,40 @@ else
                                 <td>@document.Uploader.Email</td>
                                 <td>@document.UploadDate.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td>@GetFileSize(document.FileSize)</td>
+                                <td>
+                                    @{
+                                        var statusClass = document.Status switch
+                                        {
+                                            DocumentStatus.Draft => "secondary",
+                                            DocumentStatus.PendingReview => "warning",
+                                            DocumentStatus.InReview => "info",
+                                            DocumentStatus.PendingApproval => "primary",
+                                            DocumentStatus.Approved => "success",
+                                            DocumentStatus.Rejected => "danger",
+                                            DocumentStatus.Archived => "dark",
+                                            _ => "secondary"
+                                        };
+                                        
+                                        var statusText = document.Status switch
+                                        {
+                                            DocumentStatus.Draft => "Rascunho",
+                                            DocumentStatus.PendingReview => "Aguardando Revisão",
+                                            DocumentStatus.InReview => "Em Revisão",
+                                            DocumentStatus.PendingApproval => "Aguardando Aprovação",
+                                            DocumentStatus.Approved => "Aprovado",
+                                            DocumentStatus.Rejected => "Rejeitado",
+                                            DocumentStatus.Archived => "Arquivado",
+                                            _ => "Rascunho"
+                                        };
+                                    }
+                                    <span class="badge bg-@statusClass">@statusText</span>
+                                </td>
+                                <td>
+                                    <a asp-controller="Workflow" asp-action="Document" asp-route-id="@document.Id" 
+                                       class="btn btn-sm btn-outline-secondary" title="Ver Workflow">
+                                        <i class="bi bi-diagram-3"></i>
+                                    </a>
+                                </td>
                                 <td class="actions-column">
                                     <div class="btn-group" role="group">
                                         @{

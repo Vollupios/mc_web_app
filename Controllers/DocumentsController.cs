@@ -13,6 +13,7 @@ namespace IntranetDocumentos.Controllers
         private readonly IDocumentService _documentService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAnalyticsService _analyticsService;
+        private readonly IWorkflowService _workflowService;
         private readonly ILogger<DocumentsController> _logger;
 
         /// <summary>
@@ -22,14 +23,15 @@ namespace IntranetDocumentos.Controllers
             IDocumentService documentService,
             UserManager<ApplicationUser> userManager,
             IAnalyticsService analyticsService,
+            IWorkflowService workflowService,
             ILogger<DocumentsController> logger)
         {
             _documentService = documentService;
             _userManager = userManager;
             _analyticsService = analyticsService;
+            _workflowService = workflowService;
             _logger = logger;
         }
-
         /// <summary>
         /// Lista documentos disponíveis para o usuário logado.
         /// </summary>

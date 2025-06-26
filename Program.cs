@@ -73,6 +73,7 @@ public partial class Program
         builder.Services.AddScoped<IFileUploadService, FileUploadService>();
         builder.Services.AddScoped<IReuniaoService, ReuniaoService>();
         builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+        builder.Services.AddScoped<IWorkflowService, WorkflowService>();
 
         // Add notification services
         builder.Services.AddScoped<IntranetDocumentos.Services.Notifications.IEmailService, IntranetDocumentos.Services.Notifications.EmailService>();

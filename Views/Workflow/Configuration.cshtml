@@ -1,0 +1,422 @@
+@model IntranetDocumentos.Models.ViewModels.WorkflowConfigurationViewModel
+@{
+    ViewData["Title"] = "Configuração do Workflow";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="bi bi-gear text-primary me-2"></i>
+                Configuração do Workflow
+            </h1>
+            <small class="text-muted">Configure aprovadores, revisores e fluxos por departamento</small>
+        </div>
+        
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Voltar ao Dashboard
+        </a>
+    </div>
+
+    <form asp-action="Configuration" method="post">
+        <div class="row">
+            <!-- Configurações Gerais -->
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-sliders me-2"></i>
+                            Configurações Gerais
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Aprovação Automática</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" asp-for="AutoApprovalEnabled" id="autoApprovalEnabled">
+                                <label class="form-check-label" for="autoApprovalEnabled">
+                                    Habilitar aprovação automática para documentos do departamento Geral
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                Quando habilitado, documentos enviados para o departamento "Geral" serão aprovados automaticamente.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="DefaultApprovalTimeout" class="form-label">Timeout Padrão (dias)</label>
+                            <input asp-for="DefaultApprovalTimeout" type="number" class="form-control" min="1" max="365">
+                            <div class="form-text">
+                                Tempo limite padrão para aprovação de documentos (em dias).
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Notificações</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" asp-for="EmailNotificationsEnabled" id="emailNotifications">
+                                <label class="form-check-label" for="emailNotifications">
+                                    Habilitar notificações por email
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" asp-for="RequireCommentsOnRejection" id="requireComments">
+                                <label class="form-check-label" for="requireComments">
+                                    Exigir comentários ao rejeitar documentos
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Fluxo de Aprovação</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" asp-for="RequireSequentialApproval" id="sequentialApproval">
+                                <label class="form-check-label" for="sequentialApproval">
+                                    Exigir aprovação sequencial por ordem de prioridade
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                Quando habilitado, aprovações devem seguir a ordem definida pelos aprovadores.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aprovadores por Departamento -->
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-people me-2"></i>
+                            Aprovadores por Departamento
+                        </h5>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addApprover()">
+                            <i class="bi bi-plus me-1"></i>
+                            Adicionar Aprovador
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="approvers-container">
+                            @if (Model.Approvers?.Any() == true)
+                            {
+                                @for (int i = 0; i < Model.Approvers.Count; i++)
+                                {
+                                    <div class="approver-item border rounded p-3 mb-3 bg-light">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-3">
+                                                <label class="form-label">Departamento</label>
+                                                <select asp-for="@Model.Approvers[i].DepartmentId" class="form-select">
+                                                    <option value="">Selecione...</option>
+                                                    <option value="1">Pessoal</option>
+                                                    <option value="2">Fiscal</option>
+                                                    <option value="3">Contábil</option>
+                                                    <option value="4">Cadastro</option>
+                                                    <option value="5">Apoio</option>
+                                                    <option value="6">TI</option>
+                                                    <option value="7">Geral</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label">Usuário</label>
+                                                <select asp-for="@Model.Approvers[i].UserId" class="form-select user-select">
+                                                    <option value="">Selecione...</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label">Ordem</label>
+                                                <input asp-for="@Model.Approvers[i].Order" type="number" class="form-control" min="1" max="10">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label">Obrigatório</label>
+                                                <div class="form-check">
+                                                    <input asp-for="@Model.Approvers[i].IsRequired" type="checkbox" class="form-check-input">
+                                                    <label class="form-check-label">Sim</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label">Ações</label>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeApprover(this)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <input asp-for="@Model.Approvers[i].Id" type="hidden">
+                                        <input asp-for="@Model.Approvers[i].IsActive" type="hidden" value="true">
+                                    </div>
+                                }
+                            }
+                        </div>
+                        
+                        <div id="no-approvers" class="text-center text-muted py-4" style="@(Model.Approvers?.Any() == true ? "display: none;" : "")">
+                            <i class="bi bi-people display-4 d-block mb-3"></i>
+                            <p>Nenhum aprovador configurado ainda.</p>
+                            <button type="button" class="btn btn-primary" onclick="addApprover()">
+                                <i class="bi bi-plus me-1"></i>
+                                Adicionar Primeiro Aprovador
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revisores por Departamento -->
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-eye me-2"></i>
+                            Revisores por Departamento
+                        </h5>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addReviewer()">
+                            <i class="bi bi-plus me-1"></i>
+                            Adicionar Revisor
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="reviewers-container">
+                            @if (Model.Reviewers?.Any() == true)
+                            {
+                                @for (int i = 0; i < Model.Reviewers.Count; i++)
+                                {
+                                    <div class="reviewer-item border rounded p-3 mb-3 bg-light">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-4">
+                                                <label class="form-label">Departamento</label>
+                                                <select asp-for="@Model.Reviewers[i].DepartmentId" class="form-select">
+                                                    <option value="">Selecione...</option>
+                                                    <option value="1">Pessoal</option>
+                                                    <option value="2">Fiscal</option>
+                                                    <option value="3">Contábil</option>
+                                                    <option value="4">Cadastro</option>
+                                                    <option value="5">Apoio</option>
+                                                    <option value="6">TI</option>
+                                                    <option value="7">Geral</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Usuário</label>
+                                                <select asp-for="@Model.Reviewers[i].UserId" class="form-select user-select">
+                                                    <option value="">Selecione...</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label">Ativo</label>
+                                                <div class="form-check">
+                                                    <input asp-for="@Model.Reviewers[i].IsActive" type="checkbox" class="form-check-input" checked>
+                                                    <label class="form-check-label">Sim</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label">Ações</label>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeReviewer(this)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <input asp-for="@Model.Reviewers[i].Id" type="hidden">
+                                    </div>
+                                }
+                            }
+                        </div>
+                        
+                        <div id="no-reviewers" class="text-center text-muted py-4" style="@(Model.Reviewers?.Any() == true ? "display: none;" : "")">
+                            <i class="bi bi-eye display-4 d-block mb-3"></i>
+                            <p>Nenhum revisor configurado ainda.</p>
+                            <button type="button" class="btn btn-primary" onclick="addReviewer()">
+                                <i class="bi bi-plus me-1"></i>
+                                Adicionar Primeiro Revisor
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Salvar Configurações
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Templates ocultos -->
+<div id="approver-template" style="display: none;">
+    <div class="approver-item border rounded p-3 mb-3 bg-light">
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <label class="form-label">Departamento</label>
+                <select name="Approvers[INDEX].DepartmentId" class="form-select">
+                    <option value="">Selecione...</option>
+                    <option value="1">Pessoal</option>
+                    <option value="2">Fiscal</option>
+                    <option value="3">Contábil</option>
+                    <option value="4">Cadastro</option>
+                    <option value="5">Apoio</option>
+                    <option value="6">TI</option>
+                    <option value="7">Geral</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Usuário</label>
+                <select name="Approvers[INDEX].UserId" class="form-select user-select">
+                    <option value="">Selecione...</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Ordem</label>
+                <input name="Approvers[INDEX].Order" type="number" class="form-control" min="1" max="10" value="1">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Obrigatório</label>
+                <div class="form-check">
+                    <input name="Approvers[INDEX].IsRequired" type="checkbox" class="form-check-input" checked>
+                    <label class="form-check-label">Sim</label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Ações</label>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeApprover(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+        <input name="Approvers[INDEX].Id" type="hidden" value="0">
+        <input name="Approvers[INDEX].IsActive" type="hidden" value="true">
+    </div>
+</div>
+
+<div id="reviewer-template" style="display: none;">
+    <div class="reviewer-item border rounded p-3 mb-3 bg-light">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <label class="form-label">Departamento</label>
+                <select name="Reviewers[INDEX].DepartmentId" class="form-select">
+                    <option value="">Selecione...</option>
+                    <option value="1">Pessoal</option>
+                    <option value="2">Fiscal</option>
+                    <option value="3">Contábil</option>
+                    <option value="4">Cadastro</option>
+                    <option value="5">Apoio</option>
+                    <option value="6">TI</option>
+                    <option value="7">Geral</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Usuário</label>
+                <select name="Reviewers[INDEX].UserId" class="form-select user-select">
+                    <option value="">Selecione...</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Ativo</label>
+                <div class="form-check">
+                    <input name="Reviewers[INDEX].IsActive" type="checkbox" class="form-check-input" checked>
+                    <label class="form-check-label">Sim</label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Ações</label>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeReviewer(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+        <input name="Reviewers[INDEX].Id" type="hidden" value="0">
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let approverIndex = @(Model.Approvers?.Count ?? 0);
+        let reviewerIndex = @(Model.Reviewers?.Count ?? 0);
+
+        // Lista de usuários (seria carregada via AJAX em uma implementação real)
+        const users = [
+            { id: '1', name: 'Admin Sistema' },
+            { id: '2', name: 'João Silva' },
+            { id: '3', name: 'Maria Santos' },
+            { id: '4', name: 'Pedro Oliveira' }
+        ];
+
+        function populateUserSelect(select) {
+            select.innerHTML = '<option value="">Selecione...</option>';
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.name;
+                select.appendChild(option);
+            });
+        }
+
+        function addApprover() {
+            const container = document.getElementById('approvers-container');
+            const template = document.getElementById('approver-template');
+            const clone = template.cloneNode(true);
+            
+            clone.style.display = 'block';
+            clone.innerHTML = clone.innerHTML.replace(/INDEX/g, approverIndex);
+            
+            container.appendChild(clone);
+            
+            // Populat user select
+            const userSelect = clone.querySelector('.user-select');
+            populateUserSelect(userSelect);
+            
+            approverIndex++;
+            
+            document.getElementById('no-approvers').style.display = 'none';
+        }
+
+        function removeApprover(button) {
+            const item = button.closest('.approver-item');
+            item.remove();
+            
+            const container = document.getElementById('approvers-container');
+            if (container.children.length === 0) {
+                document.getElementById('no-approvers').style.display = 'block';
+            }
+        }
+
+        function addReviewer() {
+            const container = document.getElementById('reviewers-container');
+            const template = document.getElementById('reviewer-template');
+            const clone = template.cloneNode(true);
+            
+            clone.style.display = 'block';
+            clone.innerHTML = clone.innerHTML.replace(/INDEX/g, reviewerIndex);
+            
+            container.appendChild(clone);
+            
+            // Popular user select
+            const userSelect = clone.querySelector('.user-select');
+            populateUserSelect(userSelect);
+            
+            reviewerIndex++;
+            
+            document.getElementById('no-reviewers').style.display = 'none';
+        }
+
+        function removeReviewer(button) {
+            const item = button.closest('.reviewer-item');
+            item.remove();
+            
+            const container = document.getElementById('reviewers-container');
+            if (container.children.length === 0) {
+                document.getElementById('no-reviewers').style.display = 'block';
+            }
+        }
+
+        // Popular selects de usuário existentes
+        document.addEventListener('DOMContentLoaded', function() {
+            const userSelects = document.querySelectorAll('.user-select');
+            userSelects.forEach(populateUserSelect);
+        });
+    </script>
+}

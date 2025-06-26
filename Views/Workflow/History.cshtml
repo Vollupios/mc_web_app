@@ -1,0 +1,364 @@
+@model List<IntranetDocumentos.Models.ViewModels.DocumentHistoryItemViewModel>
+@{
+    ViewData["Title"] = "Histórico do Documento";
+    var documentId = ViewBag.DocumentId;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="bi bi-clock-history text-primary me-2"></i>
+                Histórico do Documento
+            </h1>
+            <small class="text-muted">Visualize todas as ações e alterações realizadas</small>
+        </div>
+        
+        <div class="btn-group" role="group">
+            <a asp-action="Document" asp-route-id="@documentId" class="btn btn-outline-primary">
+                <i class="bi bi-diagram-3 me-1"></i>
+                Workflow
+            </a>
+            <a asp-controller="Documents" asp-action="Details" asp-route-id="@documentId" class="btn btn-outline-secondary">
+                <i class="bi bi-file-earmark me-1"></i>
+                Documento
+            </a>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <!-- Filtros -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row align-items-end">
+                    <div class="col-md-3">
+                        <label for="actionFilter" class="form-label">Filtrar por Ação</label>
+                        <select id="actionFilter" class="form-select">
+                            <option value="">Todas as ações</option>
+                            <option value="Submit">Enviar para Revisão</option>
+                            <option value="Approve">Aprovar</option>
+                            <option value="Reject">Rejeitar</option>
+                            <option value="RequestChanges">Solicitar Alterações</option>
+                            <option value="Publish">Publicar</option>
+                            <option value="Archive">Arquivar</option>
+                            <option value="Reactivate">Reativar</option>
+                            <option value="AssignReviewer">Atribuir Revisor</option>
+                            <option value="StartReview">Iniciar Revisão</option>
+                            <option value="CompleteReview">Concluir Revisão</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="userFilter" class="form-label">Filtrar por Usuário</label>
+                        <select id="userFilter" class="form-select">
+                            <option value="">Todos os usuários</option>
+                            @foreach (var user in Model.Select(m => m.UserName).Distinct().OrderBy(u => u))
+                            {
+                                <option value="@user">@user</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="dateFilter" class="form-label">Filtrar por Data</label>
+                        <input type="date" id="dateFilter" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" id="clearFilters" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i>
+                            Limpar Filtros
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline do Histórico -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-list-ol me-2"></i>
+                        Linha do Tempo Completa
+                    </h5>
+                    <span class="badge bg-primary" id="totalItems">@Model.Count itens</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="timeline" id="historyTimeline">
+                    @foreach (var item in Model.OrderByDescending(h => h.CreatedAt))
+                    {
+                        <div class="timeline-item" 
+                             data-action="@item.Action" 
+                             data-user="@item.UserName" 
+                             data-date="@item.CreatedAt.ToString("yyyy-MM-dd")">
+                            <div class="timeline-marker @GetTimelineMarkerClass(item.Action)">
+                                <i class="@GetActionIcon(item.Action)"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <h6 class="mb-0">@GetActionDisplayName(item.Action)</h6>
+                                                <small class="text-muted">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</small>
+                                            </div>
+                                            <span class="badge @GetActionBadgeClass(item.Action)">
+                                                @GetActionDisplayName(item.Action)
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="bg-primary bg-opacity-10 p-1 rounded me-2">
+                                                <i class="bi bi-person text-primary small"></i>
+                                            </div>
+                                            <span class="fw-medium">@item.UserName</span>
+                                        </div>
+                                        
+                                        @if (!string.IsNullOrEmpty(item.Description))
+                                        {
+                                            <div class="bg-light p-2 rounded mb-2">
+                                                <small class="text-muted d-block">Descrição:</small>
+                                                <div class="small">@item.Description</div>
+                                            </div>
+                                        }
+                                        
+                                        @if (!string.IsNullOrEmpty(item.OldValue) || !string.IsNullOrEmpty(item.NewValue))
+                                        {
+                                            <div class="row g-2">
+                                                @if (!string.IsNullOrEmpty(item.OldValue))
+                                                {
+                                                    <div class="col-md-6">
+                                                        <div class="bg-danger bg-opacity-10 p-2 rounded">
+                                                            <small class="text-muted d-block">Valor Anterior:</small>
+                                                            <div class="small text-danger">@item.OldValue</div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                @if (!string.IsNullOrEmpty(item.NewValue))
+                                                {
+                                                    <div class="col-md-6">
+                                                        <div class="bg-success bg-opacity-10 p-2 rounded">
+                                                            <small class="text-muted d-block">Novo Valor:</small>
+                                                            <div class="small text-success">@item.NewValue</div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        
+                                        @if (!string.IsNullOrEmpty(item.IpAddress))
+                                        {
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-geo-alt me-1"></i>
+                                                    IP: @item.IpAddress
+                                                </small>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                <!-- Mensagem quando nenhum item é exibido -->
+                <div id="noItemsMessage" class="text-center text-muted py-4" style="display: none;">
+                    <i class="bi bi-search display-4 d-block mb-3"></i>
+                    <p>Nenhum item encontrado com os filtros aplicados.</p>
+                    <button type="button" id="clearFiltersBtn" class="btn btn-outline-primary">
+                        Limpar Filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="display-6 text-success">@Model.Count(h => h.Action == "Approve")</div>
+                        <small class="text-muted">Aprovações</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="display-6 text-danger">@Model.Count(h => h.Action == "Reject")</div>
+                        <small class="text-muted">Rejeições</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="display-6 text-warning">@Model.Count(h => h.Action == "RequestChanges")</div>
+                        <small class="text-muted">Alterações Solicitadas</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="display-6 text-primary">@Model.Select(h => h.UserName).Distinct().Count()</div>
+                        <small class="text-muted">Usuários Envolvidos</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-clock-history display-1 text-muted mb-3"></i>
+                <h4 class="text-muted">Nenhum Histórico Encontrado</h4>
+                <p class="text-muted">Este documento ainda não possui registros de ações ou alterações.</p>
+                <a asp-action="Document" asp-route-id="@documentId" class="btn btn-primary">
+                    <i class="bi bi-diagram-3 me-1"></i>
+                    Ver Workflow
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const actionFilter = document.getElementById('actionFilter');
+            const userFilter = document.getElementById('userFilter');
+            const dateFilter = document.getElementById('dateFilter');
+            const clearFilters = document.getElementById('clearFilters');
+            const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+            const timeline = document.getElementById('historyTimeline');
+            const totalItems = document.getElementById('totalItems');
+            const noItemsMessage = document.getElementById('noItemsMessage');
+            
+            function applyFilters() {
+                const actionValue = actionFilter.value;
+                const userValue = userFilter.value;
+                const dateValue = dateFilter.value;
+                
+                const items = timeline.querySelectorAll('.timeline-item');
+                let visibleCount = 0;
+                
+                items.forEach(item => {
+                    const itemAction = item.dataset.action;
+                    const itemUser = item.dataset.user;
+                    const itemDate = item.dataset.date;
+                    
+                    const actionMatch = !actionValue || itemAction === actionValue;
+                    const userMatch = !userValue || itemUser === userValue;
+                    const dateMatch = !dateValue || itemDate === dateValue;
+                    
+                    if (actionMatch && userMatch && dateMatch) {
+                        item.classList.remove('hidden');
+                        visibleCount++;
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                });
+                
+                totalItems.textContent = `${visibleCount} itens`;
+                
+                if (visibleCount === 0) {
+                    noItemsMessage.style.display = 'block';
+                    timeline.style.display = 'none';
+                } else {
+                    noItemsMessage.style.display = 'none';
+                    timeline.style.display = 'block';
+                }
+            }
+            
+            function clearAllFilters() {
+                actionFilter.value = '';
+                userFilter.value = '';
+                dateFilter.value = '';
+                applyFilters();
+            }
+            
+            actionFilter.addEventListener('change', applyFilters);
+            userFilter.addEventListener('change', applyFilters);
+            dateFilter.addEventListener('change', applyFilters);
+            clearFilters.addEventListener('click', clearAllFilters);
+            clearFiltersBtn.addEventListener('click', clearAllFilters);
+        });
+    </script>
+}
+
+@functions {
+    private string GetTimelineMarkerClass(string action)
+    {
+        return action switch
+        {
+            "Submit" => "bg-primary",
+            "Approve" => "bg-success",
+            "Reject" => "bg-danger",
+            "RequestChanges" => "bg-warning",
+            "Publish" => "bg-info",
+            "Archive" => "bg-secondary",
+            "Reactivate" => "bg-success",
+            "AssignReviewer" => "bg-primary",
+            "StartReview" => "bg-primary",
+            "CompleteReview" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetActionDisplayName(string action)
+    {
+        return action switch
+        {
+            "Submit" => "Enviar para Revisão",
+            "Approve" => "Aprovar",
+            "Reject" => "Rejeitar",
+            "RequestChanges" => "Solicitar Alterações",
+            "Publish" => "Publicar",
+            "Archive" => "Arquivar",
+            "Reactivate" => "Reativar",
+            "AssignReviewer" => "Atribuir Revisor",
+            "StartReview" => "Iniciar Revisão",
+            "CompleteReview" => "Concluir Revisão",
+            _ => action
+        };
+    }
+
+    private string GetActionIcon(string action)
+    {
+        return action switch
+        {
+            "Submit" => "bi-send",
+            "Approve" => "bi-check-lg",
+            "Reject" => "bi-x-lg",
+            "RequestChanges" => "bi-pencil",
+            "Publish" => "bi-globe",
+            "Archive" => "bi-archive",
+            "Reactivate" => "bi-arrow-clockwise",
+            "AssignReviewer" => "bi-person-plus",
+            "StartReview" => "bi-play",
+            "CompleteReview" => "bi-check2-all",
+            _ => "bi-gear"
+        };
+    }
+
+    private string GetActionBadgeClass(string action)
+    {
+        return action switch
+        {
+            "Submit" => "bg-primary",
+            "Approve" => "bg-success",
+            "Reject" => "bg-danger",
+            "RequestChanges" => "bg-warning",
+            "Publish" => "bg-info",
+            "Archive" => "bg-secondary",
+            "Reactivate" => "bg-success",
+            "AssignReviewer" => "bg-primary",
+            "StartReview" => "bg-primary",
+            "CompleteReview" => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+}

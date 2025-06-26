@@ -1,0 +1,512 @@
+@model IntranetDocumentos.Models.ViewModels.WorkflowDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard de Workflow";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="bi bi-diagram-3-fill text-primary me-2"></i>
+                Dashboard de Workflow
+            </h1>
+            <small class="text-muted">Gerencie aprovações e revisões de documentos</small>
+        </div>
+        
+        <div class="btn-group" role="group">
+            @if (User.IsInRole("Admin") || User.IsInRole("Gestor"))
+            {
+                <a asp-action="AllDocuments" class="btn btn-outline-info">
+                    <i class="bi bi-list-ul me-1"></i>
+                    Todos os Documentos
+                </a>
+            }
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Configuration" class="btn btn-outline-primary">
+                    <i class="bi bi-gear me-1"></i>
+                    Configurações
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-warning bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-clock-history text-warning fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="text-muted small">Pendentes</div>
+                            <div class="fs-4 fw-bold">@Model.PendingDocuments.Count</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-eye text-primary fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="text-muted small">Em Revisão</div>
+                            <div class="fs-4 fw-bold">@Model.InReviewDocuments.Count</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-success bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-check-circle text-success fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="text-muted small">Aprovados</div>
+                            <div class="fs-4 fw-bold">@Model.ApprovedDocuments.Count</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-info bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-archive text-info fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="text-muted small">Arquivados</div>
+                            <div class="fs-4 fw-bold">@Model.ArchivedDocuments.Count</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documentos Pendentes -->
+    @if (Model.PendingDocuments.Any())
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock-history text-warning me-2"></i>
+                    Documentos Pendentes de Ação (@Model.PendingDocuments.Count)
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th><input type="checkbox" id="selectAllPending" class="form-check-input"></th>
+                                <th>Documento</th>
+                                <th>Departamento</th>
+                                <th>Status</th>
+                                <th>Enviado em</th>
+                                <th>Prazo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var doc in Model.PendingDocuments)
+                            {
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" name="selectedDocs" value="@doc.Id" class="form-check-input pending-checkbox">
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-file-earmark text-muted me-2"></i>
+                                            <div>
+                                                <div class="fw-medium">@doc.OriginalFileName</div>
+                                                <small class="text-muted">por @doc.UploaderName</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@doc.DepartmentName</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning">@doc.Status</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@doc.UploadDate.ToString("dd/MM/yyyy HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        @if (doc.DueDate.HasValue)
+                                        {
+                                            <small class="text-muted">@doc.DueDate.Value.ToString("dd/MM/yyyy")</small>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted">-</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Document" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            @if (doc.CanApprove)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-success" 
+                                                        onclick="showActionModal(@doc.Id, 'Approve', '@doc.OriginalFileName')">
+                                                    <i class="bi bi-check-lg"></i>
+                                                </button>
+                                            }
+                                            @if (doc.CanReject)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                        onclick="showActionModal(@doc.Id, 'Reject', '@doc.OriginalFileName')">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ações em Lote -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h6 class="card-title">Ações em Lote</h6>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-success" onclick="bulkAction('Approve')">
+                        <i class="bi bi-check-lg me-1"></i>
+                        Aprovar Selecionados
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="bulkAction('Reject')">
+                        <i class="bi bi-x-lg me-1"></i>
+                        Rejeitar Selecionados
+                    </button>
+                    <button type="button" class="btn btn-info" onclick="bulkAction('RequestChanges')">
+                        <i class="bi bi-pencil me-1"></i>
+                        Solicitar Alterações
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Documentos em Revisão -->
+    @if (Model.InReviewDocuments.Any())
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-eye text-primary me-2"></i>
+                    Documentos em Revisão (@Model.InReviewDocuments.Count)
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Documento</th>
+                                <th>Departamento</th>
+                                <th>Status</th>
+                                <th>Em revisão desde</th>
+                                <th>Revisor</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var doc in Model.InReviewDocuments)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-file-earmark text-muted me-2"></i>
+                                            <div>
+                                                <div class="fw-medium">@doc.OriginalFileName</div>
+                                                <small class="text-muted">por @doc.UploaderName</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@doc.DepartmentName</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">@doc.Status</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@doc.UploadDate.ToString("dd/MM/yyyy HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(doc.AssignedToUserName))
+                                        {
+                                            <small class="text-muted">@doc.AssignedToUserName</small>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted">Não atribuído</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Document" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye me-1"></i>
+                                            Ver Detalhes
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Documentos Recentemente Aprovados -->
+    @if (Model.ApprovedDocuments.Any())
+    {
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-check-circle text-success me-2"></i>
+                    Documentos Recentemente Aprovados (@Model.ApprovedDocuments.Count)
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Documento</th>
+                                <th>Departamento</th>
+                                <th>Aprovado em</th>
+                                <th>Aprovado por</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var doc in Model.ApprovedDocuments.Take(10))
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-file-earmark text-muted me-2"></i>
+                                            <div>
+                                                <div class="fw-medium">@doc.OriginalFileName</div>
+                                                <small class="text-muted">por @doc.UploaderName</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@doc.DepartmentName</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@doc.LastModified.ToString("dd/MM/yyyy HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@(doc.LastModifiedByName ?? "Sistema")</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Document" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a asp-action="History" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-info">
+                                                <i class="bi bi-clock-history"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal para Ações -->
+<div class="modal fade" id="actionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="actionModalTitle">Confirmar Ação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="ExecuteAction" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="actionDocumentId" name="documentId">
+                    <input type="hidden" id="actionType" name="action">
+                    
+                    <p id="actionMessage"></p>
+                    
+                    <div class="mb-3">
+                        <label for="actionComments" class="form-label">Comentários (opcional)</label>
+                        <textarea class="form-control" id="actionComments" name="comments" rows="3" 
+                                  placeholder="Adicione comentários sobre esta ação..."></textarea>
+                    </div>
+                    
+                    <div id="assignReviewerSection" class="mb-3" style="display: none;">
+                        <label for="assignedToUserId" class="form-label">Atribuir a</label>
+                        <select class="form-select" id="assignedToUserId" name="assignedToUserId">
+                            <option value="">Selecione um revisor...</option>
+                        </select>
+                    </div>
+                    
+                    <div id="dueDateSection" class="mb-3" style="display: none;">
+                        <label for="dueDate" class="form-label">Prazo</label>
+                        <input type="datetime-local" class="form-control" id="dueDate" name="dueDate">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="confirmActionBtn">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Ações em Lote -->
+<div class="modal fade" id="bulkActionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkActionModalTitle">Ação em Lote</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="BulkAction" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="bulkActionType" name="action">
+                    <div id="bulkDocumentIds"></div>
+                    
+                    <p id="bulkActionMessage"></p>
+                    
+                    <div class="mb-3">
+                        <label for="bulkComments" class="form-label">Comentários (opcional)</label>
+                        <textarea class="form-control" id="bulkComments" name="comments" rows="3" 
+                                  placeholder="Adicione comentários sobre esta ação..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="confirmBulkActionBtn">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Seleção de todos os checkboxes
+        document.getElementById('selectAllPending').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.pending-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+
+        // Função para mostrar modal de ação
+        function showActionModal(documentId, action, fileName) {
+            document.getElementById('actionDocumentId').value = documentId;
+            document.getElementById('actionType').value = action;
+            document.getElementById('actionModalTitle').textContent = getActionTitle(action);
+            document.getElementById('actionMessage').textContent = `Confirma a ação "${getActionDisplayName(action)}" no documento "${fileName}"?`;
+            
+            // Configurar botão
+            const btn = document.getElementById('confirmActionBtn');
+            btn.className = 'btn ' + getActionButtonClass(action);
+            btn.textContent = 'Confirmar';
+            
+            // Mostrar/ocultar seções específicas
+            document.getElementById('assignReviewerSection').style.display = action === 'AssignReviewer' ? 'block' : 'none';
+            document.getElementById('dueDateSection').style.display = ['AssignReviewer', 'StartReview'].includes(action) ? 'block' : 'none';
+            
+            new bootstrap.Modal(document.getElementById('actionModal')).show();
+        }
+
+        // Função para ações em lote
+        function bulkAction(action) {
+            const selectedBoxes = document.querySelectorAll('.pending-checkbox:checked');
+            if (selectedBoxes.length === 0) {
+                alert('Selecione pelo menos um documento.');
+                return;
+            }
+
+            document.getElementById('bulkActionType').value = action;
+            document.getElementById('bulkActionModalTitle').textContent = getActionTitle(action) + ' em Lote';
+            document.getElementById('bulkActionMessage').textContent = `Confirma a ação "${getActionDisplayName(action)}" em ${selectedBoxes.length} documento(s) selecionado(s)?`;
+            
+            // Adicionar IDs dos documentos
+            const container = document.getElementById('bulkDocumentIds');
+            container.innerHTML = '';
+            selectedBoxes.forEach(cb => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'documentIds';
+                input.value = cb.value;
+                container.appendChild(input);
+            });
+            
+            // Configurar botão
+            const btn = document.getElementById('confirmBulkActionBtn');
+            btn.className = 'btn ' + getActionButtonClass(action);
+            btn.textContent = 'Confirmar';
+            
+            new bootstrap.Modal(document.getElementById('bulkActionModal')).show();
+        }
+
+        // Funções auxiliares
+        function getActionTitle(action) {
+            const titles = {
+                'Approve': 'Aprovar Documento',
+                'Reject': 'Rejeitar Documento',
+                'RequestChanges': 'Solicitar Alterações',
+                'Publish': 'Publicar Documento',
+                'Archive': 'Arquivar Documento',
+                'AssignReviewer': 'Atribuir Revisor'
+            };
+            return titles[action] || 'Ação';
+        }
+
+        function getActionDisplayName(action) {
+            const names = {
+                'Approve': 'Aprovar',
+                'Reject': 'Rejeitar',
+                'RequestChanges': 'Solicitar Alterações',
+                'Publish': 'Publicar',
+                'Archive': 'Arquivar',
+                'AssignReviewer': 'Atribuir Revisor'
+            };
+            return names[action] || action;
+        }
+
+        function getActionButtonClass(action) {
+            const classes = {
+                'Approve': 'btn-success',
+                'Reject': 'btn-danger',
+                'RequestChanges': 'btn-warning',
+                'Publish': 'btn-info',
+                'Archive': 'btn-secondary',
+                'AssignReviewer': 'btn-primary'
+            };
+            return classes[action] || 'btn-primary';
+        }
+    </script>
+}
