@@ -1,22 +1,22 @@
 @model List<IntranetDocumentos.Models.Document>
 @{
-    ViewData["Title"] = "Documentos";
+    ViewData["Title"] = @Localizer["Documents"];
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 style="color: var(--primary-color);">
             <i class="bi bi-file-text" style="color: var(--secondary-color);"></i> 
-            Gestão de Documentos
+            @Localizer["DocumentManagement"]
         </h2>
-        <p class="text-muted mb-0">Gerencie todos os documentos da Marcos Contabilidade</p>
+        <p class="text-muted mb-0">@Localizer["ManageAllDocuments"]</p>
     </div>
     <div class="d-flex gap-2">
         <a asp-action="AdvancedSearch" class="btn btn-outline-primary">
-            <i class="bi bi-search"></i> Busca Avançada
+            <i class="bi bi-search"></i> @Localizer["AdvancedSearch"]
         </a>
         <a asp-action="Upload" class="btn btn-primary btn-lg shadow-sm">
-            <i class="bi bi-cloud-upload"></i> Enviar Documento
+            <i class="bi bi-cloud-upload"></i> @Localizer["UploadDocument"]
         </a>
     </div>
 </div>
@@ -25,10 +25,10 @@
 {
     <div class="text-center py-5">
         <i class="bi bi-inbox" style="font-size: 3rem; color: #6c757d;"></i>
-        <h4 class="text-muted mt-3">Nenhum documento encontrado</h4>
-        <p class="text-muted">Comece enviando seu primeiro documento.</p>
+        <h4 class="text-muted mt-3">@Localizer["NoDocumentsFound"]</h4>
+        <p class="text-muted">@Localizer["StartUploadingFirstDocument"]</p>
         <a asp-action="Upload" class="btn btn-primary">
-            <i class="bi bi-cloud-upload"></i> Enviar Documento
+            <i class="bi bi-cloud-upload"></i> @Localizer["UploadDocument"]
         </a>
     </div>
 }
@@ -40,14 +40,14 @@ else
                 <table class="table table-hover documents-table mb-0">
                     <thead>
                         <tr>
-                            <th><i class="bi bi-file"></i> Nome do Arquivo</th>
-                            <th><i class="bi bi-building"></i> Departamento</th>
-                            <th><i class="bi bi-person"></i> Enviado por</th>
-                            <th><i class="bi bi-calendar"></i> Data</th>
-                            <th><i class="bi bi-file-earmark-bar-graph"></i> Tamanho</th>
-                            <th><i class="bi bi-check-circle"></i> Status</th>
-                            <th><i class="bi bi-git"></i> Workflow</th>
-                            <th class="actions-column"><i class="bi bi-gear"></i> Ações</th>
+                            <th><i class="bi bi-file"></i> @Localizer["FileName"]</th>
+                            <th><i class="bi bi-building"></i> @Localizer["Department"]</th>
+                            <th><i class="bi bi-person"></i> @Localizer["UploadedBy"]</th>
+                            <th><i class="bi bi-calendar"></i> @Localizer["Date"]</th>
+                            <th><i class="bi bi-file-earmark-bar-graph"></i> @Localizer["Size"]</th>
+                            <th><i class="bi bi-check-circle"></i> @Localizer["Status"]</th>
+                            <th><i class="bi bi-git"></i> @Localizer["Workflow"]</th>
+                            <th class="actions-column"><i class="bi bi-gear"></i> @Localizer["Actions"]</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -65,7 +65,7 @@ else
                                     }
                                     else
                                     {
-                                        <span class="badge bg-secondary">Geral</span>
+                                        <span class="badge bg-secondary">@Localizer["General"]</span>
                                     }
                                 </td>
                                 <td>@document.Uploader.Email</td>
@@ -87,21 +87,21 @@ else
                                         
                                         var statusText = document.Status switch
                                         {
-                                            DocumentStatus.Draft => "Rascunho",
-                                            DocumentStatus.PendingReview => "Aguardando Revisão",
-                                            DocumentStatus.InReview => "Em Revisão",
-                                            DocumentStatus.PendingApproval => "Aguardando Aprovação",
-                                            DocumentStatus.Approved => "Aprovado",
-                                            DocumentStatus.Rejected => "Rejeitado",
-                                            DocumentStatus.Archived => "Arquivado",
-                                            _ => "Rascunho"
+                                            DocumentStatus.Draft => @Localizer["Draft"],
+                                            DocumentStatus.PendingReview => @Localizer["PendingReview"],
+                                            DocumentStatus.InReview => @Localizer["InReview"],
+                                            DocumentStatus.PendingApproval => @Localizer["PendingApproval"],
+                                            DocumentStatus.Approved => @Localizer["Approved"],
+                                            DocumentStatus.Rejected => @Localizer["Rejected"],
+                                            DocumentStatus.Archived => @Localizer["Archived"],
+                                            _ => @Localizer["Draft"]
                                         };
                                     }
                                     <span class="badge bg-@statusClass">@statusText</span>
                                 </td>
                                 <td>
                                     <a asp-controller="Workflow" asp-action="Document" asp-route-id="@document.Id" 
-                                       class="btn btn-sm btn-outline-secondary" title="Ver Workflow">
+                                       class="btn btn-sm btn-outline-secondary" title="@Localizer["ViewWorkflow"]">
                                         <i class="bi bi-diagram-3"></i>
                                     </a>
                                 </td>
@@ -118,18 +118,18 @@ else
                                         @if (canView)
                                         {
                                             <a asp-action="View" asp-route-id="@document.Id" 
-                                               class="btn btn-sm btn-outline-success" title="Visualizar" target="_blank">
+                                               class="btn btn-sm btn-outline-success" title="@Localizer["ViewDocument"]" target="_blank">
                                                 <i class="bi bi-eye-fill"></i>
                                             </a>
                                         }
                                         
                                         <a asp-action="Download" asp-route-id="@document.Id" 
-                                           class="btn btn-sm btn-outline-primary" title="Download">
+                                           class="btn btn-sm btn-outline-primary" title="@Localizer["Download"]">
                                             <i class="bi bi-download"></i>
                                         </a>
                                         
                                         <a asp-action="Details" asp-route-id="@document.Id" 
-                                           class="btn btn-sm btn-outline-info" title="Detalhes">
+                                           class="btn btn-sm btn-outline-info" title="@Localizer["Details"]">
                                             <i class="bi bi-info-circle"></i>
                                         </a>
                                         
@@ -137,7 +137,7 @@ else
                                         {
                                             <button type="button" class="btn btn-sm btn-outline-danger" 
                                                     onclick="confirmDelete(@document.Id, '@document.OriginalFileName')" 
-                                                    title="Excluir">
+                                                    title="@Localizer["Delete"]">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         }
@@ -157,19 +157,19 @@ else
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <h5 class="modal-title">@Localizer["ConfirmDeletion"]</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Tem certeza que deseja excluir o documento <strong id="fileName"></strong>?</p>
-                <p class="text-danger"><small>Esta ação não pode ser desfeita.</small></p>
+                <p>@Localizer["AreYouSureDelete"] <strong id="fileName"></strong>?</p>
+                <p class="text-danger"><small>@Localizer["CannotBeUndone"]</small></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
                 <form id="deleteForm" method="post" asp-action="Delete" class="d-inline">
                     <input type="hidden" id="documentId" name="id" />
                     <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Excluir
+                        <i class="bi bi-trash"></i> @Localizer["Delete"]
                     </button>
                 </form>
             </div>

@@ -1,20 +1,20 @@
 @model IntranetDocumentos.Models.ViewModels.LoginViewModel
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = @Localizer["Login"];
 }
 
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-5">
         <div class="text-center mb-4">
-            <img src="~/images/logo.png" alt="Marcos Contabilidade" style="height: 80px; margin-bottom: 20px;" />
-            <h2 style="color: var(--primary-color); font-weight: bold;">Marcos Contabilidade</h2>
-            <p style="color: var(--text-dark);">Sistema de Gestão de Documentos</p>
+            <img src="~/images/logo.png" alt="@Localizer["CompanyName"]" style="height: 80px; margin-bottom: 20px;" />
+            <h2 style="color: var(--primary-color); font-weight: bold;">@Localizer["CompanyName"]</h2>
+            <p style="color: var(--text-dark);">@Localizer["DocumentManagementSystem"]</p>
         </div>
         
         <div class="card shadow">
             <div class="card-header">
                 <h3 class="text-center mb-0">
-                    <i class="bi bi-box-arrow-in-right"></i> Acesso ao Sistema
+                    <i class="bi bi-box-arrow-in-right"></i> @Localizer["SystemAccess"]
                 </h3>
             </div>
             <div class="card-body p-4">
@@ -22,19 +22,19 @@
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                     
                     <div class="form-group mb-3">
-                        <label asp-for="Email" class="form-label">Email</label>
+                        <label asp-for="Email" class="form-label">@Localizer["Email"]</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                            <input asp-for="Email" class="form-control" placeholder="Digite seu email corporativo" />
+                            <input asp-for="Email" class="form-control" placeholder="@Localizer["EnterEmail"]" />
                         </div>
                         <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
                     
                     <div class="form-group mb-3">
-                        <label asp-for="Password" class="form-label">Senha</label>
+                        <label asp-for="Password" class="form-label">@Localizer["Password"]</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                            <input asp-for="Password" class="form-control" placeholder="Digite sua senha" />
+                            <input asp-for="Password" class="form-control" placeholder="@Localizer["EnterPassword"]" />
                         </div>
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
@@ -42,13 +42,13 @@
                     <div class="form-check mb-4">
                         <input asp-for="RememberMe" class="form-check-input" />
                         <label asp-for="RememberMe" class="form-check-label">
-                            Lembrar de mim neste dispositivo
+                            @Localizer["RememberMe"]
                         </label>
                     </div>
                     
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="bi bi-box-arrow-in-right"></i> Acessar Sistema
+                            <i class="bi bi-box-arrow-in-right"></i> @Localizer["AccessSystem"]
                         </button>
                     </div>
                 </form>
@@ -57,9 +57,9 @@
         
         <div class="text-center mt-4">
             <div class="alert alert-info">
-                <strong><i class="bi bi-info-circle"></i> Acesso de Demonstração:</strong><br/>
-                <strong>Email:</strong> admin@empresa.com<br/>
-                <strong>Senha:</strong> Admin123!
+                <strong><i class="bi bi-info-circle"></i> @Localizer["DemoAccess"]</strong><br/>
+                <strong>@Localizer["Email"]:</strong> admin@empresa.com<br/>
+                <strong>@Localizer["Password"]:</strong> Admin123!
             </div>
         </div>
     </div>

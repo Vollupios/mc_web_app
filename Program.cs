@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Localization;
+using System.Globalization;
 using IntranetDocumentos.Data;
 using IntranetDocumentos.Models;
 using IntranetDocumentos.Services;
@@ -26,6 +29,29 @@ public partial class Program
                 policy.WithOrigins(allowedOrigins)
                       .AllowAnyHeader()
                       .AllowAnyMethod());
+        });
+
+        // Configuração de Localização/Internacionalização
+        builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+        builder.Services.Configure<RequestLocalizationOptions>(options =>
+        {
+            var supportedCultures = new[]
+            {
+                new CultureInfo("pt-BR"), // Português (Brasil) - padrão
+                new CultureInfo("en-US")  // Inglês (EUA)
+            };
+            
+            options.DefaultRequestCulture = new RequestCulture("pt-BR");
+            options.SupportedCultures = supportedCultures;
+            options.SupportedUICultures = supportedCultures;
+            
+            // Configurar providers de cultura (ordem de prioridade)
+            options.RequestCultureProviders = new List<IRequestCultureProvider>
+            {
+                new QueryStringRequestCultureProvider(), // ?culture=pt-BR&ui-culture=pt-BR
+                new CookieRequestCultureProvider(),      // Cookie persistente
+                new AcceptLanguageHeaderRequestCultureProvider() // Accept-Language header do browser
+            };
         });
 
         // Add services to the container.
@@ -115,7 +141,9 @@ public partial class Program
         
         builder.Services.AddHostedService<BackupBackgroundService>();
 
-        builder.Services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews()
+            .AddViewLocalization(options => options.ResourcesPath = "Resources")
+            .AddDataAnnotationsLocalization();
 
         var app = builder.Build();
 
@@ -131,6 +159,10 @@ public partial class Program
 
         // Força HTTPS sempre
         app.UseHttpsRedirection();
+        
+        // Middleware de localização
+        app.UseRequestLocalization();
+        
         app.UseRouting();
 
         // Authentication & Authorization

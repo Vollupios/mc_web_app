@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> Localizer
+
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -47,31 +50,31 @@
                     {                        <ul class="navbar-nav flex-grow-1">
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Documents" asp-action="Index">
-                                    <i class="bi bi-file-text"></i> Documentos
+                                    <i class="bi bi-file-text"></i> @Localizer["Documents"]
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Documents" asp-action="AdvancedSearch">
-                                    <i class="bi bi-search"></i> Busca Avançada
+                                    <i class="bi bi-search"></i> @Localizer["AdvancedSearch"]
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Documents" asp-action="Upload">
-                                    <i class="bi bi-cloud-upload"></i> Enviar Documento
+                                    <i class="bi bi-cloud-upload"></i> @Localizer["UploadDocument"]
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Workflow" asp-action="Index">
-                                    <i class="bi bi-diagram-3"></i> Workflow
+                                    <i class="bi bi-diagram-3"></i> @Localizer["Workflow"]
                                 </a>
                             </li>                            <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Ramais" asp-action="Index">
-                                    <i class="bi bi-telephone"></i> Ramais
+                                    <i class="bi bi-telephone"></i> @Localizer["Extensions"]
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Reunioes" asp-action="Index">
-                                    <i class="bi bi-calendar3"></i> Agenda
+                                    <i class="bi bi-calendar3"></i> @Localizer["Meetings"]
                                 </a>
                             </li>
                             @if (User.IsInRole("Admin") || User.IsInRole("Gestor"))
@@ -107,7 +110,7 @@
                             {
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-gear"></i> Administração
+                                        <i class="bi bi-gear"></i> @Localizer["Administration"]
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li>
@@ -130,6 +133,37 @@
                             }
                         </ul>
                         <ul class="navbar-nav">
+                            <!-- Language Selector -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Idioma / Language">
+                                    <i class="bi bi-globe"></i>
+                                    @{
+                                        var currentCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+                                        var displayName = currentCulture == "pt-BR" ? "PT" : "EN";
+                                    }
+                                    @displayName
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <form asp-controller="Culture" asp-action="SetCulture" method="post">
+                                            <input type="hidden" name="culture" value="pt-BR" />
+                                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                            <button type="submit" class="dropdown-item @(currentCulture == "pt-BR" ? "active" : "")">
+                                                <i class="bi bi-flag"></i> Português (BR)
+                                            </button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form asp-controller="Culture" asp-action="SetCulture" method="post">
+                                            <input type="hidden" name="culture" value="en-US" />
+                                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                            <button type="submit" class="dropdown-item @(currentCulture == "en-US" ? "active" : "")">
+                                                <i class="bi bi-flag"></i> English (US)
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-person-circle"></i> @User.Identity.Name
@@ -138,7 +172,7 @@
                                     <li>
                                         <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                             <button type="submit" class="dropdown-item">
-                                                <i class="bi bi-box-arrow-right"></i> Sair
+                                                <i class="bi bi-box-arrow-right"></i> @Localizer["Logout"]
                                             </button>
                                         </form>
                                     </li>

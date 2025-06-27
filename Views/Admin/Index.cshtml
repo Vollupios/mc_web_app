@@ -1,28 +1,29 @@
 @model List<(IntranetDocumentos.Models.ApplicationUser user, IList<string> roles)>
+@inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResource> Localizer
 @{
-    ViewData["Title"] = "Administração de Usuários";
+    ViewData["Title"] = Localizer["UserAdministration"];
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 style="color: var(--primary-color);">
             <i class="bi bi-gear" style="color: var(--secondary-color);"></i> 
-            Administração de Usuários
+            @Localizer["UserAdministration"]
         </h2>
-        <p class="text-muted mb-0">Gerencie usuários e permissões do sistema</p>
+        <p class="text-muted mb-0">@Localizer["ManageUsersPermissions"]</p>
     </div>
     <div>
         <a asp-action="CreateUser" class="btn btn-success shadow-sm me-2">
-            <i class="bi bi-person-plus"></i> Novo Usuário
+            <i class="bi bi-person-plus"></i> @Localizer["NewUser"]
         </a>
         <a asp-action="SendEmail" class="btn btn-primary shadow-sm me-2">
-            <i class="bi bi-envelope"></i> Enviar Email
+            <i class="bi bi-envelope"></i> @Localizer["SendEmail"]
         </a>
         <a asp-action="EmailConfig" class="btn btn-warning shadow-sm me-2">
-            <i class="bi bi-gear"></i> Config. Email
+            <i class="bi bi-gear"></i> @Localizer["EmailConfig"]
         </a>
         <a asp-action="Departments" class="btn btn-info shadow-sm">
-            <i class="bi bi-building"></i> Departamentos
+            <i class="bi bi-building"></i> @Localizer["Departments"]
         </a>
     </div>
 </div>
@@ -34,7 +35,7 @@
             <div class="card-body text-center">
                 <i class="bi bi-people-fill text-primary" style="font-size: 2rem;"></i>
                 <h5 class="mt-2">@Model.Count</h5>
-                <small class="text-muted">Usuários Total</small>
+                <small class="text-muted">@Localizer["TotalUsers"]</small>
             </div>
         </div>
     </div>
@@ -44,9 +45,9 @@
                 <i class="bi bi-envelope-fill text-success" style="font-size: 2rem;"></i>
                 <h5 class="mt-2">
                     @* Aqui pode ser implementado contagem de emails enviados *@
-                    <a asp-action="SendEmail" class="text-decoration-none">Enviar</a>
+                    <a asp-action="SendEmail" class="text-decoration-none">@Localizer["Send"]</a>
                 </h5>
-                <small class="text-muted">Comunicação</small>
+                <small class="text-muted">@Localizer["Communication"]</small>
             </div>
         </div>
     </div>
@@ -55,11 +56,11 @@
             <div class="card-body text-center">
                 <i class="bi bi-gear-fill text-warning" style="font-size: 2rem;"></i>
                 <h5 class="mt-2">
-                    <a asp-action="EmailConfig" class="text-decoration-none">Config</a>
+                    <a asp-action="EmailConfig" class="text-decoration-none">@Localizer["Config"]</a>
                 </h5>
-                <small class="text-muted">Email SMTP</small>
+                <small class="text-muted">@Localizer["EmailSMTP"]</small>
                 <div id="emailStatus" class="mt-1">
-                    <small class="text-warning">Verificando...</small>
+                    <small class="text-warning">@Localizer["Checking"]</small>
                 </div>
             </div>
         </div>
@@ -69,9 +70,9 @@
             <div class="card-body text-center">
                 <i class="bi bi-building-fill text-info" style="font-size: 2rem;"></i>
                 <h5 class="mt-2">
-                    <a asp-action="Departments" class="text-decoration-none">Gerenciar</a>
+                    <a asp-action="Departments" class="text-decoration-none">@Localizer["Manage"]</a>
                 </h5>
-                <small class="text-muted">Departamentos</small>
+                <small class="text-muted">@Localizer["Departments"]</small>
             </div>
         </div>
     </div>
@@ -81,10 +82,10 @@
 {
     <div class="text-center py-5">
         <i class="bi bi-people" style="font-size: 3rem; color: #6c757d;"></i>
-        <h4 class="text-muted mt-3">Nenhum usuário encontrado</h4>
-        <p class="text-muted">Comece criando o primeiro usuário do sistema.</p>
+        <h4 class="text-muted mt-3">@Localizer["NoUsersFound"]</h4>
+        <p class="text-muted">@Localizer["StartCreatingFirstUser"]</p>
         <a asp-action="CreateUser" class="btn btn-success">
-            <i class="bi bi-person-plus"></i> Criar Usuário
+            <i class="bi bi-person-plus"></i> @Localizer["CreateUser"]
         </a>
     </div>
 }
@@ -96,11 +97,11 @@ else
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th><i class="bi bi-envelope"></i> Email</th>
-                            <th><i class="bi bi-building"></i> Departamento</th>
-                            <th><i class="bi bi-shield"></i> Função</th>
-                            <th><i class="bi bi-calendar"></i> Criado em</th>
-                            <th><i class="bi bi-gear"></i> Ações</th>
+                            <th><i class="bi bi-envelope"></i> @Localizer["Email"]</th>
+                            <th><i class="bi bi-building"></i> @Localizer["Department"]</th>
+                            <th><i class="bi bi-shield"></i> @Localizer["Function"]</th>
+                            <th><i class="bi bi-calendar"></i> @Localizer["CreatedOn"]</th>
+                            <th><i class="bi bi-gear"></i> @Localizer["Actions"]</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -112,7 +113,7 @@ else
                                     @user.Email
                                     @if (user.EmailConfirmed)
                                     {
-                                        <i class="bi bi-check-circle text-success" title="Email confirmado"></i>
+                                        <i class="bi bi-check-circle text-success" title="@Localizer["EmailConfirmed"]"></i>
                                     }
                                 </td>
                                 <td>
@@ -128,21 +129,21 @@ else
                                     }
                                     else
                                     {
-                                        <span class="badge bg-secondary">Sem função</span>
+                                        <span class="badge bg-secondary">@Localizer["NoRole"]</span>
                                     }
                                 </td>
                                 <td>@user.LockoutEnd?.ToString("dd/MM/yyyy") ?? "N/A"</td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <a asp-action="EditUser" asp-route-id="@user.Id" 
-                                           class="btn btn-sm btn-outline-primary" title="Editar">
+                                           class="btn btn-sm btn-outline-primary" title="@Localizer["Edit"]">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         @if (user.Email != "admin@intranet.com")
                                         {
                                             <button type="button" class="btn btn-sm btn-outline-danger" 
                                                     onclick="confirmDelete('@user.Id', '@user.Email')" 
-                                                    title="Excluir">
+                                                    title="@Localizer["Delete"]">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         }
@@ -162,19 +163,19 @@ else
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <h5 class="modal-title">@Localizer["ConfirmDeletion"]</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Tem certeza que deseja excluir o usuário <strong id="userEmail"></strong>?</p>
-                <p class="text-danger"><small>Esta ação não pode ser desfeita e todos os documentos enviados por este usuário serão mantidos.</small></p>
+                <p>@Localizer["ConfirmDeleteUser"] <strong id="userEmail"></strong>?</p>
+                <p class="text-danger"><small>@Localizer["ActionCannotBeUndone"]</small></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
                 <form id="deleteForm" method="post" asp-action="DeleteUser" class="d-inline">
                     <input type="hidden" id="userId" name="id" />
                     <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Excluir
+                        <i class="bi bi-trash"></i> @Localizer["Delete"]
                     </button>
                 </form>
             </div>
