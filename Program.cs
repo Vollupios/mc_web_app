@@ -37,21 +37,15 @@ public partial class Program
         {
             var supportedCultures = new[]
             {
-                new CultureInfo("pt-BR"), // Português (Brasil) - padrão
-                new CultureInfo("en-US")  // Inglês (EUA)
+                new CultureInfo("pt-BR") // Português (Brasil) - padrão e único
             };
             
             options.DefaultRequestCulture = new RequestCulture("pt-BR");
             options.SupportedCultures = supportedCultures;
             options.SupportedUICultures = supportedCultures;
             
-            // Configurar providers de cultura (ordem de prioridade)
-            options.RequestCultureProviders = new List<IRequestCultureProvider>
-            {
-                new QueryStringRequestCultureProvider(), // ?culture=pt-BR&ui-culture=pt-BR
-                new CookieRequestCultureProvider(),      // Cookie persistente
-                new AcceptLanguageHeaderRequestCultureProvider() // Accept-Language header do browser
-            };
+            // Usar apenas o provider padrão que sempre retorna pt-BR
+            options.RequestCultureProviders.Clear();
         });
 
         // Add services to the container.

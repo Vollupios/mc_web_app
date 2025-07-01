@@ -1,14 +1,15 @@
 @using IntranetDocumentos.Models.ViewModels
 @model SendEmailViewModel
+@inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResource> Localizer
 @{
-    ViewData["Title"] = "Enviar Email";
+    ViewData["Title"] = Localizer["SendEmail"];
 }
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-envelope-fill"></i> Enviar Email</h2>
+        <h2><i class="bi bi-envelope-fill"></i> @Localizer["SendEmail"]</h2>
         <a asp-action="Index" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Voltar
+            <i class="bi bi-arrow-left"></i> @Localizer["Common.Back"]
         </a>
     </div>
 
@@ -210,7 +211,7 @@
                 <div id="previewMessage"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Common.Close"]</button>
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="$('#sendBtn').click()">
                     <i class="bi bi-send"></i> Enviar Agora
                 </button>

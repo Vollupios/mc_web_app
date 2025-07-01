@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- Navigation -->
+  <data name="Navigation.Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Navigation.Documents" xml:space="preserve">
+    <value>Documents</value>
+  </data>
+  <data name="Navigation.Meetings" xml:space="preserve">
+    <value>Meetings</value>
+  </data>
+  <data name="Navigation.Extensions" xml:space="preserve">
+    <value>Extensions</value>
+  </data>
+  <data name="Navigation.Analytics" xml:space="preserve">
+    <value>Analytics</value>
+  </data>
+  <data name="Navigation.Admin" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="Navigation.Backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="Navigation.Profile" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="Navigation.Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="Navigation.Login" xml:space="preserve">
+    <value>Login</value>
+  </data>
+
+  <!-- Common Actions -->
+  <data name="Common.Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Common.Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Common.Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Common.Upload" xml:space="preserve">
+    <value>Upload</value>
+  </data>
+  <data name="Common.Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="Common.Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Common.Filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="Common.View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="Common.Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Common.Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Common.Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Common.Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Common.Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Common.No" xml:space="preserve">
+    <value>No</value>
+  </data>
+
+  <!-- Login & Authentication -->
+  <data name="Login.Title" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="Login.Welcome" xml:space="preserve">
+    <value>Welcome to the System</value>
+  </data>
+  <data name="Login.Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Login.Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Login.RememberMe" xml:space="preserve">
+    <value>Remember me</value>
+  </data>
+  <data name="Login.ForgotPassword" xml:space="preserve">
+    <value>Forgot password?</value>
+  </data>
+  <data name="Login.Register" xml:space="preserve">
+    <value>Create new account</value>
+  </data>
+  <data name="Login.InvalidCredentials" xml:space="preserve">
+    <value>Invalid email or password.</value>
+  </data>
+
+  <!-- Documents -->
+  <data name="Documents.Title" xml:space="preserve">
+    <value>Documents</value>
+  </data>
+  <data name="Documents.Upload" xml:space="preserve">
+    <value>Upload Document</value>
+  </data>
+  <data name="Documents.FileName" xml:space="preserve">
+    <value>File Name</value>
+  </data>
+  <data name="Documents.Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Documents.Department" xml:space="preserve">
+    <value>Department</value>
+  </data>
+  <data name="Documents.UploadDate" xml:space="preserve">
+    <value>Upload Date</value>
+  </data>
+  <data name="Documents.Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="Documents.UploadedBy" xml:space="preserve">
+    <value>Uploaded by</value>
+  </data>
+  <data name="Documents.SelectFile" xml:space="preserve">
+    <value>Select file</value>
+  </data>
+  <data name="Documents.NoFileSelected" xml:space="preserve">
+    <value>No file selected</value>
+  </data>
+
+  <!-- Meetings -->
+  <data name="Meetings.Title" xml:space="preserve">
+    <value>Meetings</value>
+  </data>
+  <data name="Meetings.Schedule" xml:space="preserve">
+    <value>Schedule Meeting</value>
+  </data>
+  <data name="Meetings.Subject" xml:space="preserve">
+    <value>Subject</value>
+  </data>
+  <data name="Meetings.DateTime" xml:space="preserve">
+    <value>Date and Time</value>
+  </data>
+  <data name="Meetings.Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="Meetings.Participants" xml:space="preserve">
+    <value>Participants</value>
+  </data>
+  <data name="Meetings.Agenda" xml:space="preserve">
+    <value>Agenda</value>
+  </data>
+  <data name="Meetings.Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+
+  <!-- Extensions -->
+  <data name="Extensions.Title" xml:space="preserve">
+    <value>Extensions</value>
+  </data>
+  <data name="Extensions.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Extensions.Extension" xml:space="preserve">
+    <value>Extension</value>
+  </data>
+  <data name="Extensions.Phone" xml:space="preserve">
+    <value>Phone</value>
+  </data>
+  <data name="Extensions.Add" xml:space="preserve">
+    <value>Add Extension</value>
+  </data>
+
+  <!-- Admin -->
+  <data name="Admin.Title" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="Admin.Users" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="Admin.Departments" xml:space="preserve">
+    <value>Departments</value>
+  </data>
+  <data name="Admin.Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Admin.CreateUser" xml:space="preserve">
+    <value>Create User</value>
+  </data>
+  <data name="Admin.UserName" xml:space="preserve">
+    <value>User Name</value>
+  </data>
+  <data name="Admin.Role" xml:space="preserve">
+    <value>Role</value>
+  </data>
+
+  <!-- Dashboard -->
+  <data name="Dashboard.Title" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="Dashboard.Welcome" xml:space="preserve">
+    <value>Welcome</value>
+  </data>
+  <data name="Dashboard.RecentDocuments" xml:space="preserve">
+    <value>Recent Documents</value>
+  </data>
+  <data name="Dashboard.UpcomingMeetings" xml:space="preserve">
+    <value>Upcoming Meetings</value>
+  </data>
+  <data name="Dashboard.QuickActions" xml:space="preserve">
+    <value>Quick Actions</value>
+  </data>
+
+  <!-- Messages -->
+  <data name="Messages.Success" xml:space="preserve">
+    <value>Operation completed successfully!</value>
+  </data>
+  <data name="Messages.Error" xml:space="preserve">
+    <value>An error occurred. Please try again.</value>
+  </data>
+  <data name="Messages.ValidationError" xml:space="preserve">
+    <value>Please correct the errors below.</value>
+  </data>
+  <data name="Messages.AccessDenied" xml:space="preserve">
+    <value>Access denied.</value>
+  </data>
+  <data name="Messages.NotFound" xml:space="preserve">
+    <value>Page not found.</value>
+  </data>
+
+  <!-- Validation -->
+  <data name="Validation.Required" xml:space="preserve">
+    <value>The {0} field is required.</value>
+  </data>
+  <data name="Validation.EmailFormat" xml:space="preserve">
+    <value>Please enter a valid email address.</value>
+  </data>
+  <data name="Validation.MinLength" xml:space="preserve">
+    <value>The {0} field must be at least {1} characters long.</value>
+  </data>
+  <data name="Validation.MaxLength" xml:space="preserve">
+    <value>The {0} field cannot be longer than {1} characters.</value>
+  </data>
+
+  <!-- Departments -->
+  <data name="Department.Contabilidade" xml:space="preserve">
+    <value>Accounting</value>
+  </data>
+  <data name="Department.Fiscal" xml:space="preserve">
+    <value>Tax</value>
+  </data>
+  <data name="Department.Pessoal" xml:space="preserve">
+    <value>Human Resources</value>
+  </data>
+  <data name="Department.Juridico" xml:space="preserve">
+    <value>Legal</value>
+  </data>
+  <data name="Department.TI" xml:space="preserve">
+    <value>IT</value>
+  </data>
+  <data name="Department.Administrativo" xml:space="preserve">
+    <value>Administrative</value>
+  </data>
+
+  <!-- Roles -->
+  <data name="Role.Admin" xml:space="preserve">
+    <value>Administrator</value>
+  </data>
+  <data name="Role.Manager" xml:space="preserve">
+    <value>Manager</value>
+  </data>
+  <data name="Role.User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  
+  <!-- Admin interface -->
+  <data name="DepartmentList" xml:space="preserve">
+    <value>Department List</value>
+  </data>
+  <data name="UsersLowercase" xml:space="preserve">
+    <value>users</value>
+  </data>
+  <data name="DocumentsLowercase" xml:space="preserve">
+    <value>documents</value>
+  </data>
+  <data name="NoDepartmentsFound" xml:space="preserve">
+    <value>No departments found.</value>
+  </data>
+  <data name="DepartmentDetails" xml:space="preserve">
+    <value>Department Details</value>
+  </data>
+  <data name="NoUsersInDepartment" xml:space="preserve">
+    <value>No users in this department.</value>
+  </data>
+  <data name="NoDocumentsInDepartment" xml:space="preserve">
+    <value>No documents in this department.</value>
+  </data>
+  <data name="AndMoreDocuments" xml:space="preserve">
+    <value>... and {0} more documents</value>
+  </data>
+  <data name="EmailPlaceholder" xml:space="preserve">
+    <value>user@company.com</value>
+  </data>
+  <data name="UserNameOptional" xml:space="preserve">
+    <value>Username (Optional)</value>
+  </data>
+  <data name="UserNamePlaceholder" xml:space="preserve">
+    <value>If empty, will use email</value>
+  </data>
+  <data name="PasswordRequirements" xml:space="preserve">
+    <value>Minimum 6 characters, at least 1 digit</value>
+  </data>
+  <data name="SelectDepartment" xml:space="preserve">
+    <value>Select a department...</value>
+  </data>
+  <data name="SelectFunction" xml:space="preserve">
+    <value>Select a function...</value>
+  </data>
+  <data name="RoleInformation" xml:space="preserve">
+    <value>Role Information</value>
+  </data>
+  <data name="AdminRoleDescription" xml:space="preserve">
+    <value>Full system access, including user administration</value>
+  </data>
+  <data name="ManagerRoleDescription" xml:space="preserve">
+    <value>Access to all documents, without user administration</value>
+  </data>
+  <data name="UserRoleDescription" xml:space="preserve">
+    <value>Access only to own department documents and General area</value>
+  </data>
+  <data name="NewPasswordOptional" xml:space="preserve">
+    <value>New Password (optional)</value>
+  </data>
+  <data name="LeaveBlankToKeepCurrent" xml:space="preserve">
+    <value>Leave blank to keep current password</value>
+  </data>
+  <data name="ConfirmNewPassword" xml:space="preserve">
+    <value>Confirm New Password</value>
+  </data>
+  <data name="RequiredOnlyIfChangingPassword" xml:space="preserve">
+    <value>Required only if changing password</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Save Changes</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="SaveSettings" xml:space="preserve">
+    <value>Save Settings</value>
+  </data>
+  <data name="Send" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="Communication" xml:space="preserve">
+    <value>Communication</value>
+  </data>
+  <data name="Config" xml:space="preserve">
+    <value>Config</value>
+  </data>
+  <data name="EmailSMTP" xml:space="preserve">
+    <value>EmailSMTP</value>
+  </data>
+  <data name="Checking" xml:space="preserve">
+    <value>Checking</value>
+  </data>
+  <data name="Manage" xml:space="preserve">
+    <value>Manage</value>
+  </data>
+  <data name="TotalUsers" xml:space="preserve">
+    <value>Total Users</value>
+  </data>
+  <data name="ManageUsersPermissions" xml:space="preserve">
+    <value>Manage users and permissions</value>
+  </data>
+</root>

@@ -1,14 +1,15 @@
 @using IntranetDocumentos.Models.ViewModels
 @model EmailConfigViewModel
+@inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResource> Localizer
 @{
-    ViewData["Title"] = "Configuração de Email";
+    ViewData["Title"] = Localizer["EmailConfig"];
 }
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-gear-fill"></i> Configuração de Email</h2>
+        <h2><i class="bi bi-gear-fill"></i> @Localizer["EmailConfig"]</h2>
         <a asp-action="Index" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Voltar
+            <i class="bi bi-arrow-left"></i> @Localizer["Common.Back"]
         </a>
     </div>
 
@@ -149,10 +150,10 @@
                             </div>
                             <div>
                                 <button type="button" class="btn btn-outline-secondary me-2" onclick="resetForm()">
-                                    <i class="bi bi-arrow-clockwise"></i> Resetar
+                                    <i class="bi bi-arrow-clockwise"></i> @Localizer["Reset"]
                                 </button>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-save"></i> Salvar Configurações
+                                    <i class="bi bi-save"></i> @Localizer["SaveSettings"]
                                 </button>
                             </div>
                         </div>

@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- Navigation -->
+  <data name="Navigation.Home" xml:space="preserve">
+    <value>Início</value>
+  </data>
+  <data name="Navigation.Documents" xml:space="preserve">
+    <value>Documentos</value>
+  </data>
+  <data name="Navigation.Meetings" xml:space="preserve">
+    <value>Reuniões</value>
+  </data>
+  <data name="Navigation.Extensions" xml:space="preserve">
+    <value>Ramais</value>
+  </data>
+  <data name="Navigation.Analytics" xml:space="preserve">
+    <value>Relatórios</value>
+  </data>
+  <data name="Navigation.Admin" xml:space="preserve">
+    <value>Administração</value>
+  </data>
+  <data name="Navigation.Backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="Navigation.Profile" xml:space="preserve">
+    <value>Perfil</value>
+  </data>
+  <data name="Navigation.Logout" xml:space="preserve">
+    <value>Sair</value>
+  </data>
+  <data name="Navigation.Login" xml:space="preserve">
+    <value>Entrar</value>
+  </data>
+
+  <!-- Legacy keys for compatibility -->
+  <data name="Documents" xml:space="preserve">
+    <value>Documentos</value>
+  </data>
+  <data name="AdvancedSearch" xml:space="preserve">
+    <value>Busca Avançada</value>
+  </data>
+  <data name="UploadDocument" xml:space="preserve">
+    <value>Enviar Documento</value>
+  </data>
+  <data name="Workflow" xml:space="preserve">
+    <value>Fluxo de Trabalho</value>
+  </data>
+  <data name="Extensions" xml:space="preserve">
+    <value>Ramais</value>
+  </data>
+  <data name="Meetings" xml:space="preserve">
+    <value>Reuniões</value>
+  </data>
+  <data name="Administration" xml:space="preserve">
+    <value>Administração</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Sair</value>
+  </data>
+
+  <!-- Common Actions -->
+  <data name="Common.Save" xml:space="preserve">
+    <value>Salvar</value>
+  </data>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>Excluir</value>
+  </data>
+  <data name="Common.Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="Common.Create" xml:space="preserve">
+    <value>Criar</value>
+  </data>
+  <data name="Common.Upload" xml:space="preserve">
+    <value>Enviar</value>
+  </data>
+  <data name="Common.Download" xml:space="preserve">
+    <value>Baixar</value>
+  </data>
+  <data name="Common.Search" xml:space="preserve">
+    <value>Pesquisar</value>
+  </data>
+  <data name="Common.Filter" xml:space="preserve">
+    <value>Filtrar</value>
+  </data>
+  <data name="Common.View" xml:space="preserve">
+    <value>Visualizar</value>
+  </data>
+  <data name="Common.Details" xml:space="preserve">
+    <value>Detalhes</value>
+  </data>
+  <data name="Common.Back" xml:space="preserve">
+    <value>Voltar</value>
+  </data>
+  <data name="Common.Close" xml:space="preserve">
+    <value>Fechar</value>
+  </data>
+  <data name="Common.Confirm" xml:space="preserve">
+    <value>Confirmar</value>
+  </data>
+  <data name="Common.Yes" xml:space="preserve">
+    <value>Sim</value>
+  </data>
+  <data name="Common.No" xml:space="preserve">
+    <value>Não</value>
+  </data>
+
+  <!-- Login & Authentication -->
+  <data name="Login.Title" xml:space="preserve">
+    <value>Entrar</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Entrar</value>
+  </data>
+  <data name="Login.Welcome" xml:space="preserve">
+    <value>Bem-vindo ao Sistema</value>
+  </data>
+  <data name="Login.Email" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="Login.Password" xml:space="preserve">
+    <value>Senha</value>
+  </data>
+  <data name="Login.RememberMe" xml:space="preserve">
+    <value>Lembrar de mim</value>
+  </data>
+  <data name="Login.ForgotPassword" xml:space="preserve">
+    <value>Esqueceu a senha?</value>
+  </data>
+  <data name="Login.Register" xml:space="preserve">
+    <value>Criar nova conta</value>
+  </data>
+  <data name="Login.InvalidCredentials" xml:space="preserve">
+    <value>E-mail ou senha incorretos.</value>
+  </data>
+  
+  <!-- Legacy keys for compatibility -->
+  <data name="CompanyName" xml:space="preserve">
+    <value>Marcos Contabilidade</value>
+  </data>
+  <data name="DocumentManagementSystem" xml:space="preserve">
+    <value>Sistema de Gestão de Documentos</value>
+  </data>
+  <data name="SystemAccess" xml:space="preserve">
+    <value>Acesso ao Sistema</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="EnterEmail" xml:space="preserve">
+    <value>Digite seu e-mail</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Senha</value>
+  </data>
+  <data name="EnterPassword" xml:space="preserve">
+    <value>Digite sua senha</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>Lembrar de mim</value>
+  </data>
+
+  <!-- Documents -->
+  <data name="Documents.Title" xml:space="preserve">
+    <value>Documentos</value>
+  </data>
+  <data name="Documents.Upload" xml:space="preserve">
+    <value>Enviar Documento</value>
+  </data>
+  <data name="Documents.FileName" xml:space="preserve">
+    <value>Nome do Arquivo</value>
+  </data>
+  <data name="Documents.Description" xml:space="preserve">
+    <value>Descrição</value>
+  </data>
+  <data name="Documents.Department" xml:space="preserve">
+    <value>Departamento</value>
+  </data>
+  <data name="Documents.UploadDate" xml:space="preserve">
+    <value>Data de Upload</value>
+  </data>
+  <data name="Documents.Size" xml:space="preserve">
+    <value>Tamanho</value>
+  </data>
+  <data name="Documents.UploadedBy" xml:space="preserve">
+    <value>Enviado por</value>
+  </data>
+  <data name="Documents.SelectFile" xml:space="preserve">
+    <value>Selecionar arquivo</value>
+  </data>
+  <data name="Documents.NoFileSelected" xml:space="preserve">
+    <value>Nenhum arquivo selecionado</value>
+  </data>
+
+  <!-- Meetings -->
+  <data name="Meetings.Title" xml:space="preserve">
+    <value>Reuniões</value>
+  </data>
+  <data name="Meetings.Schedule" xml:space="preserve">
+    <value>Agendar Reunião</value>
+  </data>
+  <data name="Meetings.Subject" xml:space="preserve">
+    <value>Assunto</value>
+  </data>
+  <data name="Meetings.DateTime" xml:space="preserve">
+    <value>Data e Hora</value>
+  </data>
+  <data name="Meetings.Location" xml:space="preserve">
+    <value>Local</value>
+  </data>
+  <data name="Meetings.Participants" xml:space="preserve">
+    <value>Participantes</value>
+  </data>
+  <data name="Meetings.Agenda" xml:space="preserve">
+    <value>Pauta</value>
+  </data>
+  <data name="Meetings.Notes" xml:space="preserve">
+    <value>Observações</value>
+  </data>
+
+  <!-- Extensions -->
+  <data name="Extensions.Title" xml:space="preserve">
+    <value>Ramais</value>
+  </data>
+  <data name="Extensions.Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="Extensions.Extension" xml:space="preserve">
+    <value>Ramal</value>
+  </data>
+  <data name="Extensions.Phone" xml:space="preserve">
+    <value>Telefone</value>
+  </data>
+  <data name="Extensions.Add" xml:space="preserve">
+    <value>Adicionar Ramal</value>
+  </data>
+
+  <!-- Admin -->
+  <data name="Admin.Title" xml:space="preserve">
+    <value>Administração</value>
+  </data>
+  <data name="Admin.Users" xml:space="preserve">
+    <value>Usuários</value>
+  </data>
+  <data name="Admin.Departments" xml:space="preserve">
+    <value>Departamentos</value>
+  </data>
+  <data name="Admin.Settings" xml:space="preserve">
+    <value>Configurações</value>
+  </data>
+  <data name="Admin.CreateUser" xml:space="preserve">
+    <value>Criar Usuário</value>
+  </data>
+  <data name="Admin.UserName" xml:space="preserve">
+    <value>Nome de Usuário</value>
+  </data>
+  <data name="Admin.Role" xml:space="preserve">
+    <value>Função</value>
+  </data>
+  <data name="Admin.SendEmail" xml:space="preserve">
+    <value>Enviar Email</value>
+  </data>
+
+  <!-- Dashboard -->
+  <data name="Dashboard.Title" xml:space="preserve">
+    <value>Painel de Controle</value>
+  </data>
+  <data name="Dashboard.Welcome" xml:space="preserve">
+    <value>Bem-vindo</value>
+  </data>
+  <data name="Dashboard.RecentDocuments" xml:space="preserve">
+    <value>Documentos Recentes</value>
+  </data>
+  <data name="Dashboard.UpcomingMeetings" xml:space="preserve">
+    <value>Próximas Reuniões</value>
+  </data>
+  <data name="Dashboard.QuickActions" xml:space="preserve">
+    <value>Ações Rápidas</value>
+  </data>
+
+  <!-- Analytics -->
+  <data name="Analytics.DocumentStatistics" xml:space="preserve">
+    <value>Estatísticas de Documentos</value>
+  </data>
+  <data name="Analytics.MeetingMetrics" xml:space="preserve">
+    <value>Métricas de Reuniões</value>
+  </data>
+  <data name="Analytics.DepartmentActivity" xml:space="preserve">
+    <value>Atividade por Departamento</value>
+  </data>
+
+  <!-- Messages -->
+  <data name="Messages.Success" xml:space="preserve">
+    <value>Operação realizada com sucesso!</value>
+  </data>
+  <data name="Messages.Error" xml:space="preserve">
+    <value>Ocorreu um erro. Tente novamente.</value>
+  </data>
+  <data name="Messages.ValidationError" xml:space="preserve">
+    <value>Por favor, corrija os erros abaixo.</value>
+  </data>
+  <data name="Messages.AccessDenied" xml:space="preserve">
+    <value>Acesso negado.</value>
+  </data>
+  <data name="Messages.NotFound" xml:space="preserve">
+    <value>Página não encontrada.</value>
+  </data>
+
+  <!-- Validation -->
+  <data name="Validation.Required" xml:space="preserve">
+    <value>O campo {0} é obrigatório.</value>
+  </data>
+  <data name="Validation.EmailFormat" xml:space="preserve">
+    <value>Digite um e-mail válido.</value>
+  </data>
+  <data name="Validation.MinLength" xml:space="preserve">
+    <value>O campo {0} deve ter pelo menos {1} caracteres.</value>
+  </data>
+  <data name="Validation.MaxLength" xml:space="preserve">
+    <value>O campo {0} não pode ter mais de {1} caracteres.</value>
+  </data>
+
+  <!-- Page Titles -->
+  <data name="Admin.SendEmailTitle" xml:space="preserve">
+    <value>Enviar Email</value>
+  </data>
+  <data name="Analytics.MeetingMetricsTitle" xml:space="preserve">
+    <value>Métricas de Reuniões</value>
+  </data>
+  <data name="UserAdministration" xml:space="preserve">
+    <value>Administração de Usuários</value>
+  </data>
+  <data name="Analytics.DashboardTitle" xml:space="preserve">
+    <value>Dashboard de Análises</value>
+  </data>
+  <data name="Admin.DepartmentsTitle" xml:space="preserve">
+    <value>Gerenciar Departamentos</value>
+  </data>
+  <data name="Admin.CreateUserTitle" xml:space="preserve">
+    <value>Criar Usuário</value>
+  </data>
+  <data name="Workflow.ConfigurationTitle" xml:space="preserve">
+    <value>Configuração do Workflow</value>
+  </data>
+  <data name="Workflow.DocumentTitle" xml:space="preserve">
+    <value>Workflow do Documento</value>
+  </data>
+  <data name="Workflow.HistoryTitle" xml:space="preserve">
+    <value>Histórico do Documento</value>
+  </data>
+  <data name="Meetings.AgendaTitle" xml:space="preserve">
+    <value>Agenda de Reuniões</value>
+  </data>
+  <data name="Meetings.EditTitle" xml:space="preserve">
+    <value>Editar Reunião</value>
+  </data>
+  <data name="Meetings.CreateTitle" xml:space="preserve">
+    <value>Agendar Reunião</value>
+  </data>
+  <data name="Meetings.DetailsTitle" xml:space="preserve">
+    <value>Detalhes da Reunião</value>
+  </data>
+  <data name="Extensions.EditTitle" xml:space="preserve">
+    <value>Editar Ramal</value>
+  </data>
+  <data name="Extensions.IndexTitle" xml:space="preserve">
+    <value>Ramais Telefônicos</value>
+  </data>
+  <data name="Analytics.DepartmentActivityTitle" xml:space="preserve">
+    <value>Atividade por Departamento</value>
+  </data>
+  <data name="Error.Title" xml:space="preserve">
+    <value>Erro</value>
+  </data>
+
+  <!-- Workflow -->
+  <data name="Workflow.Dashboard" xml:space="preserve">
+    <value>Dashboard de Workflow</value>
+  </data>
+  <data name="Workflow.ManageApprovals" xml:space="preserve">
+    <value>Gerencie aprovações e revisões de documentos</value>
+  </data>
+  <data name="Workflow.AllDocuments" xml:space="preserve">
+    <value>Todos os Documentos</value>
+  </data>
+  <data name="Workflow.Configuration" xml:space="preserve">
+    <value>Configurações</value>
+  </data>
+  <data name="Workflow.PendingDocuments" xml:space="preserve">
+    <value>Documentos Pendentes</value>
+  </data>
+  <data name="Workflow.InReview" xml:space="preserve">
+    <value>Em Revisão</value>
+  </data>
+  <data name="Workflow.Approved" xml:space="preserve">
+    <value>Aprovados</value>
+  </data>
+  <data name="Workflow.Archived" xml:space="preserve">
+    <value>Arquivados</value>
+  </data>
+  <data name="Workflow.PendingAction" xml:space="preserve">
+    <value>Documentos Pendentes de Ação</value>
+  </data>
+  <data name="Workflow.InReviewDocuments" xml:space="preserve">
+    <value>Documentos em Revisão</value>
+  </data>
+  <data name="Department.Fiscal" xml:space="preserve">
+    <value>Fiscal</value>
+  </data>
+  <data name="Department.Pessoal" xml:space="preserve">
+    <value>Pessoal</value>
+  </data>
+  <data name="Department.Juridico" xml:space="preserve">
+    <value>Jurídico</value>
+  </data>
+  <data name="Department.TI" xml:space="preserve">
+    <value>TI</value>
+  </data>
+  <data name="Department.Administrativo" xml:space="preserve">
+    <value>Administrativo</value>
+  </data>
+
+  <!-- Roles -->
+  <data name="Role.Admin" xml:space="preserve">
+    <value>Administrador</value>
+  </data>
+  <data name="Role.Manager" xml:space="preserve">
+    <value>Gestor</value>
+  </data>
+  <data name="Role.User" xml:space="preserve">
+    <value>Usuário</value>
+  </data>
+  
+  <!-- Admin interface -->
+  <data name="DepartmentList" xml:space="preserve">
+    <value>Lista de Departamentos</value>
+  </data>
+  <data name="UsersLowercase" xml:space="preserve">
+    <value>usuários</value>
+  </data>
+  <data name="DocumentsLowercase" xml:space="preserve">
+    <value>documentos</value>
+  </data>
+  <data name="NoDepartmentsFound" xml:space="preserve">
+    <value>Nenhum departamento encontrado.</value>
+  </data>
+  <data name="DepartmentDetails" xml:space="preserve">
+    <value>Detalhes do Departamento</value>
+  </data>
+  <data name="NoUsersInDepartment" xml:space="preserve">
+    <value>Nenhum usuário neste departamento.</value>
+  </data>
+  <data name="NoDocumentsInDepartment" xml:space="preserve">
+    <value>Nenhum documento neste departamento.</value>
+  </data>
+  <data name="AndMoreDocuments" xml:space="preserve">
+    <value>... e mais {0} documentos</value>
+  </data>
+  <data name="EmailPlaceholder" xml:space="preserve">
+    <value>usuario@empresa.com</value>
+  </data>
+  <data name="UserNameOptional" xml:space="preserve">
+    <value>Nome de Usuário (Opcional)</value>
+  </data>
+  <data name="UserNamePlaceholder" xml:space="preserve">
+    <value>Se vazio, usará o email</value>
+  </data>
+  <data name="PasswordRequirements" xml:space="preserve">
+    <value>Mínimo 6 caracteres, pelo menos 1 dígito</value>
+  </data>
+  <data name="SelectDepartment" xml:space="preserve">
+    <value>Selecione um departamento...</value>
+  </data>
+  <data name="SelectFunction" xml:space="preserve">
+    <value>Selecione uma função...</value>
+  </data>
+  <data name="RoleInformation" xml:space="preserve">
+    <value>Informações sobre Funções</value>
+  </data>
+  <data name="AdminRoleDescription" xml:space="preserve">
+    <value>Acesso total ao sistema, incluindo administração de usuários</value>
+  </data>
+  <data name="ManagerRoleDescription" xml:space="preserve">
+    <value>Acesso a todos os documentos, sem administração de usuários</value>
+  </data>
+  <data name="UserRoleDescription" xml:space="preserve">
+    <value>Acesso apenas aos documentos do próprio departamento e área Geral</value>
+  </data>
+  <data name="NewPasswordOptional" xml:space="preserve">
+    <value>Nova Senha (opcional)</value>
+  </data>
+  <data name="LeaveBlankToKeepCurrent" xml:space="preserve">
+    <value>Deixe em branco para manter a senha atual</value>
+  </data>
+  <data name="ConfirmNewPassword" xml:space="preserve">
+    <value>Confirmar Nova Senha</value>
+  </data>
+  <data name="RequiredOnlyIfChangingPassword" xml:space="preserve">
+    <value>Necessário apenas se estiver alterando a senha</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Salvar Alterações</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Resetar</value>
+  </data>
+  <data name="SaveSettings" xml:space="preserve">
+    <value>Salvar Configurações</value>
+  </data>
+  <data name="Send" xml:space="preserve">
+    <value>Enviar</value>
+  </data>
+  <data name="Communication" xml:space="preserve">
+    <value>Comunicação</value>
+  </data>
+  <data name="Config" xml:space="preserve">
+    <value>Config</value>
+  </data>
+  <data name="EmailSMTP" xml:space="preserve">
+    <value>EmailSMTP</value>
+  </data>
+  <data name="Checking" xml:space="preserve">
+    <value>Verificando</value>
+  </data>
+  <data name="Manage" xml:space="preserve">
+    <value>Gerenciar</value>
+  </data>
+  <data name="TotalUsers" xml:space="preserve">
+    <value>Total de Usuários</value>
+  </data>
+  <data name="ManageUsersPermissions" xml:space="preserve">
+    <value>Gerenciar usuários e permissões</value>
+  </data>
+</root>
