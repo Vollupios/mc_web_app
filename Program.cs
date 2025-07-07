@@ -30,7 +30,7 @@ public partial class Program
 
         // Add services to the container.
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlite(connectionString));
+            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
         builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         {

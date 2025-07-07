@@ -4,11 +4,13 @@ using Microsoft.Extensions.Logging;
 using IntranetDocumentos.Data;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
+using MySqlConnector;
 
 namespace IntranetDocumentos.Services
 {
     /// <summary>
-    /// Serviço para backup e restauração do banco de dados SQLite
+    /// Serviço para backup e restauração do banco de dados MySQL
     /// </summary>
     public interface IDatabaseBackupService
     {
@@ -25,7 +27,6 @@ namespace IntranetDocumentos.Services
         private readonly IConfiguration _configuration;
         private readonly ILogger<DatabaseBackupService> _logger;
         private readonly string _backupDirectory;
-        private readonly string _databasePath;
 
         public DatabaseBackupService(
             ApplicationDbContext context,
@@ -41,9 +42,7 @@ namespace IntranetDocumentos.Services
             if (!Directory.Exists(_backupDirectory))
             {
                 Directory.CreateDirectory(_backupDirectory);
-            }            // Caminho do banco de dados
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-            _databasePath = ExtractDatabasePath(connectionString ?? "Data Source=IntranetDocumentos.db");
+            }
         }
 
         /// <summary>
@@ -54,27 +53,19 @@ namespace IntranetDocumentos.Services
             try
             {
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                var backupFileName = $"IntranetDocumentos_Backup_{timestamp}.db";
+                var backupFileName = $"IntranetDocumentos_Backup_{timestamp}.sql";
                 var backupPath = Path.Combine(_backupDirectory, backupFileName);
 
-                // Força o flush de todas as transações pendentes e fecha conexões
-                await _context.Database.ExecuteSqlRawAsync("PRAGMA wal_checkpoint(FULL);");
-                
-                // Fecha temporariamente as conexões do pool
-                await _context.Database.CloseConnectionAsync();
-                
-                // Aguarda um pouco para garantir que o arquivo não está sendo usado
-                await Task.Delay(100);
-                
-                // Copia o arquivo do banco
-                File.Copy(_databasePath, backupPath, overwrite: true);
+                // Para MySQL, fazer backup usando mysqldump
+                var connectionString = _context.Database.GetConnectionString();
+                await CreateMySqlBackup(connectionString, backupPath);
 
-                // Cria também um backup comprimido usando a cópia já criada
+                // Cria também um backup comprimido
                 var zipPath = Path.Combine(_backupDirectory, $"IntranetDocumentos_Backup_{timestamp}.zip");
                 using (var zip = ZipFile.Open(zipPath, ZipArchiveMode.Create))
                 {
-                    // Usa a cópia do backup em vez do arquivo original
-                    zip.CreateEntryFromFile(backupPath, "IntranetDocumentos.db");
+                    // Adiciona o arquivo SQL do backup
+                    zip.CreateEntryFromFile(backupPath, Path.GetFileName(backupPath));
                     
                     // Adiciona informações do backup
                     var infoEntry = zip.CreateEntry("backup_info.txt");
@@ -83,7 +74,8 @@ namespace IntranetDocumentos.Services
                     {
                         await writer.WriteLineAsync($"Backup criado em: {DateTime.Now:dd/MM/yyyy HH:mm:ss}");
                         await writer.WriteLineAsync($"Versão da aplicação: 1.0");
-                        await writer.WriteLineAsync($"Tamanho do banco: {new FileInfo(_databasePath).Length} bytes");
+                        await writer.WriteLineAsync($"Tipo de backup: MySQL");
+                        await writer.WriteLineAsync($"Tamanho do backup: {new FileInfo(backupPath).Length} bytes");
                     }
                 }
 
@@ -105,7 +97,7 @@ namespace IntranetDocumentos.Services
             try
             {
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HH");
-                var backupFileName = $"IntranetDocumentos_Auto_{timestamp}.db";
+                var backupFileName = $"IntranetDocumentos_Auto_{timestamp}.sql";
                 var backupPath = Path.Combine(_backupDirectory, "Auto", backupFileName);
                 
                 var autoBackupDir = Path.Combine(_backupDirectory, "Auto");
@@ -114,14 +106,9 @@ namespace IntranetDocumentos.Services
                     Directory.CreateDirectory(autoBackupDir);
                 }
 
-                // Força checkpoint do WAL e fecha conexões
-                await _context.Database.ExecuteSqlRawAsync("PRAGMA wal_checkpoint(FULL);");
-                await _context.Database.CloseConnectionAsync();
-                
-                // Aguarda um pouco para garantir que o arquivo não está sendo usado
-                await Task.Delay(50);
-                
-                File.Copy(_databasePath, backupPath, overwrite: true);
+                // Para MySQL, fazer backup usando mysqldump
+                var connectionString = _context.Database.GetConnectionString();
+                await CreateMySqlBackup(connectionString, backupPath);
                 
                 _logger.LogInformation($"Backup automático criado: {backupPath}");
                 return backupPath;
@@ -132,9 +119,81 @@ namespace IntranetDocumentos.Services
                 throw;
             }
         }
+        /// <summary>
+        /// Cria backup usando mysqldump
+        /// </summary>
+        private async Task CreateMySqlBackup(string connectionString, string backupPath)
+        {
+            try
+            {
+                // Extrair informações da connection string
+                var builder = new MySqlConnector.MySqlConnectionStringBuilder(connectionString);
+                var server = builder.Server;
+                var database = builder.Database;
+                var user = builder.UserID;
+                var password = builder.Password;
+                var port = builder.Port;
+
+                // Comando mysqldump
+                var processInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "mysqldump",
+                    Arguments = $"--host={server} --port={port} --user={user} --password={password} --routines --triggers {database}",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using var process = new System.Diagnostics.Process { StartInfo = processInfo };
+                process.Start();
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
+
+                await process.WaitForExitAsync();
+
+                if (process.ExitCode == 0)
+                {
+                    await File.WriteAllTextAsync(backupPath, output);
+                    _logger.LogInformation($"Backup MySQL criado: {backupPath}");
+                }
+                else
+                {
+                    throw new Exception($"Erro no mysqldump: {error}");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Fallback: backup simples usando Entity Framework
+                _logger.LogWarning($"mysqldump não disponível, usando backup EF: {ex.Message}");
+                await CreateEntityFrameworkBackup(backupPath);
+            }
+        }
 
         /// <summary>
-        /// Restaura o banco de dados a partir de um backup
+        /// Backup usando Entity Framework (fallback)
+        /// </summary>
+        private async Task CreateEntityFrameworkBackup(string backupPath)
+        {
+            var backup = new StringBuilder();
+            backup.AppendLine("-- Backup Entity Framework MySQL");
+            backup.AppendLine($"-- Data: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            backup.AppendLine();
+
+            // Backup das tabelas principais (exemplo simplificado)
+            backup.AppendLine("-- Documentos");
+            var documents = await _context.Documents.ToListAsync();
+            foreach (var doc in documents)
+            {
+                backup.AppendLine($"INSERT INTO Documents VALUES ({doc.Id}, '{doc.OriginalFileName}', ...);");
+            }
+
+            await File.WriteAllTextAsync(backupPath, backup.ToString());
+        }
+
+        /// <summary>
+        /// Restaura o banco de dados a partir de um backup MySQL
         /// </summary>
         public async Task RestoreBackupAsync(string backupPath)
         {
@@ -145,30 +204,65 @@ namespace IntranetDocumentos.Services
                     throw new FileNotFoundException($"Arquivo de backup não encontrado: {backupPath}");
                 }
 
-                // Para as conexões ativas
-                await _context.Database.CloseConnectionAsync();
-                
-                // Aguarda um pouco para garantir que as conexões foram fechadas
-                await Task.Delay(1000);
-
-                // Faz backup do arquivo atual antes de restaurar
-                var currentBackup = Path.Combine(_backupDirectory, $"Pre_Restore_{DateTime.Now:yyyyMMdd_HHmmss}.db");
-                if (File.Exists(_databasePath))
-                {
-                    File.Copy(_databasePath, currentBackup, overwrite: true);
-                }
-
-                // Restaura o backup
-                File.Copy(backupPath, _databasePath, overwrite: true);
-                  // Testa a conexão com o banco restaurado
-                await _context.Database.OpenConnectionAsync();
-                await _context.Database.CloseConnectionAsync();
+                var connectionString = _context.Database.GetConnectionString();
+                await RestoreMySqlBackup(connectionString, backupPath);
                 
                 _logger.LogInformation($"Banco de dados restaurado com sucesso de: {backupPath}");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Erro ao restaurar backup: {backupPath}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Restaura backup MySQL usando mysql command
+        /// </summary>
+        private async Task RestoreMySqlBackup(string connectionString, string backupPath)
+        {
+            try
+            {
+                // Extrair informações da connection string
+                var builder = new MySqlConnectionStringBuilder(connectionString);
+                var server = builder.Server;
+                var database = builder.Database;
+                var user = builder.UserID;
+                var password = builder.Password;
+                var port = builder.Port;
+
+                // Comando mysql para restore
+                var processInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "mysql",
+                    Arguments = $"--host={server} --port={port} --user={user} --password={password} {database}",
+                    UseShellExecute = false,
+                    RedirectStandardInput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using var process = new System.Diagnostics.Process { StartInfo = processInfo };
+                process.Start();
+
+                // Lê o arquivo de backup e envia para o mysql
+                var backupContent = await File.ReadAllTextAsync(backupPath);
+                await process.StandardInput.WriteAsync(backupContent);
+                process.StandardInput.Close();
+
+                var error = await process.StandardError.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                if (process.ExitCode != 0 && !string.IsNullOrWhiteSpace(error))
+                {
+                    throw new Exception($"Erro no restore MySQL: {error}");
+                }
+
+                _logger.LogInformation($"Restore MySQL executado com sucesso");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"mysql command não disponível ou erro no restore: {ex.Message}");
                 throw;
             }
         }

@@ -393,3 +393,4 @@ appsettings.Development.json
 # Database backups
 DatabaseBackups/
 *.bak
+*.db.old
