@@ -19,21 +19,35 @@ namespace IntranetDocumentos.Services.FileProcessing
 
         /// <summary>
         /// Obtém o processador apropriado para a extensão do arquivo
+        /// Prioriza processadores específicos sobre o processador genérico
         /// </summary>
         public IFileProcessor GetProcessor(string fileExtension)
         {
-            var processor = _processors.FirstOrDefault(p => p.CanProcess(fileExtension));
+            // Primeiro, tentar encontrar um processador específico (não genérico)
+            var specificProcessor = _processors
+                .Where(p => p.GetType().Name != "GenericFileProcessor")
+                .FirstOrDefault(p => p.CanProcess(fileExtension));
             
-            if (processor == null)
+            if (specificProcessor != null)
             {
-                _logger.LogWarning("Nenhum processador encontrado para extensão: {Extension}", fileExtension);
-                throw new NotSupportedException($"Tipo de arquivo {fileExtension} não é suportado");
+                _logger.LogDebug("Processador específico encontrado para {Extension}: {ProcessorType}", 
+                    fileExtension, specificProcessor.GetType().Name);
+                return specificProcessor;
             }
 
-            _logger.LogDebug("Processador encontrado para {Extension}: {ProcessorType}", 
-                fileExtension, processor.GetType().Name);
+            // Se não encontrou processador específico, usar o genérico
+            var genericProcessor = _processors
+                .FirstOrDefault(p => p.GetType().Name == "GenericFileProcessor");
             
-            return processor;
+            if (genericProcessor != null)
+            {
+                _logger.LogDebug("Usando processador genérico para {Extension}", fileExtension);
+                return genericProcessor;
+            }
+
+            // Se nem o genérico existe, lançar exceção
+            _logger.LogWarning("Nenhum processador encontrado para extensão: {Extension}", fileExtension);
+            throw new NotSupportedException($"Tipo de arquivo {fileExtension} não é suportado");
         }
 
         /// <summary>

@@ -263,5 +263,33 @@ namespace IntranetDocumentos.Controllers
                 return RedirectToAction("Index");
             }
         }
+
+        // Aprovar todos os documentos pendentes
+        [HttpPost]
+        public async Task<IActionResult> ApproveAll()
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+                var result = await _workflowService.ApproveAllPendingDocumentsAsync(userId);
+                
+                if (result.Success)
+                {
+                    TempData["SuccessMessage"] = $"Todos os {result.Count} documentos pendentes foram aprovados com sucesso.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = result.ErrorMessage ?? "Não foi possível aprovar todos os documentos.";
+                }
+
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao aprovar todos os documentos pendentes");
+                TempData["ErrorMessage"] = "Erro ao aprovar documentos. Tente novamente.";
+                return RedirectToAction("Index");
+            }
+        }
     }
 }

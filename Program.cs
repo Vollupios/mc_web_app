@@ -85,15 +85,15 @@ public partial class Program
         // Configure request size limits for file uploads
         builder.Services.Configure<FormOptions>(options =>
         {
-            options.MultipartBodyLengthLimit = 50 * 1024 * 1024; // 50MB
-            options.ValueLengthLimit = 50 * 1024 * 1024; // 50MB
+            options.MultipartBodyLengthLimit = 100 * 1024 * 1024; // 100MB
+            options.ValueLengthLimit = 100 * 1024 * 1024; // 100MB
             options.ValueCountLimit = 1024;
             options.KeyLengthLimit = 2048;
         });
 
         builder.WebHost.ConfigureKestrel(options =>
         {
-            options.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50MB
+            options.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100MB
         });
 
         // Registrar novos serviços de documento - ISP aplicado
@@ -107,6 +107,8 @@ public partial class Program
         builder.Services.AddScoped<IntranetDocumentos.Services.FileProcessing.IFileProcessor, IntranetDocumentos.Services.FileProcessing.ImageFileProcessor>();
         builder.Services.AddScoped<IntranetDocumentos.Services.FileProcessing.IFileProcessor, IntranetDocumentos.Services.FileProcessing.DocumentFileProcessor>();
         builder.Services.AddScoped<IntranetDocumentos.Services.FileProcessing.IFileProcessor, IntranetDocumentos.Services.FileProcessing.ArchiveFileProcessor>();
+        // Processador genérico deve ser registrado por último para ter menor prioridade
+        builder.Services.AddScoped<IntranetDocumentos.Services.FileProcessing.IFileProcessor, IntranetDocumentos.Services.FileProcessing.GenericFileProcessor>();
 
         // Registrar validadores - Strategy Pattern        builder.Services.AddScoped<IntranetDocumentos.Services.Validation.IReuniaoValidator, IntranetDocumentos.Services.Validation.ReuniaoInternaValidator>();
         builder.Services.AddScoped<IntranetDocumentos.Services.Validation.IReuniaoValidator, IntranetDocumentos.Services.Validation.ReuniaoExternaValidator>();

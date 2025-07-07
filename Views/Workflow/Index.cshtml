@@ -3,6 +3,8 @@
     ViewData["Title"] = "Dashboard de Workflow";
 }
 
+@Html.AntiForgeryToken()
+
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -190,7 +192,7 @@
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <h6 class="card-title">Ações em Lote</h6>
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 flex-wrap">
                     <button type="button" class="btn btn-success" onclick="bulkAction('Approve')">
                         <i class="bi bi-check-lg me-1"></i>
                         Aprovar Selecionados
@@ -203,6 +205,12 @@
                         <i class="bi bi-pencil me-1"></i>
                         Solicitar Alterações
                     </button>
+                    <div class="ms-auto">
+                        <button type="button" class="btn btn-outline-success" onclick="approveAll()">
+                            <i class="bi bi-check-all me-1"></i>
+                            Aprovar Todos
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -507,6 +515,38 @@
                 'AssignReviewer': 'btn-primary'
             };
             return classes[action] || 'btn-primary';
+        }
+
+        // Função para aprovar todos os documentos pendentes
+        function approveAll() {
+            const pendingCheckboxes = document.querySelectorAll('.pending-checkbox');
+            
+            if (pendingCheckboxes.length === 0) {
+                alert('Não há documentos pendentes para aprovar.');
+                return;
+            }
+
+            if (!confirm(`Tem certeza que deseja aprovar TODOS os ${pendingCheckboxes.length} documentos pendentes? Esta ação não pode ser desfeita.`)) {
+                return;
+            }
+
+            // Criar formulário para enviar POST request
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("ApproveAll", "Workflow")';
+            
+            // Adicionar token anti-forgery
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) {
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '__RequestVerificationToken';
+                tokenInput.value = token.value;
+                form.appendChild(tokenInput);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
         }
     </script>
 }

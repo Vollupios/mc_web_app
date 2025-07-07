@@ -127,7 +127,8 @@ namespace IntranetDocumentos.Services.Documents
                     FileSize = file.Length,
                     UploadDate = DateTime.Now,
                     UploaderId = uploader.Id,
-                    DepartmentId = departmentId
+                    DepartmentId = departmentId,
+                    Status = DocumentStatus.PendingApproval // Enviar diretamente para aprovação
                 };
 
                 _context.Documents.Add(document);
@@ -430,23 +431,8 @@ namespace IntranetDocumentos.Services.Documents
 
         private static bool IsFileTypeAllowed(string extension)
         {
-            var allowedExtensions = new[]
-            {
-                // Documentos
-                ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
-                ".txt", ".rtf", ".odt", ".ods", ".odp",
-                
-                // Imagens
-                ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp",
-                
-                // Arquivos compactados
-                ".zip", ".rar", ".7z",
-                
-                // Outros
-                ".csv"
-            };
-
-            return allowedExtensions.Contains(extension);
+            // Aceitar todos os tipos de arquivo - sem limitações
+            return true;
         }
 
         private static bool IsFileSizeAllowed(long fileSize, string extension)
@@ -457,17 +443,8 @@ namespace IntranetDocumentos.Services.Documents
 
         private static long GetMaxFileSizeForExtension(string extension)
         {
-            return extension switch
-            {
-                // Imagens: 5MB
-                ".jpg" or ".jpeg" or ".png" or ".gif" or ".bmp" or ".tiff" or ".webp" => 5 * 1024 * 1024,
-                
-                // Arquivos compactados: 20MB
-                ".zip" or ".rar" or ".7z" => 20 * 1024 * 1024,
-                
-                // Documentos e outros: 10MB
-                _ => 10 * 1024 * 1024
-            };
+            // Limite unificado de 100MB para todos os tipos de arquivo
+            return 100 * 1024 * 1024; // 100MB
         }
 
         private string GetDocumentPhysicalPath(Document document)

@@ -18,6 +18,7 @@ namespace IntranetDocumentos.Services
         Task<WorkflowConfigurationViewModel> GetWorkflowConfigurationAsync();
         Task<bool> UpdateWorkflowConfigurationAsync(WorkflowConfigurationViewModel config);
         Task LogDocumentActionAsync(int documentId, string userId, string action, string? description = null, string? oldValue = null, string? newValue = null);
+        Task<(bool Success, int Count, string? ErrorMessage)> ApproveAllPendingDocumentsAsync(string userId);
     }
 
     public class WorkflowService : IWorkflowService
@@ -245,7 +246,7 @@ namespace IntranetDocumentos.Services
                 var pendingDocs = await _context.Documents
                     .Include(d => d.Uploader)
                     .Include(d => d.Department)
-                    .Where(d => d.Status == DocumentStatus.PendingReview)
+                    .Where(d => d.Status == DocumentStatus.PendingApproval)
                     .Take(10)
                     .ToListAsync();
 
@@ -437,6 +438,79 @@ namespace IntranetDocumentos.Services
                 LastModified = doc.LastModified,
                 LastModifiedByName = doc.LastModifiedBy?.UserName
             };
+        }
+
+        public async Task<(bool Success, int Count, string? ErrorMessage)> ApproveAllPendingDocumentsAsync(string userId)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return (false, 0, "Usuário não encontrado.");
+                }
+
+                // Buscar todos os documentos pendentes que o usuário pode aprovar
+                var pendingDocuments = await _context.Documents
+                    .Include(d => d.Department)
+                    .Include(d => d.Uploader)
+                    .Where(d => d.Status == DocumentStatus.PendingApproval)
+                    .ToListAsync();
+
+                if (!pendingDocuments.Any())
+                {
+                    return (false, 0, "Não há documentos pendentes para aprovação.");
+                }
+
+                // Filtrar documentos que o usuário pode realmente aprovar
+                var approvableDocuments = new List<Document>();
+                foreach (var doc in pendingDocuments)
+                {
+                    if (await CanUserPerformActionAsync(userId, doc.Id, WorkflowAction.Approve))
+                    {
+                        approvableDocuments.Add(doc);
+                    }
+                }
+
+                if (!approvableDocuments.Any())
+                {
+                    return (false, 0, "Você não tem permissão para aprovar os documentos pendentes.");
+                }
+
+                var approvedCount = 0;
+                foreach (var document in approvableDocuments)
+                {
+                    try
+                    {
+                        await TransitionDocumentStatusAsync(document, DocumentStatus.Approved, userId, "Aprovado em massa");
+                        
+                        // Log da ação
+                        await LogDocumentActionAsync(document.Id, userId, "Aprovação em massa", 
+                            "Documento aprovado através da função 'Aprovar Todos'");
+
+                        approvedCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Erro ao aprovar documento {DocumentId} em aprovação em massa", document.Id);
+                        // Continue com os outros documentos
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                if (approvedCount == 0)
+                {
+                    return (false, 0, "Não foi possível aprovar nenhum documento.");
+                }
+
+                return (true, approvedCount, null);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao executar aprovação em massa");
+                return (false, 0, "Erro interno do sistema.");
+            }
         }
     }
 }
