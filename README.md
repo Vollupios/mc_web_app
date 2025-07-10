@@ -1,10 +1,61 @@
-# IntranetDocumentos - Sistema de Gestão de Documentos
+# Intranet Documentos - Sistema de Gestão de Documentos
+
+**Sistema web desenvolvido em ASP.NET Core MVC para gestão de documentos corporativos**
+
+---
+
+## 📚 Documentação e Instalação
+
+### 🚀 **GUIA FINAL UNIFICADO**
+
+**👉 [GUIA-UNIFICADO-FINAL.md](GUIA-UNIFICADO-FINAL.md) - COMECE AQUI**
+
+> **Guia completo e definitivo que contém TUDO:**
+>
+> - ⚡ Instalação rápida (1 comando)
+> - 🛠️ Instalação manual detalhada  
+> - ⚙️ Configuração de produção
+> - 🌐 Deploy remoto
+> - 🔍 Verificação e diagnóstico
+> - 🚨 Solução de problemas
+> - 💾 Backup e manutenção
+> - 📁 Scripts e arquivos
+> - ✅ Checklist completo
+
+### 📖 **Documentação Técnica**
+
+- **[INDICE-DOCUMENTACAO.md](INDICE-DOCUMENTACAO.md)** - Índice de toda documentação
+- **[STATUS-FINAL.md](STATUS-FINAL.md)** - Status atual e problemas corrigidos
+
+### ⚡ **Instalação Rápida (TL;DR)**
+
+```batch
+# Execute como Administrador no Windows Server
+deploy-quick.bat
+```
+
+---
 
 Sistema web desenvolvido em ASP.NET Core MVC para gestão de documentos corporativos da Marcos Contabilidade.
 
+---
+
+## � Documentação Completa
+
+### 🚀 **Para Instalação e Deploy**
+
+👉 **[GUIA-COMPLETO.md](GUIA-COMPLETO.md)** - Guia unificado completo de instalação e deploy
+
+### 📖 **Documentação Técnica**
+
+- [README.md](README.md) - Este arquivo (visão geral do projeto)
+- [STATUS-FINAL.md](STATUS-FINAL.md) - Status atual e problemas corrigidos
+
+---
+
 ## 🚀 Funcionalidades
 
-### 📄 Gestão de Documentos
+### 📄 **Gestão de Documentos**
 
 - Upload de documentos por departamento
 - Controle de acesso baseado em roles e departamentos
@@ -12,46 +63,24 @@ Sistema web desenvolvido em ASP.NET Core MVC para gestão de documentos corporat
 - Tipos suportados: PDF, Office, imagens, texto, ZIP
 - Limite de 10MB por arquivo
 
-### 🤝 Sistema de Reuniões
-
-- Agendamento de reuniões internas e externas
-- Controle de salas e veículos
-- Gestão de participantes
-- Status de reuniões (Agendada, Em Andamento, Concluída, Cancelada)
-
-### 📞 Lista de Ramais
-
-- Cadastro de ramais corporativos
-- Organização por departamentos
-- Fotos dos funcionários
-- Status ativo/inativo
-
-# IntranetDocumentos - Sistema de Gestão de Documentos
-
-Sistema web desenvolvido em ASP.NET Core MVC para gestão de documentos corporativos.
-
-## 🚀 Funcionalidades Principais
-
-### 📄 **Gestão de Documentos**
-- Upload de documentos por departamento
-- Controle de acesso baseado em roles e departamentos  
-- Download seguro de arquivos
-- Tipos suportados: PDF, Office, imagens, texto, ZIP
-- Limite de 10MB por arquivo
-
 ### 🤝 **Sistema de Reuniões**
+
 - Agendamento de reuniões internas e externas
 - Controle de salas e veículos
 - Gestão de participantes
 - Status de reuniões (Agendada, Em Andamento, Concluída, Cancelada)
 
 ### 📞 **Lista de Ramais**
+
 - Cadastro de ramais corporativos
 - Organização por departamentos
 - Fotos dos funcionários
 - Status ativo/inativo
+- Fotos dos funcionários
+- Status ativo/inativo
 
 ### 📧 **Sistema de Email e Notificações**
+
 - Configuração SMTP para diferentes provedores (Gmail, Outlook, Office365)
 - Envio de emails administrativos para grupos de usuários
 - Notificações automáticas para novos documentos
@@ -65,6 +94,7 @@ Sistema web desenvolvido em ASP.NET Core MVC para gestão de documentos corporat
 - Controle por departamentos
 
 ### 🔧 Administração
+
 - Área administrativa para gerenciamento
 - Backup automático do banco de dados
 - Logs de atividades
@@ -105,12 +135,14 @@ IntranetDocumentos/
 ## 👤 Roles e Permissões
 
 ### Admin (TI)
+
 - Acesso total ao sistema
 - Gerenciamento de usuários
 - Área administrativa
 - Acesso a todos os departamentos
 
 ### Gestor
+
 - Acesso a todos os documentos
 - Gerenciamento de reuniões
 - Visualização de relatórios
@@ -138,6 +170,7 @@ IntranetDocumentos/
    ```
 
 2. **Execute a aplicação**
+
    ```bash
    # Opção 1: Comando direto
    dotnet run --project IntranetDocumentos.csproj
@@ -147,11 +180,12 @@ IntranetDocumentos/
    ```
 
 3. **Acesse a aplicação**
-   - HTTP: http://localhost:5098
-   - HTTPS: https://localhost:7168
+   - HTTP: <http://localhost:5098>
+   - HTTPS: <https://localhost:7168>
 
 ### Login Padrão
-- **Email**: admin@intranet.com
+
+- **Email**: <admin@intranet.com>
 - **Senha**: Admin123!
 
 ## 🗄️ Banco de Dados
