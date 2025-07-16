@@ -349,15 +349,13 @@ namespace IntranetDocumentos.Controllers
                 // Para PDFs e imagens, usar inline para exibir no navegador
                 if (IsViewableInBrowser(document.OriginalFileName))
                 {
-                    Response.Headers["Content-Disposition"] = $"inline; filename=\"{document.OriginalFileName}\"";
+                    return File(fileStream, contentType, document.OriginalFileName, false);
                 }
                 else
                 {
                     // Para outros tipos, forçar download
-                    Response.Headers["Content-Disposition"] = $"attachment; filename=\"{document.OriginalFileName}\"";
+                    return File(fileStream, contentType, document.OriginalFileName);
                 }
-
-                return File(fileStream, contentType, document.OriginalFileName);
             }
             catch (Exception ex)
             {
