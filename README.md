@@ -185,7 +185,33 @@ dotnet test
 
 ---
 
-## 📄 **Licença**
+## � **Correções Aplicadas**
+
+### ✅ Scripts Unificados e Organizados
+- Criada estrutura `/Scripts/` para organização
+- Corrigidos warnings PSScriptAnalyzer nos scripts PowerShell
+- Removidos scripts duplicados e desnecessários
+
+### ✅ Workflow Restrito a Admins
+- Acesso ao WorkflowController limitado apenas a usuários Admin
+- Menu e colunas de workflow ocultados para usuários não-admin
+
+### ✅ Visualização de Documentos Corrigida
+- PDFs e imagens agora são exibidos no navegador (inline)
+- Outros tipos de arquivo são baixados automaticamente
+- Corrigida codificação UTF-8 para nomes de arquivos com acentos
+
+### ✅ Dashboard de Analytics Funcionando
+- Corrigido erro LINQ no cálculo de tempo médio de reuniões
+- Dashboard agora carrega corretamente via menu "Dados > Dashboard"
+- Exibe estatísticas de documentos, reuniões e departamentos
+
+### 📁 Arquivos Removidos
+Consulte `ANALISE-ARQUIVOS-DUPLICADOS.md` para lista completa dos 27 arquivos removidos.
+
+---
+
+## �📄 **Licença**
 
 Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
 

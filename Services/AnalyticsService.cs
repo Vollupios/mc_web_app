@@ -144,10 +144,18 @@ namespace IntranetDocumentos.Services
                     .Where(r => r.Data.Date < DateTime.Now.Date)
                     .CountAsync();
 
-                var tempoMedioReunioes = await _context.Reunioes
-                    .Select(r => (r.HoraFim - r.HoraInicio).TotalMinutes)
-                    .DefaultIfEmpty(0)
-                    .AverageAsync();
+                // Calcular o tempo médio das reuniões usando uma abordagem compatível com EF Core
+                var reunioesComTempo = await _context.Reunioes
+                    .Select(r => new { HoraInicio = r.HoraInicio, HoraFim = r.HoraFim })
+                    .ToListAsync();
+
+                double tempoMedioReunioes = 0;
+                if (reunioesComTempo.Any())
+                {
+                    tempoMedioReunioes = reunioesComTempo
+                        .Select(r => (r.HoraFim - r.HoraInicio).TotalMinutes)
+                        .Average();
+                }
 
                 var reuniaoPorTipo = await GetReuniaoPorTipoAsync();
                 var reuniaoPorStatus = await GetReuniaoPorStatusAsync();
