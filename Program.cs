@@ -39,7 +39,19 @@ public partial class Program
 
         // Add services to the container.
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+        {
+            // Auto-detect database provider based on connection string
+            if (connectionString.Contains("Data Source=") && connectionString.EndsWith(".db"))
+            {
+                // SQLite for development/cross-platform
+                options.UseSqlite(connectionString);
+            }
+            else
+            {
+                // SQL Server for production
+                options.UseSqlServer(connectionString);
+            }
+        });
 
         // 🔴 Configurar Redis para cache distribuído
         var redisConnectionString = builder.Configuration.GetConnectionString("Redis");

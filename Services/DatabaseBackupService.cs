@@ -5,12 +5,12 @@ using IntranetDocumentos.Data;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 
 namespace IntranetDocumentos.Services
 {
     /// <summary>
-    /// Serviço para backup e restauração do banco de dados MySQL
+    /// Serviço para backup e restauração do banco de dados SQL Server
     /// </summary>
     public interface IDatabaseBackupService
     {
@@ -18,73 +18,85 @@ namespace IntranetDocumentos.Services
         Task<string> CreateScheduledBackupAsync();
         Task RestoreBackupAsync(string backupPath);
         Task<List<string>> GetBackupListAsync();
-        Task CleanOldBackupsAsync(int keepDays = 30);
+        Task CleanupOldBackupsAsync(int retentionDays = 30);
     }
 
+    /// <summary>
+    /// Implementação do serviço de backup para SQL Server
+    /// </summary>
     public class DatabaseBackupService : IDatabaseBackupService
     {
         private readonly ApplicationDbContext _context;
-        private readonly IConfiguration _configuration;
         private readonly ILogger<DatabaseBackupService> _logger;
-        private readonly string _backupDirectory;
+        private readonly IConfiguration _configuration;
+        private readonly string _backupBasePath;
 
         public DatabaseBackupService(
             ApplicationDbContext context,
-            IConfiguration configuration,
-            ILogger<DatabaseBackupService> logger)
+            ILogger<DatabaseBackupService> logger,
+            IConfiguration configuration)
         {
             _context = context;
-            _configuration = configuration;
             _logger = logger;
-            
-            // Diretório de backup
-            _backupDirectory = Path.Combine(Directory.GetCurrentDirectory(), "DatabaseBackups");
-            if (!Directory.Exists(_backupDirectory))
-            {
-                Directory.CreateDirectory(_backupDirectory);
-            }
+            _configuration = configuration;
+            _backupBasePath = _configuration["Backup:BackupPath"] ?? Path.Combine(Directory.GetCurrentDirectory(), "DatabaseBackups");
         }
 
         /// <summary>
-        /// Cria um backup manual do banco de dados
+        /// Cria backup manual do banco de dados SQL Server
         /// </summary>
         public async Task<string> CreateBackupAsync()
         {
             try
             {
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                var backupFileName = $"IntranetDocumentos_Backup_{timestamp}.sql";
-                var backupPath = Path.Combine(_backupDirectory, backupFileName);
+                var backupFileName = $"IntranetDocumentos_Backup_{timestamp}.bak";
+                var backupPath = Path.Combine(_backupBasePath, backupFileName);
 
-                // Para MySQL, fazer backup usando mysqldump
+                // Garantir que o diretório existe
+                Directory.CreateDirectory(_backupBasePath);
+
                 var connectionString = _context.Database.GetConnectionString();
-                await CreateMySqlBackup(connectionString, backupPath);
+                var builder = new SqlConnectionStringBuilder(connectionString);
+                var databaseName = builder.InitialCatalog;
 
-                // Cria também um backup comprimido
-                var zipPath = Path.Combine(_backupDirectory, $"IntranetDocumentos_Backup_{timestamp}.zip");
-                using (var zip = ZipFile.Open(zipPath, ZipArchiveMode.Create))
+                using var connection = new SqlConnection(connectionString);
+                await connection.OpenAsync();
+
+                // Comando SQL Server para backup
+                var backupCommand = $@"
+                    BACKUP DATABASE [{databaseName}] 
+                    TO DISK = N'{backupPath}' 
+                    WITH FORMAT, INIT, 
+                         NAME = 'IntranetDocumentos-Full Database Backup', 
+                         SKIP, NOREWIND, NOUNLOAD, STATS = 10";
+
+                using var command = new SqlCommand(backupCommand, connection);
+                command.CommandTimeout = 600; // 10 minutos timeout
+
+                _logger.LogInformation($"Iniciando backup SQL Server: {backupPath}");
+                await command.ExecuteNonQueryAsync();
+
+                // Criar arquivo ZIP com o backup
+                var zipPath = backupPath.Replace(".bak", ".zip");
+                using (var zip = new FileStream(zipPath, FileMode.Create))
+                using (var archive = new ZipArchive(zip, ZipArchiveMode.Create))
                 {
-                    // Adiciona o arquivo SQL do backup
-                    zip.CreateEntryFromFile(backupPath, Path.GetFileName(backupPath));
-                    
-                    // Adiciona informações do backup
-                    var infoEntry = zip.CreateEntry("backup_info.txt");
-                    using (var stream = infoEntry.Open())
-                    using (var writer = new StreamWriter(stream))
-                    {
-                        await writer.WriteLineAsync($"Backup criado em: {DateTime.Now:dd/MM/yyyy HH:mm:ss}");
-                        await writer.WriteLineAsync($"Versão da aplicação: 1.0");
-                        await writer.WriteLineAsync($"Tipo de backup: MySQL");
-                        await writer.WriteLineAsync($"Tamanho do backup: {new FileInfo(backupPath).Length} bytes");
-                    }
+                    archive.CreateEntryFromFile(backupPath, Path.GetFileName(backupPath));
                 }
 
-                _logger.LogInformation($"Backup criado com sucesso: {backupPath}");
-                return backupPath;
+                // Remover arquivo .bak original (manter apenas o ZIP)
+                if (File.Exists(backupPath))
+                {
+                    File.Delete(backupPath);
+                }
+
+                _logger.LogInformation($"Backup SQL Server criado: {zipPath}");
+                return zipPath;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao criar backup do banco de dados");
+                _logger.LogError(ex, "Erro ao criar backup do banco de dados SQL Server");
                 throw;
             }
         }
@@ -97,117 +109,104 @@ namespace IntranetDocumentos.Services
             try
             {
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HH");
-                var backupFileName = $"IntranetDocumentos_Auto_{timestamp}.sql";
-                var backupPath = Path.Combine(_backupDirectory, "Auto", backupFileName);
-                
-                var autoBackupDir = Path.Combine(_backupDirectory, "Auto");
-                if (!Directory.Exists(autoBackupDir))
-                {
-                    Directory.CreateDirectory(autoBackupDir);
-                }
+                var backupFileName = $"IntranetDocumentos_Auto_{timestamp}.bak";
+                var autoBackupPath = Path.Combine(_backupBasePath, "Auto");
+                var backupPath = Path.Combine(autoBackupPath, backupFileName);
 
-                // Para MySQL, fazer backup usando mysqldump
+                // Garantir que o diretório existe
+                Directory.CreateDirectory(autoBackupPath);
+
                 var connectionString = _context.Database.GetConnectionString();
-                await CreateMySqlBackup(connectionString, backupPath);
-                
+                var builder = new SqlConnectionStringBuilder(connectionString);
+                var databaseName = builder.InitialCatalog;
+
+                using var connection = new SqlConnection(connectionString);
+                await connection.OpenAsync();
+
+                // Comando SQL Server para backup
+                var backupCommand = $@"
+                    BACKUP DATABASE [{databaseName}] 
+                    TO DISK = N'{backupPath}' 
+                    WITH FORMAT, INIT, 
+                         NAME = 'IntranetDocumentos-Auto Database Backup', 
+                         SKIP, NOREWIND, NOUNLOAD, STATS = 10";
+
+                using var command = new SqlCommand(backupCommand, connection);
+                command.CommandTimeout = 600; // 10 minutos timeout
+
+                _logger.LogInformation($"Iniciando backup automático SQL Server: {backupPath}");
+                await command.ExecuteNonQueryAsync();
+
                 _logger.LogInformation($"Backup automático criado: {backupPath}");
                 return backupPath;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao criar backup automático");
+                _logger.LogError(ex, "Erro ao criar backup automático do banco de dados");
                 throw;
             }
         }
-        /// <summary>
-        /// Cria backup usando mysqldump
-        /// </summary>
-        private async Task CreateMySqlBackup(string connectionString, string backupPath)
-        {
-            try
-            {
-                // Extrair informações da connection string
-                var builder = new MySqlConnector.MySqlConnectionStringBuilder(connectionString);
-                var server = builder.Server;
-                var database = builder.Database;
-                var user = builder.UserID;
-                var password = builder.Password;
-                var port = builder.Port;
-
-                // Comando mysqldump
-                var processInfo = new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = "mysqldump",
-                    Arguments = $"--host={server} --port={port} --user={user} --password={password} --routines --triggers {database}",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true
-                };
-
-                using var process = new System.Diagnostics.Process { StartInfo = processInfo };
-                process.Start();
-
-                var output = await process.StandardOutput.ReadToEndAsync();
-                var error = await process.StandardError.ReadToEndAsync();
-
-                await process.WaitForExitAsync();
-
-                if (process.ExitCode == 0)
-                {
-                    await File.WriteAllTextAsync(backupPath, output);
-                    _logger.LogInformation($"Backup MySQL criado: {backupPath}");
-                }
-                else
-                {
-                    throw new Exception($"Erro no mysqldump: {error}");
-                }
-            }
-            catch (Exception ex)
-            {
-                // Fallback: backup simples usando Entity Framework
-                _logger.LogWarning($"mysqldump não disponível, usando backup EF: {ex.Message}");
-                await CreateEntityFrameworkBackup(backupPath);
-            }
-        }
 
         /// <summary>
-        /// Backup usando Entity Framework (fallback)
-        /// </summary>
-        private async Task CreateEntityFrameworkBackup(string backupPath)
-        {
-            var backup = new StringBuilder();
-            backup.AppendLine("-- Backup Entity Framework MySQL");
-            backup.AppendLine($"-- Data: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-            backup.AppendLine();
-
-            // Backup das tabelas principais (exemplo simplificado)
-            backup.AppendLine("-- Documentos");
-            var documents = await _context.Documents.ToListAsync();
-            foreach (var doc in documents)
-            {
-                backup.AppendLine($"INSERT INTO Documents VALUES ({doc.Id}, '{doc.OriginalFileName}', ...);");
-            }
-
-            await File.WriteAllTextAsync(backupPath, backup.ToString());
-        }
-
-        /// <summary>
-        /// Restaura o banco de dados a partir de um backup MySQL
+        /// Restaura backup do banco de dados
         /// </summary>
         public async Task RestoreBackupAsync(string backupPath)
         {
             try
             {
-                if (!File.Exists(backupPath))
-                {
-                    throw new FileNotFoundException($"Arquivo de backup não encontrado: {backupPath}");
-                }
+                _logger.LogInformation($"Iniciando restauração do backup: {backupPath}");
 
                 var connectionString = _context.Database.GetConnectionString();
-                await RestoreMySqlBackup(connectionString, backupPath);
-                
-                _logger.LogInformation($"Banco de dados restaurado com sucesso de: {backupPath}");
+                var builder = new SqlConnectionStringBuilder(connectionString);
+                var databaseName = builder.InitialCatalog;
+
+                // Extrair arquivo .bak se for ZIP
+                string actualBackupPath = backupPath;
+                if (Path.GetExtension(backupPath).ToLower() == ".zip")
+                {
+                    var extractPath = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(backupPath));
+                    Directory.CreateDirectory(extractPath);
+                    
+                    using (var archive = ZipFile.OpenRead(backupPath))
+                    {
+                        foreach (var entry in archive.Entries)
+                        {
+                            if (entry.Name.EndsWith(".bak"))
+                            {
+                                actualBackupPath = Path.Combine(extractPath, entry.Name);
+                                entry.ExtractToFile(actualBackupPath, true);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                using var connection = new SqlConnection(connectionString);
+                await connection.OpenAsync();
+
+                // Comando para restaurar banco
+                var restoreCommand = $@"
+                    RESTORE DATABASE [{databaseName}] 
+                    FROM DISK = N'{actualBackupPath}' 
+                    WITH REPLACE, STATS = 10";
+
+                using var command = new SqlCommand(restoreCommand, connection);
+                command.CommandTimeout = 1800; // 30 minutos timeout
+
+                await command.ExecuteNonQueryAsync();
+
+                // Limpar arquivo temporário se foi extraído
+                if (actualBackupPath != backupPath && File.Exists(actualBackupPath))
+                {
+                    File.Delete(actualBackupPath);
+                    var tempDir = Path.GetDirectoryName(actualBackupPath);
+                    if (Directory.Exists(tempDir) && !Directory.EnumerateFileSystemEntries(tempDir).Any())
+                    {
+                        Directory.Delete(tempDir);
+                    }
+                }
+
+                _logger.LogInformation($"Restauração concluída com sucesso: {backupPath}");
             }
             catch (Exception ex)
             {
@@ -217,123 +216,96 @@ namespace IntranetDocumentos.Services
         }
 
         /// <summary>
-        /// Restaura backup MySQL usando mysql command
-        /// </summary>
-        private async Task RestoreMySqlBackup(string connectionString, string backupPath)
-        {
-            try
-            {
-                // Extrair informações da connection string
-                var builder = new MySqlConnectionStringBuilder(connectionString);
-                var server = builder.Server;
-                var database = builder.Database;
-                var user = builder.UserID;
-                var password = builder.Password;
-                var port = builder.Port;
-
-                // Comando mysql para restore
-                var processInfo = new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = "mysql",
-                    Arguments = $"--host={server} --port={port} --user={user} --password={password} {database}",
-                    UseShellExecute = false,
-                    RedirectStandardInput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true
-                };
-
-                using var process = new System.Diagnostics.Process { StartInfo = processInfo };
-                process.Start();
-
-                // Lê o arquivo de backup e envia para o mysql
-                var backupContent = await File.ReadAllTextAsync(backupPath);
-                await process.StandardInput.WriteAsync(backupContent);
-                process.StandardInput.Close();
-
-                var error = await process.StandardError.ReadToEndAsync();
-                await process.WaitForExitAsync();
-
-                if (process.ExitCode != 0 && !string.IsNullOrWhiteSpace(error))
-                {
-                    throw new Exception($"Erro no restore MySQL: {error}");
-                }
-
-                _logger.LogInformation($"Restore MySQL executado com sucesso");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning($"mysql command não disponível ou erro no restore: {ex.Message}");
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Lista todos os backups disponíveis
+        /// Obtém lista de backups disponíveis
         /// </summary>
         public async Task<List<string>> GetBackupListAsync()
         {
-            await Task.CompletedTask;
-            
-            var backups = new List<string>();
-            
-            if (Directory.Exists(_backupDirectory))
+            try
             {
-                var files = Directory.GetFiles(_backupDirectory, "*.db", SearchOption.AllDirectories)
-                    .Union(Directory.GetFiles(_backupDirectory, "*.zip", SearchOption.AllDirectories))
-                    .OrderByDescending(f => new FileInfo(f).CreationTime)
-                    .ToList();
-                
-                backups.AddRange(files);
+                var backups = new List<string>();
+
+                if (Directory.Exists(_backupBasePath))
+                {
+                    // Backups manuais
+                    var manualBackups = Directory.GetFiles(_backupBasePath, "*.zip")
+                        .Where(f => Path.GetFileName(f).StartsWith("IntranetDocumentos_Backup_"))
+                        .OrderByDescending(f => File.GetCreationTime(f))
+                        .ToList();
+
+                    backups.AddRange(manualBackups);
+
+                    // Backups automáticos
+                    var autoBackupPath = Path.Combine(_backupBasePath, "Auto");
+                    if (Directory.Exists(autoBackupPath))
+                    {
+                        var autoBackups = Directory.GetFiles(autoBackupPath, "*.bak")
+                            .Where(f => Path.GetFileName(f).StartsWith("IntranetDocumentos_Auto_"))
+                            .OrderByDescending(f => File.GetCreationTime(f))
+                            .Take(10) // Últimos 10 backups automáticos
+                            .ToList();
+
+                        backups.AddRange(autoBackups);
+                    }
+                }
+
+                return await Task.FromResult(backups);
             }
-            
-            return backups;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter lista de backups");
+                return new List<string>();
+            }
         }
 
         /// <summary>
         /// Remove backups antigos
         /// </summary>
-        public async Task CleanOldBackupsAsync(int keepDays = 30)
+        public async Task CleanupOldBackupsAsync(int retentionDays = 30)
         {
-            await Task.CompletedTask;
-            
             try
             {
-                if (!Directory.Exists(_backupDirectory)) return;
+                var cutoffDate = DateTime.Now.AddDays(-retentionDays);
+                int deletedCount = 0;
 
-                var cutoffDate = DateTime.Now.AddDays(-keepDays);
-                var files = Directory.GetFiles(_backupDirectory, "*", SearchOption.AllDirectories);
-
-                foreach (var file in files)
+                if (Directory.Exists(_backupBasePath))
                 {
-                    var fileInfo = new FileInfo(file);
-                    if (fileInfo.CreationTime < cutoffDate)
+                    // Limpar backups manuais antigos
+                    var oldManualBackups = Directory.GetFiles(_backupBasePath, "*.zip")
+                        .Where(f => File.GetCreationTime(f) < cutoffDate)
+                        .ToList();
+
+                    foreach (var backup in oldManualBackups)
                     {
-                        File.Delete(file);
-                        _logger.LogInformation($"Backup antigo removido: {file}");
+                        File.Delete(backup);
+                        deletedCount++;
+                        _logger.LogInformation($"Backup antigo removido: {backup}");
+                    }
+
+                    // Limpar backups automáticos antigos
+                    var autoBackupPath = Path.Combine(_backupBasePath, "Auto");
+                    if (Directory.Exists(autoBackupPath))
+                    {
+                        var oldAutoBackups = Directory.GetFiles(autoBackupPath, "*.bak")
+                            .Where(f => File.GetCreationTime(f) < cutoffDate)
+                            .ToList();
+
+                        foreach (var backup in oldAutoBackups)
+                        {
+                            File.Delete(backup);
+                            deletedCount++;
+                            _logger.LogInformation($"Backup automático antigo removido: {backup}");
+                        }
                     }
                 }
+
+                _logger.LogInformation($"Limpeza de backups concluída. {deletedCount} arquivos removidos.");
+                await Task.CompletedTask;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao limpar backups antigos");
+                _logger.LogError(ex, "Erro durante limpeza de backups antigos");
+                throw;
             }
-        }
-
-        /// <summary>
-        /// Extrai o caminho do banco de dados da connection string
-        /// </summary>
-        private string ExtractDatabasePath(string connectionString)
-        {
-            var parts = connectionString.Split(';');
-            foreach (var part in parts)
-            {
-                if (part.Trim().StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
-                {
-                    var path = part.Substring(part.IndexOf('=') + 1).Trim();
-                    return Path.IsPathRooted(path) ? path : Path.Combine(Directory.GetCurrentDirectory(), path);
-                }
-            }
-            throw new InvalidOperationException("Caminho do banco de dados não encontrado na connection string");
         }
     }
 }

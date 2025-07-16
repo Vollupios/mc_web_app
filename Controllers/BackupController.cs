@@ -153,7 +153,7 @@ namespace IntranetDocumentos.Controllers
         {
             try
             {
-                await _backupService.CleanOldBackupsAsync(keepDays);
+                await _backupService.CleanupOldBackupsAsync(keepDays);
                 TempData["Success"] = $"Backups antigos removidos (mantidos últimos {keepDays} dias)";
             }
             catch (Exception ex)

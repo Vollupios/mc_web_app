@@ -38,7 +38,7 @@ namespace IntranetDocumentos.Services
                         await backupService.CreateScheduledBackupAsync();
                         
                         // Limpa backups antigos
-                        await backupService.CleanOldBackupsAsync(30);
+                        await backupService.CleanupOldBackupsAsync(30);
                         
                         _logger.LogInformation("Backup automático executado com sucesso");
                     }

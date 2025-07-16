@@ -1,13 +1,13 @@
 # 🗄️ CONFIGURADOR DE BANCO DE DADOS - Intranet Documentos
 # ================================================================
 # Script unificado para configuração de banco de dados
-# Suporta: SQLite (dev), MySQL (produção)
+# Suporta: SQL Server (padrão), SQLite (dev)
 # ================================================================
 
 param(
-    [Parameter(HelpMessage="Tipo de banco: SQLite, MySQL")]
-    [ValidateSet("SQLite", "MySQL")]
-    [string]$DatabaseType = "SQLite",
+    [Parameter(HelpMessage="Tipo de banco: SqlServer, SQLite")]
+    [ValidateSet("SqlServer", "SQLite")]
+    [string]$DatabaseType = "SqlServer",
     
     [Parameter(HelpMessage="String de conexão personalizada")]
     [string]$ConnectionString = "",
