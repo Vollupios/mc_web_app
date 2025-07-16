@@ -349,7 +349,8 @@ namespace IntranetDocumentos.Controllers
                 // Para PDFs e imagens, usar inline para exibir no navegador
                 if (IsViewableInBrowser(document.OriginalFileName))
                 {
-                    return File(fileStream, contentType, document.OriginalFileName, false);
+                    Response.Headers["Content-Disposition"] = $"inline; filename=\"{document.OriginalFileName}\"";
+                    return File(fileStream, contentType);
                 }
                 else
                 {
