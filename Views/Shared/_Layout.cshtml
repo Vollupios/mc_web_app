@@ -60,11 +60,15 @@
                                     <i class="bi bi-cloud-upload"></i> Enviar Documento
                                 </a>
                             </li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Workflow" asp-action="Index">
+                                        <i class="bi bi-diagram-3"></i> Workflow
+                                    </a>
+                                </li>
+                            }
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Workflow" asp-action="Index">
-                                    <i class="bi bi-diagram-3"></i> Workflow
-                                </a>
-                            </li>                            <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Ramais" asp-action="Index">
                                     <i class="bi bi-telephone"></i> Ramais
                                 </a>

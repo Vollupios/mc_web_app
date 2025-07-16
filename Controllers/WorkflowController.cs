@@ -7,7 +7,7 @@ using IntranetDocumentos.Services;
 
 namespace IntranetDocumentos.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class WorkflowController : Controller
     {
         private readonly IWorkflowService _workflowService;

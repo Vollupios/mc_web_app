@@ -46,7 +46,10 @@ else
                             <th><i class="bi bi-calendar"></i> Data</th>
                             <th><i class="bi bi-file-earmark-bar-graph"></i> Tamanho</th>
                             <th><i class="bi bi-check-circle"></i> Status</th>
-                            <th><i class="bi bi-git"></i> Workflow</th>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <th><i class="bi bi-git"></i> Workflow</th>
+                            }
                             <th class="actions-column"><i class="bi bi-gear"></i> Ações</th>
                         </tr>
                     </thead>
@@ -99,12 +102,15 @@ else
                                     }
                                     <span class="badge bg-@statusClass">@statusText</span>
                                 </td>
-                                <td>
-                                    <a asp-controller="Workflow" asp-action="Document" asp-route-id="@document.Id" 
-                                       class="btn btn-sm btn-outline-secondary" title="Ver Workflow">
-                                        <i class="bi bi-diagram-3"></i>
-                                    </a>
-                                </td>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <td>
+                                        <a asp-controller="Workflow" asp-action="Document" asp-route-id="@document.Id" 
+                                           class="btn btn-sm btn-outline-secondary" title="Ver Workflow">
+                                            <i class="bi bi-diagram-3"></i>
+                                        </a>
+                                    </td>
+                                }
                                 <td class="actions-column">
                                     <div class="btn-group" role="group">
                                         @{
