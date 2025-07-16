@@ -1,0 +1,35 @@
+{
+    "files.associations": {
+        "**/setup-mysql.sql": "mysql",
+        "**/*mysql*.sql": "mysql",
+        "**/*MySQL*.sql": "mysql"
+    },
+    "sql.connections": [
+        {
+            "server": "localhost",
+            "database": "IntranetDocumentos",
+            "user": "app_user",
+            "password": "",
+            "port": 3306,
+            "authenticationType": "SqlLogin",
+            "profileName": "IntranetDocumentos MySQL",
+            "connectionTimeout": 30,
+            "commandTimeout": 30,
+            "connectionString": "",
+            "options": {},
+            "savePassword": false,
+            "emptyPasswordInput": false
+        }
+    ],
+    "mssql.enableIntelliSense": false,
+    "mysql.connections": [
+        {
+            "name": "IntranetDocumentos",
+            "host": "localhost",
+            "user": "app_user",
+            "password": "",
+            "port": 3306,
+            "database": "IntranetDocumentos"
+        }
+    ]
+}
