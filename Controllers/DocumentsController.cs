@@ -316,21 +316,28 @@ namespace IntranetDocumentos.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
+                _logger.LogWarning("Usuário não autenticado tentando visualizar documento {DocumentId}", id);
                 return Challenge();
             }
+
+            _logger.LogInformation("Tentativa de visualização - DocumentId: {DocumentId}, UserId: {UserId}", id, user.Id);
 
             if (!await _documentService.CanUserAccessDocumentAsync(id, user))
             {
                 _logger.LogWarning("Tentativa não autorizada de visualização - ID: {DocumentId}, Usuário: {UserId}", id, user.Id);
-                return Forbid();
+                TempData["Error"] = "Você não tem permissão para visualizar este documento.";
+                return RedirectToAction(nameof(Index));
             }
 
             var document = await _documentService.GetDocumentByIdAsync(id);
             if (document == null)
             {
                 _logger.LogWarning("Documento não encontrado para visualização - ID: {DocumentId}", id);
-                return NotFound();
+                TempData["Error"] = "Documento não encontrado.";
+                return RedirectToAction(nameof(Index));
             }
+
+            _logger.LogInformation("Documento encontrado - ID: {DocumentId}, Nome: {FileName}", id, document.OriginalFileName);
 
             try
             {
@@ -338,30 +345,35 @@ namespace IntranetDocumentos.Controllers
                 if (fileStream == null)
                 {
                     _logger.LogWarning("Stream do documento não encontrado - ID: {DocumentId}", id);
-                    return NotFound();
+                    TempData["Error"] = "Arquivo não encontrado no servidor.";
+                    return RedirectToAction(nameof(Index));
                 }
 
-                _logger.LogInformation("Visualização de documento - ID: {DocumentId}, Usuário: {UserId}", id, user.Id);
+                _logger.LogInformation("Stream obtido com sucesso - ID: {DocumentId}, Usuário: {UserId}", id, user.Id);
 
                 // Determinar o Content-Type correto baseado na extensão
                 var contentType = GetContentTypeFromExtension(document.OriginalFileName);
                 
+                // Codificar o nome do arquivo para evitar problemas com caracteres especiais
+                var encodedFileName = Uri.EscapeDataString(document.OriginalFileName);
+                
                 // Para PDFs e imagens, usar inline para exibir no navegador
                 if (IsViewableInBrowser(document.OriginalFileName))
                 {
-                    Response.Headers["Content-Disposition"] = $"inline; filename=\"{document.OriginalFileName}\"";
+                    Response.Headers["Content-Disposition"] = $"inline; filename*=UTF-8''{encodedFileName}";
                     return File(fileStream, contentType);
                 }
                 else
                 {
                     // Para outros tipos, forçar download
-                    return File(fileStream, contentType, document.OriginalFileName);
+                    Response.Headers["Content-Disposition"] = $"attachment; filename*=UTF-8''{encodedFileName}";
+                    return File(fileStream, contentType);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao visualizar documento - ID: {DocumentId}, Usuário: {UserId}", id, user.Id);
-                TempData["Error"] = "Erro ao visualizar o documento. Tente novamente.";
+                TempData["Error"] = $"Erro ao visualizar o documento: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
         }
