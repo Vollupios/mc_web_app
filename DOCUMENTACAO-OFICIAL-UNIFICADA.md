@@ -26,6 +26,7 @@
 ### **Para Administradores - Setup em 5 minutos**
 
 #### **Windows Server (Produção)**
+
 ```batch
 # 1. Execute como Administrador
 deploy-quick.bat
@@ -40,6 +41,7 @@ mysql -u root -p < setup-database.mysql.sql
 ```
 
 #### **Desenvolvimento Local**
+
 ```bash
 # 1. Clone o repositório
 git clone https://github.com/Vollupios/mc_web_app.git
@@ -52,6 +54,7 @@ dotnet run --project IntranetDocumentos.csproj
 ```
 
 ### **✅ Verificação Rápida**
+
 - ✅ Aplicação carrega sem erros
 - ✅ Login funciona
 - ✅ Upload de documento funciona
@@ -74,6 +77,7 @@ Sistema web corporativo para gestão centralizada de documentos, reuniões e ram
 | **🔑 Administradores** | Total | Usuários, configurações, segurança |
 
 ### **🏢 Departamentos Suportados**
+
 - **Pessoal** - Documentos de RH
 - **Fiscal** - Documentos fiscais e tributários  
 - **Contábil** - Documentos contábeis e financeiros
@@ -83,6 +87,7 @@ Sistema web corporativo para gestão centralizada de documentos, reuniões e ram
 - **Geral** - Documentos acessíveis por todos
 
 ### **🔧 Tecnologias Utilizadas**
+
 ```
 Frontend:     Bootstrap 5 + JavaScript + Razor Views
 Backend:      ASP.NET Core 9.0 MVC
@@ -98,6 +103,7 @@ Web Server:   IIS (Produção) / Kestrel (Dev)
 ### **💻 Requisitos do Sistema**
 
 #### **Windows Server (Produção)**
+
 - **OS:** Windows Server 2019/2022
 - **RAM:** 8GB mínimo (16GB recomendado)
 - **Disco:** 100GB+ SSD
@@ -105,11 +111,13 @@ Web Server:   IIS (Produção) / Kestrel (Dev)
 - **.NET:** ASP.NET Core Runtime 9.0
 
 #### **MySQL Database**
+
 - **Versão:** MySQL 8.0+
 - **RAM:** 2GB mínimo
 - **Conexões:** 100+ simultâneas
 
 #### **Redis Cache (Opcional)**
+
 - **Versão:** Redis 6.0+
 - **RAM:** 512MB mínimo
 - **Política:** allkeys-lru
@@ -117,6 +125,7 @@ Web Server:   IIS (Produção) / Kestrel (Dev)
 ### **🚀 Deploy Automatizado**
 
 #### **1. Scripts de Deploy Prontos**
+
 ```powershell
 # Deploy completo no Windows Server
 .\Deploy-WindowsServer.ps1
@@ -132,6 +141,7 @@ Web Server:   IIS (Produção) / Kestrel (Dev)
 ```
 
 #### **2. Configuração MySQL**
+
 ```sql
 -- Execute o script de setup
 mysql -u root -p < setup-database.mysql.sql
@@ -144,6 +154,7 @@ FLUSH PRIVILEGES;
 ```
 
 #### **3. Configuração da Aplicação**
+
 ```json
 // appsettings.Production.json
 {
@@ -157,6 +168,7 @@ FLUSH PRIVILEGES;
 ### **🌐 Configuração IIS**
 
 #### **Application Pool**
+
 ```powershell
 # Criar Application Pool
 New-WebAppPool -Name "IntranetDocumentos"
@@ -164,12 +176,14 @@ Set-ItemProperty IIS:\AppPools\IntranetDocumentos managedRuntimeVersion ""
 ```
 
 #### **Website**
+
 ```powershell
 # Criar Website
 New-Website -Name "IntranetDocumentos" -ApplicationPool "IntranetDocumentos" -PhysicalPath "C:\inetpub\wwwroot\IntranetDocumentos" -Port 80
 ```
 
 #### **HTTPS (Recomendado)**
+
 ```powershell
 # Configurar HTTPS
 New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
@@ -182,12 +196,14 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
 ### **🛡️ Recursos de Segurança Implementados**
 
 #### **Autenticação e Autorização**
+
 - ✅ **ASP.NET Core Identity** com senhas robustas
 - ✅ **Role-based access** (Admin, Gestor, Usuario)
 - ✅ **Department-based permissions**
 - ✅ **Session management** seguro
 
 #### **Proteção contra Ataques**
+
 - ✅ **CSRF Protection** - Anti-forgery tokens
 - ✅ **XSS Protection** - Encoding automático
 - ✅ **SQL Injection** - Entity Framework parametrizado  
@@ -195,6 +211,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
 - ✅ **Path Traversal** - Sanitização de caminhos
 
 #### **Headers de Segurança**
+
 ```http
 X-Frame-Options: DENY
 X-XSS-Protection: 1; mode=block
@@ -206,11 +223,13 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 ### **⚡ Rate Limiting**
 
 #### **Limites Configurados**
+
 - **Login**: 5 tentativas em 15 min → Bloqueio 30 min
 - **Upload**: 20 uploads em 60 min por usuário
 - **Global**: Distribuído via Redis entre servidores
 
 #### **Configuração**
+
 ```json
 {
   "RateLimiting": {
@@ -230,6 +249,7 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 ### **📋 Auditoria**
 
 #### **Logs de Segurança**
+
 ```json
 {
   "Timestamp": "2025-07-16T14:52:39Z",
@@ -242,6 +262,7 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 ```
 
 #### **Eventos Auditados**
+
 - ✅ Tentativas de login (sucesso/falha)
 - ✅ Uploads de documentos
 - ✅ Downloads de documentos
@@ -249,6 +270,7 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 - ✅ Acessos negados
 
 ### **🔧 Scripts de Hardening**
+
 ```powershell
 # Auditoria completa de segurança
 .\Auditoria-Seguranca.ps1
@@ -264,6 +286,7 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 ### **📄 Sistema de Documentos**
 
 #### **Upload de Documentos**
+
 - ✅ **Tipos suportados**: PDF, Office, imagens, texto, ZIP
 - ✅ **Tamanho máximo**: 10MB por arquivo
 - ✅ **Organização**: Por departamentos
@@ -271,6 +294,7 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 - ✅ **Versionamento**: Histórico de alterações
 
 #### **🔍 Busca Avançada**
+
 ```
 Filtros disponíveis:
 ✅ Termo de busca (nome do arquivo/conteúdo)
@@ -281,6 +305,7 @@ Filtros disponíveis:
 ```
 
 #### **📁 Organização de Arquivos**
+
 ```
 DocumentsStorage/
 ├── Pessoal/
@@ -295,11 +320,13 @@ DocumentsStorage/
 ### **📅 Sistema de Reuniões**
 
 #### **Tipos de Reunião**
+
 - **Ordinária** - Reuniões regulares programadas
 - **Extraordinária** - Reuniões especiais eventuais
 - **Emergencial** - Reuniões urgentes
 
 #### **Funcionalidades**
+
 - ✅ **Agendamento** com data/hora
 - ✅ **Controle de participantes**
 - ✅ **Notificações por email**
@@ -309,6 +336,7 @@ DocumentsStorage/
 ### **📞 Ramais Telefônicos**
 
 #### **Funcionalidades**
+
 - ✅ **Catálogo completo** de ramais
 - ✅ **Organização por departamento**
 - ✅ **Busca rápida** por nome/ramal/cargo
@@ -318,12 +346,14 @@ DocumentsStorage/
 ### **📊 Analytics e Relatórios**
 
 #### **Dashboard Executivo**
+
 - 📈 **Estatísticas de documentos** (total, mensais, por departamento)
 - 📈 **Métricas de reuniões** (por tipo, status, departamento)
 - 📈 **Atividade por usuário** (uploads, downloads, reuniões)
 - 📈 **Performance do sistema** (Redis, MySQL, aplicação)
 
 #### **Relatórios Disponíveis**
+
 - **Documentos mais baixados**
 - **Usuários mais ativos**
 - **Atividade por departamento**
@@ -335,6 +365,7 @@ DocumentsStorage/
 ## 🛠️ **DESENVOLVIMENTO**
 
 ### **📁 Estrutura do Projeto**
+
 ```
 IntranetDocumentos/
 ├── Controllers/          # Controladores MVC
@@ -353,6 +384,7 @@ IntranetDocumentos/
 ### **🏗️ Padrões Arquiteturais**
 
 #### **Repository Pattern**
+
 ```csharp
 public interface IDocumentRepository
 {
@@ -363,6 +395,7 @@ public interface IDocumentRepository
 ```
 
 #### **Service Pattern**
+
 ```csharp
 public interface IDocumentService  
 {
@@ -375,6 +408,7 @@ public interface IDocumentService
 ### **🔧 Convenções de Código**
 
 #### **Nomenclatura**
+
 ```csharp
 // Classes: PascalCase
 public class DocumentService { }
@@ -393,6 +427,7 @@ public interface IDocumentService { }
 ```
 
 #### **Logging Estruturado**
+
 ```csharp
 _logger.LogInformation("📄 Upload iniciado - Arquivo: {FileName}, Usuário: {UserId}", 
     fileName, userId);
@@ -402,6 +437,7 @@ _logger.LogWarning("🔒 Acesso negado - Documento: {DocumentId}, Usuário: {Use
 ```
 
 ### **🧪 Testes**
+
 ```
 Tests/
 ├── UnitTests/           # Testes unitários
@@ -410,6 +446,7 @@ Tests/
 ```
 
 ### **📦 Build e Deploy**
+
 ```powershell
 # Build local
 dotnet build IntranetDocumentos.csproj --configuration Release
@@ -428,6 +465,7 @@ dotnet publish --configuration Release --output ./publish
 ### **❓ Problemas Comuns**
 
 #### **🔴 "Failed to bind to address already in use"**
+
 ```bash
 # Verificar processos na porta
 netstat -tulpn | grep :5000
@@ -437,6 +475,7 @@ dotnet run --urls "http://localhost:5001"
 ```
 
 #### **🔴 "Connection string not found"**
+
 ```json
 // Verificar appsettings.json
 {
@@ -447,6 +486,7 @@ dotnet run --urls "http://localhost:5001"
 ```
 
 #### **🔴 "Redis connection failed"**
+
 ```bash
 # Verificar Redis
 redis-cli ping
@@ -457,6 +497,7 @@ redis-cli ping
 ```
 
 #### **🔴 "File upload size exceeded"**
+
 ```xml
 <!-- web.config -->
 <system.webServer>
@@ -471,6 +512,7 @@ redis-cli ping
 ### **📊 Diagnóstico**
 
 #### **Verificar Status da Aplicação**
+
 ```powershell
 # Status IIS
 Get-WebAppPoolState -Name "IntranetDocumentos"
@@ -488,6 +530,7 @@ Test-NetConnection -ComputerName localhost -Port 6379
 ### **💾 Backup e Restore**
 
 #### **Backup Automático**
+
 ```powershell
 # Configurar backup diário
 .\backup-database.ps1
@@ -497,6 +540,7 @@ schtasks /create /tn "Backup Intranet" /tr "C:\path\backup-database.ps1" /sc dai
 ```
 
 #### **Backup Manual**
+
 ```bash
 # Backup MySQL
 mysqldump -u app_user -p IntranetDocumentos > backup.sql
@@ -506,6 +550,7 @@ tar -czf DocumentsStorage_backup.tar.gz DocumentsStorage/
 ```
 
 #### **Restore**
+
 ```bash
 # Restore MySQL
 mysql -u app_user -p IntranetDocumentos < backup.sql
@@ -521,6 +566,7 @@ tar -xzf DocumentsStorage_backup.tar.gz
 ### **📅 Versão 2.0 (16/07/2025) - ATUAL**
 
 #### **✅ Correções Implementadas**
+
 - ✅ **Rota AdvancedSearch** implementada (DocumentsController)
 - ✅ **Queries LINQ otimizadas** (AnalyticsService)
 - ✅ **Sintaxe SQL MySQL** corrigida
@@ -529,6 +575,7 @@ tar -xzf DocumentsStorage_backup.tar.gz
 - ✅ **VS Code configurado** para MySQL
 
 #### **🔒 Melhorias de Segurança**
+
 - ✅ Rate limiting por usuário/email
 - ✅ Headers de segurança enterprise
 - ✅ Auditoria completa implementada
@@ -536,6 +583,7 @@ tar -xzf DocumentsStorage_backup.tar.gz
 - ✅ Validação robusta de entrada
 
 #### **⚡ Otimizações de Performance**
+
 - ✅ Cache Redis distribuído
 - ✅ Queries MySQL otimizadas
 - ✅ Índices de banco otimizados
@@ -545,6 +593,7 @@ tar -xzf DocumentsStorage_backup.tar.gz
 ### **🎯 Roadmap Futuro**
 
 #### **Versão 2.1 (Próximos 30 dias)**
+
 - 🔄 **Notificações em tempo real** (SignalR)
 - 📱 **PWA** (Progressive Web App)
 - 🔍 **Busca full-text** em conteúdo
@@ -552,6 +601,7 @@ tar -xzf DocumentsStorage_backup.tar.gz
 - 🌍 **Multi-idioma** (i18n)
 
 #### **Versão 2.2 (Próximos 60 dias)**
+
 - ☁️ **Integração nuvem** (Azure/AWS)
 - 🤖 **OCR** para documentos escaneados
 - 📧 **Aprovação por email**
@@ -559,6 +609,7 @@ tar -xzf DocumentsStorage_backup.tar.gz
 - 🔄 **Sincronização offline**
 
 #### **Versão 3.0 (Próximos 90 dias)**
+
 - 🤖 **IA para categorização**
 - 🔐 **Single Sign-On** (SAML/OAuth)
 - 📊 **Business Intelligence**
@@ -570,17 +621,20 @@ tar -xzf DocumentsStorage_backup.tar.gz
 ## 📞 **SUPORTE E CONTATO**
 
 ### **🔧 Suporte Técnico**
+
 - **Documentação**: Esta documentação unificada
 - **Issues**: [GitHub Issues](https://github.com/Vollupios/mc_web_app/issues)
 - **Wiki**: [GitHub Wiki](https://github.com/Vollupios/mc_web_app/wiki)
 
 ### **📚 Recursos Adicionais**
+
 - **Scripts de Deploy**: Disponíveis na pasta raiz
 - **Configurações de Produção**: `appsettings.Production.json`
 - **Logs**: Pasta `Logs/` (criada automaticamente)
 - **Backups**: Pasta `DatabaseBackups/`
 
 ### **🎯 Status do Projeto**
+
 **✅ PRODUÇÃO READY - Sistema 100% funcional e testado**
 
 ---

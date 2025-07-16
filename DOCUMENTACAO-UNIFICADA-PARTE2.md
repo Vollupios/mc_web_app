@@ -5,6 +5,7 @@
 ### **🔒 Medidas de Segurança Implementadas**
 
 #### **1. Autenticação e Autorização**
+
 ```csharp
 // ASP.NET Core Identity configurado
 services.AddDefaultIdentity<ApplicationUser>()
@@ -23,6 +24,7 @@ services.Configure<IdentityOptions>(options =>
 ```
 
 #### **2. Headers de Segurança**
+
 ```csharp
 // SecurityHeadersMiddleware implementado
 app.UseMiddleware<SecurityHeadersMiddleware>();
@@ -36,6 +38,7 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 ```
 
 #### **3. Proteção contra Ataques**
+
 - ✅ **CSRF**: Anti-forgery tokens em todos os formulários
 - ✅ **XSS**: Encoding automático em Razor views
 - ✅ **SQL Injection**: Entity Framework com queries parametrizadas
@@ -43,6 +46,7 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 - ✅ **File Upload**: Validação de tipo e tamanho
 
 ### **🔍 Auditoria de Segurança**
+
 ```csharp
 // SecurityAuditMiddleware registra todas as ações
 public class SecurityAuditMiddleware
@@ -63,6 +67,7 @@ public class SecurityAuditMiddleware
 ### **⚡ Rate Limiting Distribuído com Redis**
 
 #### **🔧 Configuração**
+
 ```csharp
 // UserRateLimitingService com Redis
 public class UserRateLimitingService : IUserRateLimitingService
@@ -75,6 +80,7 @@ public class UserRateLimitingService : IUserRateLimitingService
 ```
 
 #### **📊 Limites Configurados**
+
 ```json
 {
   "RateLimiting": {
@@ -92,6 +98,7 @@ public class UserRateLimitingService : IUserRateLimitingService
 ```
 
 #### **🛡️ Proteção Implementada**
+
 - ✅ **Login**: 5 tentativas em 15 min → Bloqueio 30 min
 - ✅ **Upload**: 20 uploads em 60 min por usuário
 - ✅ **Global**: Distribuído via Redis entre servidores
@@ -102,6 +109,7 @@ public class UserRateLimitingService : IUserRateLimitingService
 ## **4.3 Hardening**
 
 ### **🔒 Script de Hardening (Hardening-Seguranca.ps1)**
+
 ```powershell
 # Configurações de segurança do Windows Server
 # - Desabilitar serviços desnecessários
@@ -112,6 +120,7 @@ public class UserRateLimitingService : IUserRateLimitingService
 ```
 
 ### **🛡️ Configurações IIS**
+
 ```xml
 <!-- web.config - Configurações de segurança -->
 <system.webServer>
@@ -128,6 +137,7 @@ public class UserRateLimitingService : IUserRateLimitingService
 ```
 
 ### **🔐 Certificados SSL**
+
 ```powershell
 # Configuração HTTPS obrigatório
 New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443
@@ -139,6 +149,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443
 ## **4.4 Auditoria**
 
 ### **📋 Script de Auditoria (Auditoria-Seguranca.ps1)**
+
 ```powershell
 # Verificações automatizadas:
 # ✅ Configurações de segurança do IIS
@@ -150,6 +161,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443
 ```
 
 ### **📊 Logs de Auditoria**
+
 ```json
 {
   "Timestamp": "2025-07-16T14:52:39.1007342Z",
@@ -165,6 +177,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443
 ```
 
 ### **🔍 Monitoramento Contínuo**
+
 - ✅ **Tentativas de acesso negado**
 - ✅ **Downloads de documentos sensíveis**
 - ✅ **Múltiplos logins do mesmo usuário**
@@ -178,6 +191,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443
 ### **🔴 Implementação Redis**
 
 #### **⚙️ Configuração no Program.cs**
+
 ```csharp
 // Configuração Redis com fallback
 builder.Services.AddStackExchangeRedisCache(options =>
@@ -191,6 +205,7 @@ services.AddMemoryCache();
 ```
 
 #### **💾 Uso do Cache**
+
 ```csharp
 // Rate limiting distribuído
 await _distributedCache.SetStringAsync($"login_attempts:{email}", json);
@@ -203,6 +218,7 @@ await _distributedCache.SetStringAsync($"departments", departmentsJson);
 ```
 
 ### **📊 Benefícios Obtidos**
+
 - ⚡ **10-100x mais rápido** que consultas ao banco
 - 🔄 **Cache persistente** entre restarts da aplicação
 - 💾 **Menos carga no MySQL** (redução de consultas)
@@ -210,6 +226,7 @@ await _distributedCache.SetStringAsync($"departments", departmentsJson);
 - 🛡️ **Rate limiting preciso** globalmente
 
 ### **🔧 Monitoramento Redis**
+
 ```bash
 # Verificar status
 redis-cli ping
@@ -229,6 +246,7 @@ redis-cli info memory
 ## **5.2 Otimizações de Performance**
 
 ### **📊 Queries Otimizadas (AnalyticsService)**
+
 ```csharp
 // ANTES (problemático)
 MonthName = cultureInfo.DateTimeFormat.GetMonthName(g.Key.Month), // Erro EF Core
@@ -243,6 +261,7 @@ foreach (var month in monthlyUploads)
 ```
 
 ### **🗄️ Otimizações MySQL**
+
 ```sql
 -- Configurações de produção otimizadas
 SET GLOBAL innodb_buffer_pool_size = 134217728; -- 128MB
@@ -256,6 +275,7 @@ CREATE INDEX idx_download_logs_date ON DocumentDownloadLogs(DownloadDate);
 ```
 
 ### **📁 Otimizações de Arquivo**
+
 ```csharp
 // Upload otimizado com streaming
 public async Task<string> SaveFileAsync(IFormFile file)
@@ -275,6 +295,7 @@ public async Task<string> SaveFileAsync(IFormFile file)
 ## **5.3 Monitoramento**
 
 ### **📊 Dashboard de Monitoramento**
+
 ```csharp
 // Métricas implementadas no AnalyticsService:
 // - Total de documentos e downloads
@@ -286,6 +307,7 @@ public async Task<string> SaveFileAsync(IFormFile file)
 ```
 
 ### **🔍 Logs Estruturados**
+
 ```csharp
 // Logging configurado com Serilog/NLog
 _logger.LogInformation("📄 Upload iniciado - Arquivo: {FileName}, Usuário: {UserId}, Tamanho: {FileSize}", 
@@ -299,6 +321,7 @@ _logger.LogError("❌ Erro no upload - Arquivo: {FileName}, Erro: {Error}",
 ```
 
 ### **📈 Métricas de Performance**
+
 ```json
 {
   "Application": {
@@ -324,6 +347,7 @@ _logger.LogError("❌ Erro no upload - Arquivo: {FileName}, Erro: {Error}",
 ## **6.1 Sistema de Documentos**
 
 ### **📄 Upload de Documentos**
+
 ```csharp
 public class DocumentService : IDocumentService
 {
@@ -338,6 +362,7 @@ public class DocumentService : IDocumentService
 ```
 
 ### **📁 Organização de Arquivos**
+
 ```
 DocumentsStorage/
 ├── Pessoal/
@@ -353,6 +378,7 @@ DocumentsStorage/
 ```
 
 ### **🔒 Controle de Acesso**
+
 ```csharp
 public async Task<bool> CanUserAccessDocumentAsync(int documentId, ApplicationUser user)
 {
@@ -377,6 +403,7 @@ public async Task<bool> CanUserAccessDocumentAsync(int documentId, ApplicationUs
 ## **6.2 Busca Avançada**
 
 ### **🔍 Funcionalidades da Busca**
+
 ```csharp
 [HttpPost]
 [ValidateAntiForgeryToken]
@@ -395,6 +422,7 @@ public async Task<IActionResult> AdvancedSearch(
 ```
 
 ### **🗄️ Query Otimizada**
+
 ```csharp
 public async Task<List<Document>> AdvancedSearchAsync(...)
 {
@@ -424,6 +452,7 @@ public async Task<List<Document>> AdvancedSearchAsync(...)
 ```
 
 ### **🎨 Interface da Busca**
+
 ```html
 <!-- Formulário de busca avançada -->
 <form asp-action="AdvancedSearch" method="post">
@@ -467,6 +496,7 @@ public async Task<List<Document>> AdvancedSearchAsync(...)
 ## **6.3 Sistema de Reuniões**
 
 ### **📅 Tipos de Reunião**
+
 ```csharp
 public enum TipoReuniao
 {
@@ -482,6 +512,7 @@ public enum TipoReuniao
 ```
 
 ### **🔔 Sistema de Notificações**
+
 ```csharp
 public class NotificationService : INotificationService
 {
@@ -503,6 +534,7 @@ public class NotificationService : INotificationService
 ```
 
 ### **📊 Analytics de Reuniões**
+
 ```csharp
 public class ReunioesMetricsViewModel
 {
@@ -522,6 +554,7 @@ public class ReunioesMetricsViewModel
 ## **6.4 Ramais Telefônicos**
 
 ### **📞 Estrutura de Ramais**
+
 ```csharp
 public class Ramal
 {
@@ -537,6 +570,7 @@ public class Ramal
 ```
 
 ### **🔍 Busca de Ramais**
+
 ```csharp
 public async Task<List<Ramal>> SearchRamaisAsync(string searchTerm, int? departmentId)
 {
@@ -561,6 +595,7 @@ public async Task<List<Ramal>> SearchRamaisAsync(string searchTerm, int? departm
 ```
 
 ### **📱 Interface Responsiva**
+
 ```html
 <!-- Lista de ramais com busca -->
 <div class="ramal-search">
@@ -593,6 +628,7 @@ public async Task<List<Ramal>> SearchRamaisAsync(string searchTerm, int? departm
 ## **6.5 Analytics e Relatórios**
 
 ### **📊 Dashboard Executivo**
+
 ```csharp
 public class DashboardViewModel
 {
@@ -605,6 +641,7 @@ public class DashboardViewModel
 ```
 
 ### **📈 Métricas de Documentos**
+
 ```csharp
 public class DocumentStatisticsViewModel
 {
@@ -621,6 +658,7 @@ public class DocumentStatisticsViewModel
 ```
 
 ### **🎯 Atividade por Departamento**
+
 ```csharp
 public class DepartmentActivityViewModel
 {
@@ -640,6 +678,7 @@ public class DepartmentStatsViewModel
 ```
 
 ### **📊 Visualização de Dados**
+
 ```javascript
 // Charts.js para gráficos interativos
 // Gráficos implementados:

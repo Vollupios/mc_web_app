@@ -9,6 +9,74 @@
 
 ## 🗂️ **ESTRUTURA FINAL DOS SCRIPTS**
 
+Scripts/                                   # 📁 Pasta principal unificada
+├── README.md                             # 📖 Documentação completa dos scripts
+├── install-quick.bat                     # 🚀 Instalação ultra-rápida
+├── Install-IntranetDocumentos.ps1        # 📋 Instalador principal completo
+│
+├── Deploy/                               # 🚀 Scripts de deploy e produção
+│   ├── Deploy-WindowsServer.ps1          # Deploy completo Windows Server
+│   ├── Configuracao-IIS.ps1              # Configuração automática IIS
+│   ├── Install-Redis-Windows.ps1         # Instalação Redis
+│   ├── Publish-ToWindowsServer.ps1       # Publicação remota
+│   └── Verificacao-Pos-Instalacao.ps1    # Verificações pós-instalação
+│
+├── Database/                             # 🗄️ Scripts de banco de dados
+│   ├── Setup-Database.ps1                # Configurador unificado de BD
+│   ├── backup-database.ps1               # Backup automático
+│   ├── recreate-database.ps1             # Recriar banco (dev)
+│   ├── fix-database.ps1/.sh              # Correção de problemas
+│   ├── setup-database.mysql.sql          # Script MySQL
+│   ├── setup-mysql.sql                   # Config MySQL alternativa
+│   └── check-departments.sql             # Verificação departamentos
+│
+├── Security/                             # 🔒 Scripts de segurança
+│   ├── Hardening-Seguranca.ps1           # Hardening do sistema
+│   └── Auditoria-Seguranca.ps1           # Auditoria de segurança
+│
+└── Development/                          # 🛠️ Scripts de desenvolvimento
+    ├── Dev-Tools.ps1                     # Ferramentas unificadas
+    ├── run-app.ps1                       # Executar aplicação
+    ├── start-app.ps1                     # Inicialização alternativa
+    ├── check-admin-user.ps1              # Verificar usuário admin
+    ├── build-analytics.sh                # Build analytics
+    ├── test-analytics.sh                 # Testes analytics
+    └── fix-markdown.sh                   # Correção markdown
+
+Scripts/                                   # 📁 Pasta principal unificada
+├── README.md                             # 📖 Documentação completa dos scripts
+├── install-quick.bat                     # 🚀 Instalação ultra-rápida
+├── Install-IntranetDocumentos.ps1        # 📋 Instalador principal completo
+│
+├── Deploy/                               # 🚀 Scripts de deploy e produção
+│   ├── Deploy-WindowsServer.ps1          # Deploy completo Windows Server
+│   ├── Configuracao-IIS.ps1              # Configuração automática IIS
+│   ├── Install-Redis-Windows.ps1         # Instalação Redis
+│   ├── Publish-ToWindowsServer.ps1       # Publicação remota
+│   └── Verificacao-Pos-Instalacao.ps1    # Verificações pós-instalação
+│
+├── Database/                             # 🗄️ Scripts de banco de dados
+│   ├── Setup-Database.ps1                # Configurador unificado de BD
+│   ├── backup-database.ps1               # Backup automático
+│   ├── recreate-database.ps1             # Recriar banco (dev)
+│   ├── fix-database.ps1/.sh              # Correção de problemas
+│   ├── setup-database.mysql.sql          # Script MySQL
+│   ├── setup-mysql.sql                   # Config MySQL alternativa
+│   └── check-departments.sql             # Verificação departamentos
+│
+├── Security/                             # 🔒 Scripts de segurança
+│   ├── Hardening-Seguranca.ps1           # Hardening do sistema
+│   └── Auditoria-Seguranca.ps1           # Auditoria de segurança
+│
+└── Development/                          # 🛠️ Scripts de desenvolvimento
+    ├── Dev-Tools.ps1                     # Ferramentas unificadas
+    ├── run-app.ps1                       # Executar aplicação
+    ├── start-app.ps1                     # Inicialização alternativa
+    ├── check-admin-user.ps1              # Verificar usuário admin
+    ├── build-analytics.sh                # Build analytics
+    ├── test-analytics.sh                 # Testes analytics
+    └── fix-markdown.sh                   # Correção markdown
+
 ```
 Scripts/                                   # 📁 Pasta principal unificada
 ├── README.md                             # 📖 Documentação completa dos scripts
@@ -103,6 +171,7 @@ Scripts\Development\Dev-Tools.ps1 run -Watch
 ### **Install-IntranetDocumentos.ps1 (Principal)**
 
 **Recursos:**
+
 - ✅ Verificação automática de pré-requisitos
 - ✅ Configuração de banco de dados (SQLite/MySQL)
 - ✅ Instalação opcional do Redis
@@ -113,6 +182,7 @@ Scripts\Development\Dev-Tools.ps1 run -Watch
 - ✅ Modo silencioso para automação
 
 **Parâmetros:**
+
 ```powershell
 -InstallType      # Dev ou Production
 -WithRedis        # Instalar Redis (padrão: true)
@@ -125,6 +195,7 @@ Scripts\Development\Dev-Tools.ps1 run -Watch
 ### **install-quick.bat (Acesso Rápido)**
 
 **Recursos:**
+
 - ✅ Instalação em minutos sem configurações
 - ✅ Verificação automática de privilégios
 - ✅ Setup SQLite automático

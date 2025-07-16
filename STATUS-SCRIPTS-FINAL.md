@@ -60,6 +60,7 @@
 **Localização:** `Scripts/Install-IntranetDocumentos.ps1`
 
 **Recursos Implementados:**
+
 - ✅ **Verificação automática** de pré-requisitos (.NET, Admin, PowerShell)
 - ✅ **Instalação modular** com parâmetros configuráveis
 - ✅ **Deploy automático** da aplicação
@@ -73,6 +74,7 @@
 - ✅ **Relatório final** completo
 
 **Parâmetros Disponíveis:**
+
 ```powershell
 -InstallType      # Dev ou Production (padrão: Production)
 -WithRedis        # Instalar Redis (padrão: $true)
@@ -87,6 +89,7 @@
 **Localização:** `Scripts/install-quick.bat`
 
 **Recursos Implementados:**
+
 - ✅ **Instalação em minutos** sem configurações
 - ✅ **Interface amigável** para usuários finais
 - ✅ **Verificação automática** de privilégios e .NET
@@ -100,6 +103,7 @@
 **Localização:** `Scripts/Development/Dev-Tools.ps1`
 
 **Recursos Implementados:**
+
 - ✅ **Menu interativo** com todas as opções
 - ✅ **Comandos unificados:** run, build, test, migrate, etc.
 - ✅ **Modo watch** com recarregamento automático
@@ -114,6 +118,7 @@
 **Localização:** `Scripts/Database/Setup-Database.ps1`
 
 **Recursos Implementados:**
+
 - ✅ **Suporte SQLite e MySQL**
 - ✅ **Configuração automática** de connection strings
 - ✅ **Migrações EF Core** automáticas
@@ -127,6 +132,7 @@
 ## 📋 **FUNCIONALIDADES IMPLEMENTADAS**
 
 ### **🔧 Instalação e Deploy**
+
 - ✅ **Verificação de pré-requisitos** automática
 - ✅ **Instalação .NET** (verificação e orientação)
 - ✅ **Configuração IIS** completa para produção
@@ -135,6 +141,7 @@
 - ✅ **SSL/HTTPS** configuração automática
 
 ### **🗄️ Banco de Dados**
+
 - ✅ **SQLite** para desenvolvimento (padrão)
 - ✅ **MySQL** para produção
 - ✅ **Migrações automáticas** EF Core
@@ -143,6 +150,7 @@
 - ✅ **Verificação de integridade**
 
 ### **🔒 Segurança**
+
 - ✅ **Hardening automático** do sistema
 - ✅ **Headers de segurança** HTTP
 - ✅ **Rate limiting** distribuído
@@ -151,6 +159,7 @@
 - ✅ **Permissões de arquivos**
 
 ### **🛠️ Desenvolvimento**
+
 - ✅ **Hot reload** com modo watch
 - ✅ **Build automático** Debug/Release
 - ✅ **Testes unitários** integrados
@@ -159,6 +168,7 @@
 - ✅ **Publicação** automatizada
 
 ### **📊 Logs e Monitoramento**
+
 - ✅ **Logs detalhados** com timestamps
 - ✅ **Códigos de erro** específicos
 - ✅ **Relatórios finais** de instalação
@@ -170,12 +180,14 @@
 ## 🎯 **CENÁRIOS DE USO COBERTOS**
 
 ### **👤 Para Usuários Finais:**
+
 ```batch
 # Instalação mais simples possível
 deploy-quick.bat
 ```
 
 ### **👔 Para Administradores:**
+
 ```powershell
 # Instalação completa de produção
 Scripts\Install-IntranetDocumentos.ps1
@@ -185,6 +197,7 @@ Scripts\Install-IntranetDocumentos.ps1 -InstallType Production -WithRedis:$true 
 ```
 
 ### **🛠️ Para Desenvolvedores:**
+
 ```powershell
 # Menu interativo de desenvolvimento
 Scripts\Development\Dev-Tools.ps1
@@ -197,6 +210,7 @@ Scripts\Development\Dev-Tools.ps1 build -Configuration Release
 ```
 
 ### **🔧 Para DevOps:**
+
 ```powershell
 # Deploy automatizado
 Scripts\Deploy\Deploy-WindowsServer.ps1
@@ -213,11 +227,13 @@ Scripts\Security\Hardening-Seguranca.ps1
 ## 📖 **DOCUMENTAÇÃO CRIADA**
 
 ### **📚 Documentos Principais:**
+
 1. **[Scripts/README.md](Scripts/README.md)** - 📖 Guia completo de todos os scripts
 2. **[SCRIPTS-UNIFICADOS.md](SCRIPTS-UNIFICADOS.md)** - 📋 Índice e organização
 3. **Help integrado** em todos os scripts PowerShell
 
 ### **🆘 Help Contextual:**
+
 ```powershell
 # Help do instalador principal
 Get-Help Scripts\Install-IntranetDocumentos.ps1 -Full
@@ -270,18 +286,21 @@ Get-Help Scripts\Database\Setup-Database.ps1 -Examples
 ## 🚀 **FACILIDADE DE USO FINAL**
 
 ### **Para Qualquer Usuário:**
+
 ```batch
 # Da raiz do projeto - MAIS SIMPLES POSSÍVEL
 deploy-quick.bat
 ```
 
 ### **Para Administradores:**
+
 ```powershell
 # Instalação completa com todas as opções
 Scripts\Install-IntranetDocumentos.ps1
 ```
 
 ### **Para Desenvolvedores:**
+
 ```powershell
 # Ferramentas completas de desenvolvimento
 Scripts\Development\Dev-Tools.ps1

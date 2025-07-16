@@ -16,6 +16,7 @@ Pasta unificada com todos os scripts de instalação, deploy, desenvolvimento e 
 ### 📁 **ORGANIZE POR CATEGORIAS**
 
 #### 🚀 **Deploy (/Deploy/)**
+
 - **Deploy-WindowsServer.ps1** - Deploy completo para Windows Server
 - **Configuracao-IIS.ps1** - Configuração automática do IIS
 - **Install-Redis-Windows.ps1** - Instalação do Redis
@@ -23,6 +24,7 @@ Pasta unificada com todos os scripts de instalação, deploy, desenvolvimento e 
 - **Verificacao-Pos-Instalacao.ps1** - Verificações pós-instalação
 
 #### 🗄️ **Banco de Dados (/Database/)**
+
 - **Setup-Database.ps1** - Configurador unificado de BD
 - **backup-database.ps1** - Backup automático
 - **recreate-database.ps1** - Recriar banco (desenvolvimento)
@@ -32,10 +34,12 @@ Pasta unificada com todos os scripts de instalação, deploy, desenvolvimento e 
 - **check-departments.sql** - Verificação de departamentos
 
 #### 🔒 **Segurança (/Security/)**
+
 - **Hardening-Seguranca.ps1** - Hardening do sistema
 - **Auditoria-Seguranca.ps1** - Auditoria de segurança
 
 #### 🛠️ **Desenvolvimento (/Development/)**
+
 - **Dev-Tools.ps1** - Ferramentas unificadas de desenvolvimento
 - **run-app.ps1** - Executar aplicação
 - **start-app.ps1** - Inicialização alternativa
@@ -96,6 +100,7 @@ install-quick.bat
 ```
 
 **O que faz:**
+
 - ✅ Verifica pré-requisitos (.NET, privilégios)
 - ✅ Configura banco SQLite automaticamente
 - ✅ Restaura dependências e compila
@@ -119,6 +124,7 @@ install-quick.bat
 ```
 
 **Parâmetros disponíveis:**
+
 - `InstallType`: Dev ou Production
 - `WithRedis`: Instalar Redis (padrão: true)
 - `WithSecurity`: Aplicar hardening (padrão: true)
@@ -168,6 +174,7 @@ install-quick.bat
 ```
 
 **Configurações aplicadas:**
+
 - Headers de segurança HTTP
 - Rate limiting distribuído
 - Configurações de SSL/TLS
@@ -247,6 +254,7 @@ install-quick.bat
 ```
 
 **Verifica:**
+
 - ✅ Aplicação respondendo
 - ✅ Banco de dados conectado
 - ✅ Redis funcionando (se instalado)
@@ -298,29 +306,34 @@ Get-Content Logs\application-latest.log -Wait
 ### **Problemas Comuns**
 
 #### **"Acesso negado" / "Access Denied"**
+
 ```powershell
 # Execute como Administrador
 # Clique direito no PowerShell → "Executar como administrador"
 ```
 
 #### **".NET não encontrado"**
+
 ```powershell
 # Instale .NET 8.0+ de: https://dotnet.microsoft.com/download
 ```
 
 #### **"Não é possível executar scripts"**
+
 ```powershell
 # Execute uma vez:
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 #### **Erro de conexão com banco**
+
 ```powershell
 # Reconfigure o banco:
 .\Database\Setup-Database.ps1 -Recreate
 ```
 
 #### **Aplicação não inicia**
+
 ```powershell
 # Verificar dependências:
 .\Development\Dev-Tools.ps1 check
@@ -334,14 +347,17 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ## 📞 **SUPORTE**
 
 ### **Documentação Completa**
+
 📚 **[DOCUMENTACAO-OFICIAL-UNIFICADA.md](../DOCUMENTACAO-OFICIAL-UNIFICADA.md)**
 
 ### **Links Úteis**
-- 🐙 **Repositório:** https://github.com/Vollupios/mc_web_app
-- 📋 **Issues:** https://github.com/Vollupios/mc_web_app/issues
-- 📖 **Wiki:** https://github.com/Vollupios/mc_web_app/wiki
+
+- 🐙 **Repositório:** <https://github.com/Vollupios/mc_web_app>
+- 📋 **Issues:** <https://github.com/Vollupios/mc_web_app/issues>
+- 📖 **Wiki:** <https://github.com/Vollupios/mc_web_app/wiki>
 
 ### **Informações do Sistema**
+
 - **Versão:** 2.0 Production Ready
 - **Framework:** ASP.NET Core 9.0
 - **Banco:** SQLite (dev) / MySQL (prod)

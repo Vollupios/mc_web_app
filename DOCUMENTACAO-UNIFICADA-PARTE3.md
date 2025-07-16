@@ -3,6 +3,7 @@
 ## **7.1 Estrutura do Projeto**
 
 ### **📁 Organização de Pastas**
+
 ```
 IntranetDocumentos/
 ├── Controllers/          # Controladores MVC
@@ -42,6 +43,7 @@ IntranetDocumentos/
 ### **🏗️ Padrões Arquiteturais**
 
 #### **Repository Pattern**
+
 ```csharp
 public interface IDocumentRepository
 {
@@ -54,6 +56,7 @@ public interface IDocumentRepository
 ```
 
 #### **Service Pattern**
+
 ```csharp
 public interface IDocumentService
 {
@@ -65,6 +68,7 @@ public interface IDocumentService
 ```
 
 #### **Builder Pattern**
+
 ```csharp
 public class DocumentBuilder : IBuilder<Document>
 {
@@ -93,6 +97,7 @@ public class DocumentBuilder : IBuilder<Document>
 ### **🔧 Convenções de Nomenclatura**
 
 #### **C# Code Style**
+
 ```csharp
 // Classes: PascalCase
 public class DocumentService { }
@@ -114,6 +119,7 @@ public interface IDocumentService { }
 ```
 
 #### **Async/Await Pattern**
+
 ```csharp
 // Sempre usar Async suffix
 public async Task<Document> GetDocumentAsync(int id)
@@ -138,6 +144,7 @@ public async Task<Document> SaveDocumentAsync(Document document)
 ```
 
 ### **📝 Logging Pattern**
+
 ```csharp
 // Logs estruturados com contexto
 _logger.LogInformation("📄 Upload iniciado - Arquivo: {FileName}, Usuário: {UserId}, Tamanho: {FileSize}", 
@@ -151,6 +158,7 @@ _logger.LogError(ex, "❌ Erro crítico - Operação: {Operation}, Usuário: {Us
 ```
 
 ### **🔒 Security Patterns**
+
 ```csharp
 // Validação de entrada
 public async Task<IActionResult> Download(int id)
@@ -179,6 +187,7 @@ public async Task<IActionResult> Upload(UploadViewModel model) { }
 ## **7.3 Testes**
 
 ### **🧪 Estrutura de Testes**
+
 ```
 Tests/
 ├── UnitTests/
@@ -201,6 +210,7 @@ Tests/
 ```
 
 ### **🔧 Exemplo de Teste Unitário**
+
 ```csharp
 [TestClass]
 public class DocumentServiceTests
@@ -250,6 +260,7 @@ public class DocumentServiceTests
 ```
 
 ### **🌐 Teste de Integração**
+
 ```csharp
 [TestClass]
 public class DocumentUploadIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
@@ -291,6 +302,7 @@ public class DocumentUploadIntegrationTests : IClassFixture<WebApplicationFactor
 ### **🔧 Build Scripts**
 
 #### **build-analytics.sh (Linux/Mac)**
+
 ```bash
 #!/bin/bash
 echo "🔧 Building Intranet Documentos..."
@@ -311,6 +323,7 @@ echo "✅ Build completed successfully!"
 ```
 
 #### **Deploy-WindowsServer.ps1**
+
 ```powershell
 #!/usr/bin/env pwsh
 param(
@@ -347,6 +360,7 @@ Write-Host "✅ Deploy concluído com sucesso!" -ForegroundColor Green
 ```
 
 ### **📦 CI/CD Pipeline (GitHub Actions)**
+
 ```yaml
 name: Build and Deploy
 
@@ -392,6 +406,7 @@ jobs:
 ## **8.1 Problemas Comuns**
 
 ### **🔴 Erro: "Failed to bind to address already in use"**
+
 ```bash
 # Verificar processos na porta
 sudo netstat -tulpn | grep :5000
@@ -404,6 +419,7 @@ dotnet run --urls "http://localhost:5001"
 ```
 
 ### **🔴 Erro: "Connection string not found"**
+
 ```json
 // Verificar appsettings.json
 {
@@ -414,6 +430,7 @@ dotnet run --urls "http://localhost:5001"
 ```
 
 ### **🔴 Erro: "Redis connection failed"**
+
 ```bash
 # Verificar se Redis está rodando
 redis-cli ping
@@ -426,6 +443,7 @@ redis-cli info server
 ```
 
 ### **🔴 Erro: "File upload size exceeded"**
+
 ```xml
 <!-- web.config - Aumentar limite de upload -->
 <system.webServer>
@@ -438,6 +456,7 @@ redis-cli info server
 ```
 
 ### **🔴 Erro: "Database migration failed"**
+
 ```bash
 # Verificar conexão com banco
 mysql -u app_user -p -e "SELECT 1;"
@@ -455,6 +474,7 @@ dotnet ef database update
 ## **8.2 Logs e Diagnóstico**
 
 ### **📊 Estrutura de Logs**
+
 ```
 Logs/
 ├── application-YYYYMMDD.log      # Logs da aplicação
@@ -464,6 +484,7 @@ Logs/
 ```
 
 ### **🔍 Comandos de Diagnóstico**
+
 ```powershell
 # Verificar logs da aplicação
 Get-Content -Path "Logs\application-$(Get-Date -Format 'yyyyMMdd').log" -Tail 50
@@ -483,6 +504,7 @@ Test-NetConnection -ComputerName localhost -Port 6379
 ```
 
 ### **📈 Monitoramento de Performance**
+
 ```csharp
 // Performance counters
 public class PerformanceMonitor
@@ -504,6 +526,7 @@ public class PerformanceMonitor
 ## **8.3 FAQ**
 
 ### **❓ Como adicionar um novo departamento?**
+
 ```sql
 -- Via SQL
 INSERT INTO Departments (Name) VALUES ('Novo Departamento');
@@ -513,6 +536,7 @@ INSERT INTO Departments (Name) VALUES ('Novo Departamento');
 ```
 
 ### **❓ Como resetar senha de usuário?**
+
 ```csharp
 // Via código (admin)
 var user = await _userManager.FindByEmailAsync("usuario@empresa.com");
@@ -521,6 +545,7 @@ await _userManager.ResetPasswordAsync(user, token, "NovaSenha123!");
 ```
 
 ### **❓ Como fazer backup manual?**
+
 ```bash
 # Backup completo
 ./backup-database.ps1
@@ -531,6 +556,7 @@ tar -czf DocumentsStorage_backup.tar.gz DocumentsStorage/
 ```
 
 ### **❓ Como verificar se Redis está funcionando?**
+
 ```bash
 # Teste básico
 redis-cli ping
@@ -544,6 +570,7 @@ redis-cli monitor
 ```
 
 ### **❓ Como configurar HTTPS em produção?**
+
 ```powershell
 # 1. Obter certificado SSL
 # 2. Instalar no Windows Server
@@ -569,6 +596,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
 ### **🔧 Versão 2.0 (16/07/2025)**
 
 #### **✅ Principais Correções:**
+
 - ✅ **Rota AdvancedSearch implementada** (DocumentsController)
 - ✅ **Queries LINQ otimizadas** (AnalyticsService)  
 - ✅ **Sintaxe SQL MySQL corrigida** (setup-mysql.sql)
@@ -577,6 +605,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
 - ✅ **VS Code configurado** para MySQL
 
 #### **🔒 Melhorias de Segurança:**
+
 - ✅ Rate limiting por usuário/email
 - ✅ Headers de segurança (X-Frame-Options, CSP, etc.)
 - ✅ Auditoria de segurança completa
@@ -584,6 +613,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
 - ✅ Validação robusta de entrada
 
 #### **⚡ Otimizações de Performance:**
+
 - ✅ Cache Redis distribuído
 - ✅ Queries MySQL otimizadas
 - ✅ Índices de banco otimizados
@@ -595,6 +625,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
 ## **9.2 Roadmap**
 
 ### **🎯 Versão 2.1 (Próximos 30 dias)**
+
 - 🔄 **Notificações em tempo real** (SignalR)
 - 📱 **PWA** (Progressive Web App)
 - 🔍 **Busca full-text** em conteúdo de documentos
@@ -602,6 +633,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
 - 🌍 **Multi-idioma** (i18n)
 
 ### **🎯 Versão 2.2 (Próximos 60 dias)**
+
 - ☁️ **Integração nuvem** (Azure/AWS)
 - 🤖 **OCR** para documentos escaneados
 - 📧 **Sistema de aprovação** por email
@@ -609,6 +641,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
 - 🔄 **Sincronização offline**
 
 ### **🎯 Versão 3.0 (Próximos 90 dias)**
+
 - 🤖 **IA para categorização** automática
 - 🔐 **Single Sign-On** (SAML/OAuth)
 - 📊 **Business Intelligence** integrado
@@ -620,6 +653,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
 ## **9.3 Próximos Passos**
 
 ### **🚀 Deploy em Produção**
+
 1. ✅ **Executar scripts de deploy** (`Deploy-WindowsServer.ps1`)
 2. ✅ **Configurar SSL/HTTPS** obrigatório
 3. ✅ **Configurar backup automático** (diário)
@@ -627,6 +661,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
 5. ✅ **Treinamento** dos usuários
 
 ### **🔧 Manutenção**
+
 1. ✅ **Backup diário** automatizado
 2. ✅ **Monitoramento** de logs
 3. ✅ **Atualizações de segurança** mensais
@@ -634,6 +669,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
 5. ✅ **Auditoria** de segurança semestral
 
 ### **📈 Melhorias Contínuas**
+
 1. ✅ **Feedback** dos usuários
 2. ✅ **Métricas** de uso
 3. ✅ **Otimizações** de performance
@@ -645,9 +681,11 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
 ## **🎯 CONCLUSÃO**
 
 ### **✅ Status Final do Projeto**
+
 A aplicação **Intranet Documentos** está **100% funcional** e pronta para deploy em ambiente de produção. Todas as funcionalidades principais foram implementadas, testadas e documentadas.
 
 ### **🏆 Principais Conquistas**
+
 - ✅ **Sistema completo** de gestão de documentos
 - ✅ **Segurança enterprise-grade** implementada
 - ✅ **Performance otimizada** com Redis
@@ -656,6 +694,7 @@ A aplicação **Intranet Documentos** está **100% funcional** e pronta para dep
 - ✅ **Documentação unificada** e abrangente
 
 ### **🚀 Pronto para Produção**
+
 - ✅ **Scripts de deploy** automatizados
 - ✅ **Configurações de segurança** validadas
 - ✅ **Backup e restore** funcionais
