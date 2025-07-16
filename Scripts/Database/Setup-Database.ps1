@@ -13,13 +13,13 @@ param(
     [string]$ConnectionString = "",
     
     [Parameter(HelpMessage="Recriar banco de dados (ATENÇÃO: Apaga dados!)")]
-    [switch]$Recreate = $false,
+    [switch]$Recreate,
     
     [Parameter(HelpMessage="Executar apenas migrações")]
-    [switch]$MigrateOnly = $false,
+    [switch]$MigrateOnly,
     
     [Parameter(HelpMessage="Inserir dados de exemplo")]
-    [switch]$WithSampleData = $true
+    [switch]$WithSampleData
 )
 
 $ErrorActionPreference = "Stop"
@@ -76,7 +76,7 @@ function Test-DatabaseConnection {
 # CONFIGURAÇÃO SQLITE
 # ================================================================
 
-function Setup-SQLiteDatabase {
+function Initialize-SQLiteDatabase {
     Write-DbLog "🗄️ Configurando banco SQLite..." "INFO"
     
     $dbPath = Join-Path $AppRoot "IntranetDocumentos.db"
@@ -118,7 +118,7 @@ function Setup-SQLiteDatabase {
 # CONFIGURAÇÃO MYSQL
 # ================================================================
 
-function Setup-MySQLDatabase {
+function Initialize-MySQLDatabase {
     Write-DbLog "🗄️ Configurando banco MySQL..." "INFO"
     
     $setupScript = Join-Path $ScriptRoot "setup-database.mysql.sql"
@@ -166,7 +166,7 @@ function Setup-MySQLDatabase {
 # DADOS DE EXEMPLO
 # ================================================================
 
-function Insert-SampleData {
+function Add-SampleData {
     if (!$WithSampleData) {
         return
     }
@@ -276,6 +276,11 @@ function Update-AppConfiguration {
 # ================================================================
 
 function Main {
+    # Definir valores padrão para switch parameters (PowerShell Best Practice)
+    if (!$PSBoundParameters.ContainsKey('WithSampleData')) { $WithSampleData = $true }
+    if (!$PSBoundParameters.ContainsKey('Recreate')) { $Recreate = $false }
+    if (!$PSBoundParameters.ContainsKey('MigrateOnly')) { $MigrateOnly = $false }
+    
     try {
         Write-DbLog "🗄️ CONFIGURADOR DE BANCO - Intranet Documentos" "SUCCESS"
         Write-DbLog "=============================================" "INFO"
@@ -292,16 +297,16 @@ function Main {
         
         # Configurar banco de dados
         if ($DatabaseType -eq "SQLite") {
-            $finalConnectionString = Setup-SQLiteDatabase
+            $finalConnectionString = Initialize-SQLiteDatabase
         } elseif ($DatabaseType -eq "MySQL") {
-            $finalConnectionString = Setup-MySQLDatabase
+            $finalConnectionString = Initialize-MySQLDatabase
         }
         
         # Atualizar configuração da aplicação
         Update-AppConfiguration $finalConnectionString $DatabaseType
         
         # Inserir dados de exemplo
-        Insert-SampleData
+        Add-SampleData
         
         Write-DbLog "✅ CONFIGURAÇÃO DE BANCO CONCLUÍDA!" "SUCCESS"
         Write-DbLog "Connection String: $finalConnectionString" "INFO"

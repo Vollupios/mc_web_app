@@ -11,19 +11,19 @@ param(
     [string]$InstallType = "Production",
     
     [Parameter(HelpMessage="Instalar Redis para cache distribuído")]
-    [switch]$WithRedis = $true,
+    [switch]$WithRedis,
     
     [Parameter(HelpMessage="Aplicar hardening de segurança")]
-    [switch]$WithSecurity = $true,
+    [switch]$WithSecurity,
     
     [Parameter(HelpMessage="Configurar IIS automaticamente")]
-    [switch]$WithIIS = $true,
+    [switch]$WithIIS,
     
     [Parameter(HelpMessage="Executar verificação pós-instalação")]
-    [switch]$WithVerification = $true,
+    [switch]$WithVerification,
     
     [Parameter(HelpMessage="Modo silencioso (sem interação)")]
-    [switch]$Silent = $false
+    [switch]$Silent
 )
 
 # ================================================================
@@ -93,9 +93,9 @@ function Invoke-ScriptSafely {
     
     try {
         if ($Arguments) {
-            $result = & $ScriptPath $Arguments
+            $null = & $ScriptPath $Arguments
         } else {
-            $result = & $ScriptPath
+            $null = & $ScriptPath
         }
         
         Write-InstallLog "✅ Script executado com sucesso: $ScriptPath" "SUCCESS"
@@ -265,6 +265,13 @@ function Show-InstallationSummary {
 # ================================================================
 
 function Main {
+    # Definir valores padrão para switches (PowerShell Best Practice)
+    if (!$PSBoundParameters.ContainsKey('WithRedis')) { $WithRedis = $true }
+    if (!$PSBoundParameters.ContainsKey('WithSecurity')) { $WithSecurity = $true }
+    if (!$PSBoundParameters.ContainsKey('WithIIS')) { $WithIIS = $true }
+    if (!$PSBoundParameters.ContainsKey('WithVerification')) { $WithVerification = $true }
+    if (!$PSBoundParameters.ContainsKey('Silent')) { $Silent = $false }
+    
     try {
         Write-InstallLog "🚀 INSTALADOR OFICIAL - Intranet Documentos v2.0" "SUCCESS"
         Write-InstallLog "================================================" "INFO"
