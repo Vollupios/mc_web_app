@@ -306,5 +306,113 @@ namespace IntranetDocumentos.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        /// <summary>
+        /// Visualiza um documento no navegador (PDFs, imagens, etc).
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> View(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Challenge();
+            }
+
+            if (!await _documentService.CanUserAccessDocumentAsync(id, user))
+            {
+                _logger.LogWarning("Tentativa não autorizada de visualização - ID: {DocumentId}, Usuário: {UserId}", id, user.Id);
+                return Forbid();
+            }
+
+            var document = await _documentService.GetDocumentByIdAsync(id);
+            if (document == null)
+            {
+                _logger.LogWarning("Documento não encontrado para visualização - ID: {DocumentId}", id);
+                return NotFound();
+            }
+
+            try
+            {
+                var fileStream = await _documentService.GetDocumentStreamAsync(document.Id, user);
+                if (fileStream == null)
+                {
+                    _logger.LogWarning("Stream do documento não encontrado - ID: {DocumentId}", id);
+                    return NotFound();
+                }
+
+                _logger.LogInformation("Visualização de documento - ID: {DocumentId}, Usuário: {UserId}", id, user.Id);
+
+                // Determinar o Content-Type correto baseado na extensão
+                var contentType = GetContentTypeFromExtension(document.OriginalFileName);
+                
+                // Para PDFs e imagens, usar inline para exibir no navegador
+                if (IsViewableInBrowser(document.OriginalFileName))
+                {
+                    Response.Headers["Content-Disposition"] = $"inline; filename=\"{document.OriginalFileName}\"";
+                }
+                else
+                {
+                    // Para outros tipos, forçar download
+                    Response.Headers["Content-Disposition"] = $"attachment; filename=\"{document.OriginalFileName}\"";
+                }
+
+                return File(fileStream, contentType, document.OriginalFileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao visualizar documento - ID: {DocumentId}, Usuário: {UserId}", id, user.Id);
+                TempData["Error"] = "Erro ao visualizar o documento. Tente novamente.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        /// <summary>
+        /// Determina se um arquivo pode ser visualizado diretamente no navegador.
+        /// </summary>
+        private static bool IsViewableInBrowser(string fileName)
+        {
+            var extension = Path.GetExtension(fileName).ToLowerInvariant();
+            return extension switch
+            {
+                ".pdf" => true,
+                ".jpg" or ".jpeg" => true,
+                ".png" => true,
+                ".gif" => true,
+                ".bmp" => true,
+                ".webp" => true,
+                ".txt" => true,
+                ".svg" => true,
+                _ => false
+            };
+        }
+
+        /// <summary>
+        /// Obtém o Content-Type correto baseado na extensão do arquivo.
+        /// </summary>
+        private static string GetContentTypeFromExtension(string fileName)
+        {
+            var extension = Path.GetExtension(fileName).ToLowerInvariant();
+            return extension switch
+            {
+                ".pdf" => "application/pdf",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".bmp" => "image/bmp",
+                ".webp" => "image/webp",
+                ".txt" => "text/plain",
+                ".svg" => "image/svg+xml",
+                ".doc" => "application/msword",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ".xls" => "application/vnd.ms-excel",
+                ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ".ppt" => "application/vnd.ms-powerpoint",
+                ".pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                ".zip" => "application/zip",
+                ".rar" => "application/x-rar-compressed",
+                _ => "application/octet-stream"
+            };
+        }
     }
 }
