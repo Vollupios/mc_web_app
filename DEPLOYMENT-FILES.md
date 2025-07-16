@@ -1,37 +1,44 @@
 # 📦 Arquivos de Instalação Criados
 
 ## Scripts PowerShell (.ps1)
+
 - `Deploy-WindowsServer.ps1` - Script principal de deploy automático
 - `Configuracao-IIS.ps1` - Configuração específica do IIS e Application Pool  
 - `Publish-ToWindowsServer.ps1` - Script para publicação remota
 - `Verificacao-Pos-Instalacao.ps1` - Verificação e diagnóstico pós-instalação
 
 ## Scripts Batch (.bat)
+
 - `deploy-quick.bat` - Instalação rápida automatizada (execute como Admin)
 
 ## Configuração
+
 - `web.config` - Configuração do IIS para ASP.NET Core
 - `appsettings.Production.json` - Configurações de produção (atualizado)
 - `setup-mysql.sql` - Script SQL para configurar banco MySQL
 
 ## Documentação
+
 - `INSTALL-GUIDE.md` - Guia completo de instalação passo a passo
 - `PACKAGE-README.md` - Resumo do pacote de instalação
 - `DEPLOYMENT-FILES.md` - Este arquivo (lista de arquivos criados)
 
 ## Projeto Atualizado
+
 - `IntranetDocumentos.csproj` - Dependências atualizadas para .NET 9
 - `Program.cs` - Configurações de produção e logging do Windows
 
 ## Como Usar
 
 ### Instalação Automática (Recomendado)
+
 ```batch
 # Execute como Administrador
 deploy-quick.bat
 ```
 
 ### Instalação Manual
+
 ```powershell
 # 1. Deploy completo
 .\Deploy-WindowsServer.ps1
@@ -44,6 +51,7 @@ deploy-quick.bat
 ```
 
 ### Publicação Remota
+
 ```powershell
 # Para publicar em servidor remoto
 .\Publish-ToWindowsServer.ps1 -TargetServer "SEU-SERVIDOR"

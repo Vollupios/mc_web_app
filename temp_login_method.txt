@@ -1,45 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.RateLimiting;
-using IntranetDocumentos.Models;
-using IntranetDocumentos.Models.ViewModels;
-using IntranetDocumentos.Services.Security;
-
-namespace IntranetDocumentos.Controllers
-{
-    public class AccountController : Controller
-    {
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ISecurityAlertService _securityAlertService;
-        private readonly IUserRateLimitingService _userRateLimitingService;
-        private readonly ILogger<AccountController> _logger;
-
-        public AccountController(
-            SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager,
-            ISecurityAlertService securityAlertService,
-            IUserRateLimitingService userRateLimitingService,
-            ILogger<AccountController> logger)
-        {
-            _signInManager = signInManager;
-            _userManager = userManager;
-            _securityAlertService = securityAlertService;
-            _userRateLimitingService = userRateLimitingService;
-            _logger = logger;
-        }
-
-        /// <summary>
-        /// Exibe tela de login.
-        /// </summary>
-        [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
-        {
-            ViewBag.ReturnUrl = returnUrl;
-            _logger.LogInformation("Acessando tela de login.");
-            return View();
-        }
-
         /// <summary>
         /// 🔒 Realiza login do usuário com rate limiting baseado em email/usuário específico
         /// </summary>
@@ -58,11 +16,11 @@ namespace IntranetDocumentos.Controllers
                 {
                     var status = await _userRateLimitingService.GetUserStatusAsync(model.Email);
                     
-                    _logger.LogWarning("🔒 LOGIN BLOQUEADO: Usuário {Email} excedeu limite de tentativas - Tempo restante: {RemainingTime} (IP: {IP})", 
-                        model.Email, status.RemainingLockoutTime, clientIp);
+                    _logger.LogWarning("🔒 LOGIN BLOQUEADO: Usuário {Email} excedeu limite de tentativas - Bloqueado até: {LockoutUntil} (IP: {IP})", 
+                        model.Email, status.LockoutUntil, clientIp);
                     
-                    var lockoutMessage = status.RemainingLockoutTime.HasValue 
-                        ? $"Muitas tentativas de login. Conta bloqueada por mais {Math.Ceiling(status.RemainingLockoutTime.Value.TotalMinutes)} minutos."
+                    var lockoutMessage = status.LockoutUntil.HasValue 
+                        ? $"Muitas tentativas de login. Conta bloqueada até {status.LockoutUntil.Value.ToString("HH:mm")}."
                         : $"Muitas tentativas de login. Você pode tentar novamente em alguns minutos.";
                     
                     ModelState.AddModelError(string.Empty, lockoutMessage);

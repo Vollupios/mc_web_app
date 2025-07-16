@@ -269,10 +269,17 @@ namespace IntranetDocumentos.Services
                 {
                     Year = g.Key.Year,
                     Month = g.Key.Month,
-                    MonthName = cultureInfo.DateTimeFormat.GetMonthName(g.Key.Month),
-                    DocumentsUploaded = g.Count(),                    TotalDownloads = 0 // Será preenchido abaixo
+                    MonthName = "", // Será preenchido abaixo
+                    DocumentsUploaded = g.Count(),
+                    TotalDownloads = 0 // Será preenchido abaixo
                 })
                 .ToListAsync();
+
+            // Preencher nomes dos meses após a query no banco
+            foreach (var month in monthlyUploads)
+            {
+                month.MonthName = cultureInfo.DateTimeFormat.GetMonthName(month.Month);
+            }
 
             // Preencher downloads mensais
             foreach (var month in monthlyUploads)
@@ -290,15 +297,26 @@ namespace IntranetDocumentos.Services
             var totalReunioes = await _context.Reunioes.CountAsync();
             if (totalReunioes == 0) return new List<ReuniaoPorTipoViewModel>();
 
-            return await _context.Reunioes
+            var reunioesPorTipo = await _context.Reunioes
                 .GroupBy(r => r.TipoReuniao)
                 .Select(g => new ReuniaoPorTipoViewModel
                 {
-                    TipoReuniao = g.Key.GetDisplayName(),
+                    TipoReuniao = g.Key.ToString(), // Será convertido abaixo
                     Count = g.Count(),
                     Percentage = (double)g.Count() / totalReunioes * 100
                 })
                 .ToListAsync();
+
+            // Converter enum para display name após a query no banco
+            foreach (var item in reunioesPorTipo)
+            {
+                if (Enum.TryParse<TipoReuniao>(item.TipoReuniao, out var tipoEnum))
+                {
+                    item.TipoReuniao = tipoEnum.GetDisplayName();
+                }
+            }
+
+            return reunioesPorTipo;
         }
 
         private async Task<List<ReuniaoPorStatusViewModel>> GetReuniaoPorStatusAsync()

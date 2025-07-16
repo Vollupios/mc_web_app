@@ -1,9 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 using IntranetDocumentos.Data;
 using IntranetDocumentos.Models;
 using IntranetDocumentos.Services;
+using IntranetDocumentos.Middleware;
 
 public partial class Program
 {
@@ -38,32 +41,60 @@ public partial class Program
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
+        // 🔴 Configurar Redis para cache distribuído
+        var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
+        if (!string.IsNullOrEmpty(redisConnectionString))
+        {
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConnectionString;
+                options.InstanceName = builder.Configuration["Redis:InstanceName"] ?? "IntranetDocumentos";
+            });
+            
+            // Adicionar também StackExchange.Redis para operações avançadas
+            builder.Services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(provider =>
+            {
+                var configuration = StackExchange.Redis.ConfigurationOptions.Parse(redisConnectionString);
+                configuration.AbortOnConnectFail = false;
+                configuration.ConnectRetry = 3;
+                configuration.ConnectTimeout = 5000;
+                return StackExchange.Redis.ConnectionMultiplexer.Connect(configuration);
+            });
+        }
+        else
+        {
+            // Fallback para MemoryCache se Redis não estiver configurado
+            builder.Services.AddMemoryCache();
+        }
+
         builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         {
-            // Password settings
+            // 🔒 Política de senha robusta
             options.Password.RequireDigit = true;
-            options.Password.RequiredLength = 6;
-            options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequireUppercase = false;
-            options.Password.RequireLowercase = false;
+            options.Password.RequiredLength = 12;              // ✅ Mínimo 12 caracteres
+            options.Password.RequireNonAlphanumeric = true;    // ✅ Símbolos obrigatórios
+            options.Password.RequireUppercase = true;          // ✅ Maiúsculas obrigatórias
+            options.Password.RequireLowercase = true;          // ✅ Minúsculas obrigatórias
+            options.Password.RequiredUniqueChars = 6;          // ✅ Caracteres únicos
 
-            // Lockout settings
-            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-            options.Lockout.MaxFailedAccessAttempts = 5;
+            // 🔒 Lockout mais rigoroso
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);  // ✅ 30 min de bloqueio
+            options.Lockout.MaxFailedAccessAttempts = 3;        // ✅ Máximo 3 tentativas
             options.Lockout.AllowedForNewUsers = true;
 
             // User settings
             options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             options.User.RequireUniqueEmail = true;
 
-            // Sign in settings
-            options.SignIn.RequireConfirmedEmail = false;
+            // 🔒 Confirmar email obrigatório (ativar em produção)
+            options.SignIn.RequireConfirmedEmail = false;      // TODO: Ativar em produção
             options.SignIn.RequireConfirmedPhoneNumber = false;
         })
         .AddEntityFrameworkStores<ApplicationDbContext>()
-        .AddDefaultTokenProviders();
+        .AddDefaultTokenProviders()
+        .AddPasswordValidator<IntranetDocumentos.Services.Security.CustomPasswordValidator>(); // 🔒 Validador customizado
 
-        // Configure cookie settings
+        // 🔒 Configure cookie settings with security hardening
         builder.Services.ConfigureApplicationCookie(options =>
         {
             options.LoginPath = "/Account/Login";
@@ -71,12 +102,51 @@ public partial class Program
             options.AccessDeniedPath = "/Account/AccessDenied";
             options.ExpireTimeSpan = TimeSpan.FromHours(8);
             options.SlidingExpiration = true;
+            
+            // 🔒 Security hardening for cookies
+            options.Cookie.HttpOnly = true;                    // ✅ Previne acesso via JavaScript
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;  // ✅ HTTPS obrigatório
+            options.Cookie.SameSite = SameSiteMode.Strict;     // ✅ Proteção CSRF
+            options.Cookie.Name = "IntranetAuth";              // ✅ Nome personalizado
+        });
+
+        // 🔒 Configurar rate limiting para proteção contra ataques (ajustado para ambiente corporativo)
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            
+            // Rate limiting para login (crítico) - por IP compartilhado
+            options.AddFixedWindowLimiter("LoginPolicy", options =>
+            {
+                options.Window = TimeSpan.FromMinutes(15);
+                options.PermitLimit = 50;  // ✅ 50 tentativas por IP em 15 min (ambiente corporativo)
+                options.AutoReplenishment = true;
+            });
+            
+            // Rate limiting para upload - por IP compartilhado
+            options.AddFixedWindowLimiter("UploadPolicy", options =>
+            {
+                options.Window = TimeSpan.FromMinutes(10);
+                options.PermitLimit = 100;     // ✅ 100 uploads por IP em 10 min (múltiplos usuários)
+                options.AutoReplenishment = true;
+            });
+            
+            // Rate limiting geral - muito permissivo para ambiente corporativo
+            options.AddFixedWindowLimiter("GeneralPolicy", options =>
+            {
+                options.Window = TimeSpan.FromMinutes(1);
+                options.PermitLimit = 1000;  // ✅ 1000 requests por minuto por IP (ambiente corporativo)
+                options.AutoReplenishment = true;
+            });
         });
 
         // Add custom services
         builder.Services.AddScoped<IDocumentService, DocumentService>();
         builder.Services.AddScoped<IDatabaseBackupService, DatabaseBackupService>();
         builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+        builder.Services.AddScoped<ISecureFileUploadService, SecureFileUploadService>(); // 🔒 Novo serviço seguro
+        builder.Services.AddScoped<IntranetDocumentos.Services.Security.ISecurityAlertService, IntranetDocumentos.Services.Security.SecurityAlertService>(); // 🔒 Alertas de segurança
+        builder.Services.AddScoped<IntranetDocumentos.Services.Security.IUserRateLimitingService, IntranetDocumentos.Services.Security.UserRateLimitingService>(); // 🔒 Rate limiting por usuário
         builder.Services.AddScoped<IReuniaoService, ReuniaoService>();
         builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
         builder.Services.AddScoped<IWorkflowService, WorkflowService>();
@@ -141,6 +211,15 @@ public partial class Program
 
         // Ativa CORS
         app.UseCors();
+
+        // 🔒 Headers de segurança automáticos
+        app.UseSecurityHeaders();
+
+        // 🔒 Ativar rate limiting
+        app.UseRateLimiter();
+
+        // 🔒 Middleware de auditoria de segurança
+        app.UseSecurityAudit();
 
         // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment())

@@ -28,24 +28,29 @@ deploy-quick.bat
 ## 📋 Índice Completo
 
 ### 🚀 Instalação
+
 1. [Instalação Rápida](#-instalação-rápida-1-comando)
 2. [Pré-requisitos](#-pré-requisitos)
 3. [Instalação Manual](#-instalação-manual-detalhada)
 
 ### ⚙️ Configuração
+
 4. [Configuração de Produção](#-configuração-de-produção)
 5. [Deploy Remoto](#-deploy-remoto)
 6. [Configurações Avançadas](#-configurações-avançadas)
 
 ### 🔧 Manutenção
+
 7. [Verificação e Diagnóstico](#-verificação-e-diagnóstico)
 8. [Solução de Problemas](#-solução-de-problemas)
 9. [Backup e Manutenção](#-backup-e-manutenção)
 
 ### 📖 Referência
+
 10. [Scripts e Arquivos](#-scripts-e-arquivos)
 11. [Checklist de Verificação](#-checklist-de-verificação)
-12. [Contato e Suporte](#-contato-e-suporte)
+12. [Segurança e Hardening](#-segurança-e-hardening)
+13. [Contato e Suporte](#-contato-e-suporte)
 
 ---
 
@@ -54,18 +59,21 @@ deploy-quick.bat
 ### Método Automatizado
 
 **1. Preparar Ambiente**
+
 ```batch
 # Baixar e extrair para:
 C:\Deploy\IntranetDocumentos\
 ```
 
 **2. Executar Instalação**
+
 ```batch
 # Clique com botão direito → "Executar como administrador"
 deploy-quick.bat
 ```
 
 **3. Configurar Aplicação**
+
 - Edite `C:\inetpub\wwwroot\IntranetDocumentos\appsettings.Production.json`
 - Configure:
   - String de conexão MySQL
@@ -73,12 +81,14 @@ deploy-quick.bat
   - Chaves de segurança
 
 **4. Verificar Instalação**
+
 ```powershell
 # Execute para verificar se tudo está funcionando
 .\Verificacao-Pos-Instalacao.ps1
 ```
 
 **5. Acessar Sistema**
+
 - URL: `http://localhost/IntranetDocumentos`
 - Login padrão: `admin@empresa.com.br` / `Admin123!`
 
@@ -87,21 +97,25 @@ deploy-quick.bat
 ## 📋 Pré-requisitos
 
 ### Sistema Operacional
+
 - ✅ **Windows Server 2019/2022** (recomendado)
 - ✅ **Windows 10/11 Pro** (desenvolvimento/teste)
 
 ### Software Obrigatório
+
 - ✅ **IIS (Internet Information Services)**
 - ✅ **.NET 9.0 Hosting Bundle** - [Download](https://dotnet.microsoft.com/download/dotnet/9.0)
 - ✅ **MySQL Server 8.0+** ou **MariaDB 10.5+**
 
 ### Hardware Recomendado
+
 - **CPU**: 2+ cores (4+ recomendado)
 - **RAM**: 4GB mínimo (8GB+ recomendado)
 - **Disco**: 20GB+ espaço livre
 - **Rede**: Conexão estável
 
 ### Permissões
+
 - ✅ **Administrador** no Windows Server
 - ✅ **Escrita** em `C:\inetpub\wwwroot`
 - ✅ **Criação** de diretórios em `C:\IntranetData`
@@ -403,6 +417,7 @@ Measure-Command { Invoke-WebRequest "http://localhost/IntranetDocumentos" }
 **Sintomas**: Erro 500, página em branco, timeout
 
 **Diagnóstico**:
+
 ```powershell
 # Verificar logs detalhados
 Get-EventLog -LogName Application -Source "IIS AspNetCore Module V2" -Newest 5
@@ -412,19 +427,23 @@ Get-Process -Name "dotnet" -ErrorAction SilentlyContinue
 ```
 
 **Soluções**:
+
 1. **Verificar .NET Hosting Bundle**
+
    ```powershell
    # Reinstalar se necessário
    dotnet --info | Select-String "Host"
    ```
 
 2. **Verificar permissões**
+
    ```powershell
    # Dar permissões ao IIS_IUSRS
    icacls "C:\inetpub\wwwroot\IntranetDocumentos" /grant "IIS_IUSRS:(OI)(CI)F" /T
    ```
 
 3. **Verificar web.config**
+
    ```xml
    <!-- Verificar se está configurado corretamente -->
    <aspNetCore processPath="dotnet" arguments=".\IntranetDocumentos.dll" stdoutLogEnabled="true" stdoutLogFile=".\logs\stdout" />
@@ -435,6 +454,7 @@ Get-Process -Name "dotnet" -ErrorAction SilentlyContinue
 **Sintomas**: "Unable to connect to database"
 
 **Diagnóstico**:
+
 ```sql
 -- Testar conexão
 mysql -u intranet_user -p -h localhost
@@ -447,7 +467,9 @@ SHOW GRANTS FOR 'intranet_user'@'localhost';
 ```
 
 **Soluções**:
+
 1. **Recriar usuário**
+
    ```sql
    DROP USER 'intranet_user'@'localhost';
    CREATE USER 'intranet_user'@'localhost' IDENTIFIED BY 'SuaSenhaSegura123!';
@@ -456,6 +478,7 @@ SHOW GRANTS FOR 'intranet_user'@'localhost';
    ```
 
 2. **Verificar string de conexão**
+
    ```json
    {
      "ConnectionStrings": {
@@ -469,6 +492,7 @@ SHOW GRANTS FOR 'intranet_user'@'localhost';
 **Sintomas**: Erro ao fazer upload, "Path not found"
 
 **Diagnóstico**:
+
 ```powershell
 # Verificar diretórios
 Test-Path "C:\IntranetData\Documents"
@@ -476,7 +500,9 @@ Get-Acl "C:\IntranetData\Documents"
 ```
 
 **Soluções**:
+
 1. **Criar diretórios**
+
    ```powershell
    New-Item -ItemType Directory -Path "C:\IntranetData\Documents" -Force
    New-Item -ItemType Directory -Path "C:\IntranetData\Backups" -Force
@@ -484,6 +510,7 @@ Get-Acl "C:\IntranetData\Documents"
    ```
 
 2. **Configurar permissões**
+
    ```powershell
    icacls "C:\IntranetData" /grant "IIS_IUSRS:(OI)(CI)F" /T
    icacls "C:\IntranetData" /grant "BUILTIN\Users:(OI)(CI)M" /T
@@ -494,13 +521,16 @@ Get-Acl "C:\IntranetData\Documents"
 **Sintomas**: Notificações não chegam, erro SMTP
 
 **Diagnóstico**:
+
 ```powershell
 # Testar SMTP
 Test-NetConnection -ComputerName "smtp.gmail.com" -Port 587
 ```
 
 **Soluções**:
+
 1. **Verificar configurações SMTP**
+
    ```json
    {
      "EmailSettings": {
@@ -620,6 +650,7 @@ C:\Logs\                                   # Logs personalizados
 ## ✅ Checklist de Verificação
 
 ### Pré-instalação
+
 - [ ] Windows Server 2019/2022 instalado
 - [ ] IIS habilitado e configurado
 - [ ] .NET 9.0 Hosting Bundle instalado
@@ -628,6 +659,7 @@ C:\Logs\                                   # Logs personalizados
 - [ ] Firewall configurado (portas 80, 443, 3306)
 
 ### Durante a Instalação
+
 - [ ] Scripts executados como administrador
 - [ ] Banco de dados criado com sucesso
 - [ ] Usuário MySQL criado e configurado
@@ -636,6 +668,7 @@ C:\Logs\                                   # Logs personalizados
 - [ ] Application Pool configurado
 
 ### Pós-instalação
+
 - [ ] `appsettings.Production.json` configurado
 - [ ] Conexão com banco de dados funcionando
 - [ ] Migrations executadas
@@ -646,6 +679,7 @@ C:\Logs\                                   # Logs personalizados
 - [ ] Logs sendo gravados
 
 ### Produção
+
 - [ ] Backup automático configurado
 - [ ] Monitoramento implementado
 - [ ] SSL/TLS configurado (se necessário)
@@ -656,58 +690,270 @@ C:\Logs\                                   # Logs personalizados
 
 ---
 
-## 📞 Contato e Suporte
+## 🔐 Segurança e Hardening
 
-### Informações do Sistema
+### 🚨 Avaliação de Segurança
 
-**Nome**: Intranet Documentos  
-**Versão**: 1.0.0  
-**Tecnologia**: ASP.NET Core 9.0  
-**Banco**: MySQL 8.0+  
+A segurança da aplicação é **crítica** para proteger dados corporativos. Esta seção aborda as principais vulnerabilidades e suas correções.
 
-### Desenvolvedor
+#### Análise Completa
 
-**PCJV Tecnologia**  
-**Email**: pcjv@outlook.com  
+Para uma análise detalhada de segurança, consulte:
 
-### Suporte Técnico
+- **[ANALISE-SEGURANCA.md](ANALISE-SEGURANCA.md)** - Análise completa de vulnerabilidades
+- **Scripts de correção** incluídos no pacote
 
-**Para problemas técnicos**:
-1. Verifique o [Checklist de Verificação](#-checklist-de-verificação)
-2. Consulte [Solução de Problemas](#-solução-de-problemas)
-3. Execute `.\Verificacao-Pos-Instalacao.ps1`
-4. Entre em contato com logs detalhados
+### ⚡ Hardening Rápido
 
-### Licença
+Execute o script automatizado para aplicar as correções mais críticas:
 
-Este projeto está licenciado sob a [MIT License](LICENSE).
-
----
-
-## 🎯 Resumo de Comandos Essenciais
-
-```batch
-# INSTALAÇÃO RÁPIDA (Execute como Admin)
-deploy-quick.bat
-
-# VERIFICAÇÃO PÓS-INSTALAÇÃO
-.\Verificacao-Pos-Instalacao.ps1
-
-# BACKUP MANUAL
-.\backup-daily.ps1
-
-# VERIFICAR LOGS
-Get-EventLog -LogName Application -Source "IntranetDocumentos" -Newest 10
-
-# REINICIAR APLICAÇÃO
-iisreset
-
-# VERIFICAR STATUS
-Invoke-WebRequest -Uri "http://localhost/IntranetDocumentos" -UseBasicParsing
+```powershell
+# Execute como Administrador
+.\Hardening-Seguranca.ps1 -Force
 ```
 
----
+**Este script:**
 
-**🚀 Pronto! Sua Intranet Documentos está configurada e funcionando.**
+- ✅ Altera senhas padrão automaticamente
+- ✅ Configura headers de segurança
+- ✅ Aplica permissões restritivas
+- ✅ Remove headers desnecessários
+- ✅ Cria backup das configurações
 
-*Para dúvidas ou suporte, consulte este guia ou entre em contato com a equipe técnica.*
+### 🔍 Auditoria Contínua
+
+Execute auditoria de segurança regularmente:
+
+```powershell
+# Auditoria básica
+.\Auditoria-Seguranca.ps1
+
+# Auditoria detalhada com relatório
+.\Auditoria-Seguranca.ps1 -Detailed -ExportReport
+```
+
+### 🛡️ Melhorias Críticas
+
+#### 1. **Política de Senhas Forte**
+
+**❌ Configuração Atual (Insegura):**
+
+```csharp
+options.Password.RequiredLength = 6;              // Muito baixo
+options.Password.RequireNonAlphanumeric = false;  // Sem símbolos
+options.Password.RequireUppercase = false;        // Sem maiúsculas
+```
+
+**✅ Configuração Recomendada (Segura):**
+
+```csharp
+options.Password.RequiredLength = 12;             // Mínimo 12 caracteres
+options.Password.RequireNonAlphanumeric = true;   // Símbolos obrigatórios
+options.Password.RequireUppercase = true;         // Maiúsculas obrigatórias
+options.Password.RequireLowercase = true;         // Minúsculas obrigatórias
+options.Password.RequiredUniqueChars = 6;         // Caracteres únicos
+```
+
+#### 2. **Headers de Segurança**
+
+Adicione ao `web.config`:
+
+```xml
+<httpProtocol>
+  <customHeaders>
+    <!-- Proteção XSS e Clickjacking -->
+    <add name="X-Content-Type-Options" value="nosniff" />
+    <add name="X-Frame-Options" value="DENY" />
+    <add name="X-XSS-Protection" value="1; mode=block" />
+    
+    <!-- Content Security Policy -->
+    <add name="Content-Security-Policy" 
+         value="default-src 'self'; script-src 'self' 'unsafe-inline';" />
+    
+    <!-- HSTS para HTTPS -->
+    <add name="Strict-Transport-Security" 
+         value="max-age=31536000; includeSubDomains" />
+    
+    <!-- Remover headers que expõem informações -->
+    <remove name="Server" />
+    <remove name="X-Powered-By" />
+  </customHeaders>
+</httpProtocol>
+```
+
+#### 3. **Validação de Upload Rigorosa**
+
+Implemente validação avançada de arquivos:
+
+```csharp
+public class SecureFileValidator
+{
+    private static readonly string[] AllowedExtensions = 
+    {
+        ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt"
+        // ❌ NUNCA: .exe, .bat, .ps1, .js, .vbs
+    };
+
+    public bool ValidateFile(IFormFile file)
+    {
+        // 1. Validar extensão
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!AllowedExtensions.Contains(extension))
+            return false;
+
+        // 2. Validar MIME type real
+        if (!ValidateMimeType(file))
+            return false;
+
+        // 3. Verificar assinatura de arquivo (magic bytes)
+        if (!ValidateFileSignature(file))
+            return false;
+
+        return true;
+    }
+}
+```
+
+### 🔒 Configurações de Produção Seguras
+
+#### Cookies Seguros
+
+```csharp
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = true;              // Protege contra XSS
+    options.Cookie.SameSite = SameSiteMode.Strict; // Protege contra CSRF
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // HTTPS apenas
+    options.ExpireTimeSpan = TimeSpan.FromHours(2);  // Sessão mais curta
+    options.SlidingExpiration = false;           // Não renovar automaticamente
+});
+```
+
+#### Rate Limiting
+
+```csharp
+// Middleware para prevenir ataques de força bruta
+public class RateLimitingMiddleware
+{
+    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+    {
+        var clientIp = context.Connection.RemoteIpAddress?.ToString();
+        
+        if (IsRateLimited(clientIp, context.Request.Path))
+        {
+            context.Response.StatusCode = 429; // Too Many Requests
+            await context.Response.WriteAsync("Rate limit exceeded.");
+            return;
+        }
+
+        await next(context);
+    }
+}
+```
+
+### 📊 Monitoramento de Segurança
+
+#### Logs Críticos para Monitorar
+
+1. **Tentativas de login falhadas múltiplas**
+2. **Upload de arquivos com extensões suspeitas**
+3. **Tentativas de acesso não autorizado**
+4. **Alterações em configurações administrativas**
+5. **Downloads em massa de documentos**
+
+#### Configuração de Alertas
+
+```csharp
+public class SecurityAuditService
+{
+    public async Task LogSecurityEventAsync(string eventType, string details)
+    {
+        // 1. Log crítico para monitoramento
+        _logger.LogCritical("SECURITY EVENT: {EventType} - {Details}", 
+            eventType, details);
+
+        // 2. Email para administradores em eventos críticos
+        if (IsCriticalEvent(eventType))
+        {
+            await _emailService.SendSecurityAlertAsync(eventType, details);
+        }
+
+        // 3. Salvar em tabela de auditoria
+        await SaveToAuditLogAsync(eventType, details);
+    }
+}
+```
+
+### 🛠️ Scripts de Segurança
+
+| Script | Função | Uso |
+|--------|--------|-----|
+| `Hardening-Seguranca.ps1` | Aplicar correções automáticas | `.\Hardening-Seguranca.ps1 -Force` |
+| `Auditoria-Seguranca.ps1` | Verificar estado de segurança | `.\Auditoria-Seguranca.ps1 -Detailed` |
+| `Backup-Configuracoes.ps1` | Backup antes de alterações | `.\Backup-Configuracoes.ps1` |
+
+### ✅ Checklist de Segurança
+
+#### ⚡ **Crítico (Implementar Imediatamente)**
+
+- [ ] **Senha administrativa alterada** (não usar "Admin123!")
+- [ ] **Headers de segurança configurados** no web.config
+- [ ] **Permissões de diretório restringidas** (sem "Everyone")
+- [ ] **HTTPS configurado** e HTTP redirecionado
+- [ ] **Validação de upload implementada** (tipos de arquivo)
+
+#### 🔒 **Alta Prioridade**
+
+- [ ] **Política de senhas fortalecida** (12+ caracteres, complexidade)
+- [ ] **Rate limiting implementado** (anti força bruta)
+- [ ] **Logs de segurança ativos** (tentativas de login, uploads)
+- [ ] **Cookies seguros configurados** (HttpOnly, Secure, SameSite)
+- [ ] **Backup automático configurado** com criptografia
+
+#### 📋 **Média Prioridade**
+
+- [ ] **Auditoria regular de segurança** (semanal)
+- [ ] **Monitoramento de logs** automatizado
+- [ ] **Alertas de segurança** por email configurados
+- [ ] **Antivírus integrado** para uploads
+- [ ] **2FA implementado** para administradores
+
+### 🚨 Resposta a Incidentes
+
+#### Em Caso de Suspeita de Comprometimento
+
+1. **Imediato:**
+
+   ```powershell
+   # Executar auditoria de emergência
+   .\Auditoria-Seguranca.ps1 -Detailed -ExportReport
+   
+   # Verificar logs suspeitos
+   Get-EventLog -LogName Security -Newest 100 | Where-Object {$_.EntryType -eq "FailureAudit"}
+   ```
+
+2. **Investigação:**
+   - Verificar uploads recentes suspeitos
+   - Analisar logs de acesso não autorizado
+   - Verificar alterações em configurações
+
+3. **Contenção:**
+   - Desabilitar contas comprometidas
+   - Alterar todas as senhas
+   - Revisar permissões de acesso
+
+4. **Recuperação:**
+   - Restaurar backups se necessário
+   - Aplicar patches de segurança
+   - Reforçar monitoramento
+
+### 📞 Suporte de Segurança
+
+Para questões críticas de segurança:
+
+1. **Execute auditoria:** `.\Auditoria-Seguranca.ps1 -ExportReport`
+2. **Aplique hardening:** `.\Hardening-Seguranca.ps1 -Force`
+3. **Consulte:** `ANALISE-SEGURANCA.md` para detalhes técnicos
+4. **Contate:** Equipe de desenvolvimento com relatório de auditoria
+
+**⚠️ Importante:** Implemente as correções de segurança em ambiente de teste antes de aplicar em produção.

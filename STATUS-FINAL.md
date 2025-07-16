@@ -22,7 +22,32 @@
 | ~~`INSTALL-GUIDE.md`~~ | ⚠️ **Obsoleto** | Integrado ao final |
 | ~~`DEPLOY-GUIDE.md`~~ | ⚠️ **Obsoleto** | Integrado ao final |
 
-## ✅ Problemas Corrigidos
+## ✅ Problemas Corrigidos Recentemente (10/07/2025)
+
+### 1. ✅ Conflitos de Build Críticos RESOLVIDOS
+
+- **Problema**: Arquivos duplicados causando erros de compilação
+  - `Controllers/AccountController_New.cs` (duplicado)
+  - `Controllers/DocumentsController_Clean.cs` (temporário)
+- **Solução**: Removidos arquivos duplicados e temporários
+- **Status**: ✅ **RESOLVIDO COMPLETAMENTE**
+
+### 2. ✅ Erros de Código Críticos CORRIGIDOS
+
+- **Problema**: Erro CS7036 - Parâmetro 'user' faltando em `GetDocumentStreamAsync`
+- **Problema**: Erro CS1061 - Propriedade `FileName` não existe no modelo `Document`
+- **Solução**: Corrigido para usar `document.Id, user` e `document.OriginalFileName`
+- **Status**: ✅ **RESOLVIDO COMPLETAMENTE**
+
+### 3. ✅ Compilação e Execução FUNCIONANDO
+
+- **Build Status**: ✅ Compila com sucesso (apenas warnings menores)
+- **Runtime Status**: ✅ Aplicação executa corretamente na porta 5099
+- **Serviços**: ✅ Todos os serviços de background funcionando
+- **Banco de Dados**: ✅ Conexão MySQL funcionando
+- **Backup Automático**: ✅ Executando conforme esperado
+
+## ✅ Problemas Corrigidos Anteriormente
 
 ### 1. Warnings de Compilação
 

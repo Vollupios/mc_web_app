@@ -5,12 +5,14 @@ Este guia fornece instruções passo a passo para instalar a aplicação **Intra
 ## 📋 Pré-requisitos
 
 ### Software Necessário
+
 - ✅ **Windows Server 2019/2022** ou Windows 10/11 Pro
 - ✅ **IIS (Internet Information Services)** com ASP.NET Core Module V2
 - ✅ **.NET 9.0 Hosting Bundle** ([Download aqui](https://dotnet.microsoft.com/download/dotnet/9.0))
 - ✅ **MySQL Server 8.0+** ou **MariaDB 10.5+**
 
 ### Hardware Recomendado
+
 - **CPU**: 2+ cores
 - **RAM**: 4GB+ (recomendado 8GB)
 - **Disco**: 20GB+ espaço livre
@@ -21,6 +23,7 @@ Este guia fornece instruções passo a passo para instalar a aplicação **Intra
 ### Opção 1: Script Automatizado (Recomendado)
 
 1. **Execute como Administrador**:
+
    ```batch
    deploy-quick.bat
    ```
@@ -36,6 +39,7 @@ Este guia fornece instruções passo a passo para instalar a aplicação **Intra
    - Reinicie o servidor após a instalação
 
 2. **Configurar IIS**:
+
    ```powershell
    # Execute como Administrador
    .\Configuracao-IIS.ps1
@@ -49,6 +53,7 @@ Este guia fornece instruções passo a passo para instalar a aplicação **Intra
    - Configure usuário `root` com senha segura
 
 2. **Criar Banco de Dados**:
+
    ```sql
    -- Execute no MySQL Workbench ou linha de comando
    source setup-mysql.sql
@@ -57,6 +62,7 @@ Este guia fornece instruções passo a passo para instalar a aplicação **Intra
 #### Passo 3: Deploy da Aplicação
 
 1. **Publicar aplicação**:
+
    ```powershell
    # Na máquina de desenvolvimento
    .\Publish-ToWindowsServer.ps1 -TargetServer "SEU-SERVIDOR"
@@ -69,6 +75,7 @@ Este guia fornece instruções passo a passo para instalar a aplicação **Intra
 #### Passo 4: Configuração
 
 1. **Editar `appsettings.Production.json`**:
+
    ```json
    {
      "ConnectionStrings": {
@@ -85,6 +92,7 @@ Este guia fornece instruções passo a passo para instalar a aplicação **Intra
    ```
 
 2. **Configurar Permissões**:
+
    ```cmd
    icacls "C:\inetpub\wwwroot\IntranetDocumentos" /grant "IIS_IUSRS:(OI)(CI)RX" /T
    icacls "C:\IntranetData" /grant "IIS_IUSRS:(OI)(CI)F" /T
@@ -100,12 +108,14 @@ Este guia fornece instruções passo a passo para instalar a aplicação **Intra
 ### Configurar HTTPS
 
 1. **Instalar Certificado SSL**:
+
    ```powershell
    # Com certificado existente
    .\Configuracao-IIS.ps1 -CertificateThumbprint "SEU_THUMBPRINT_AQUI"
    ```
 
 2. **Ou gerar certificado auto-assinado** (apenas desenvolvimento):
+
    ```powershell
    New-SelfSignedCertificate -DnsName "intranet.empresa.com" -CertStoreLocation "cert:\LocalMachine\My"
    ```
@@ -121,6 +131,7 @@ New-NetFirewallRule -DisplayName "Intranet HTTPS" -Direction Inbound -Protocol T
 ### Backup Automático
 
 O sistema já inclui backup automático configurado em:
+
 - **Frequência**: Diário (24h)
 - **Local**: `C:\IntranetData\Backups\Auto`
 - **Retenção**: 30 dias
@@ -128,10 +139,12 @@ O sistema já inclui backup automático configurado em:
 ## 🧪 Teste da Instalação
 
 ### 1. Verificar Aplicação
+
 - Acesse: `http://seu-servidor/` ou `https://seu-servidor/`
 - Login padrão: `admin@empresa.com` / `Admin123!`
 
 ### 2. Testar Funcionalidades
+
 - ✅ Login/Logout
 - ✅ Upload de documentos
 - ✅ Download de documentos
@@ -139,6 +152,7 @@ O sistema já inclui backup automático configurado em:
 - ✅ Agendamento de reuniões
 
 ### 3. Verificar Logs
+
 - **IIS Logs**: `C:\inetpub\logs\LogFiles\W3SVC1\`
 - **Application Logs**: Event Viewer → Windows Logs → Application
 - **Custom Logs**: `C:\IntranetData\Logs\`
@@ -148,6 +162,7 @@ O sistema já inclui backup automático configurado em:
 ### Erro 500.30 - ASP.NET Core app failed to start
 
 **Solução**:
+
 1. Verificar se .NET 9.0 está instalado
 2. Verificar permissões do Application Pool
 3. Verificar connection string
@@ -156,6 +171,7 @@ O sistema já inclui backup automático configurado em:
 ### Erro de Conexão com Banco
 
 **Solução**:
+
 1. Verificar se MySQL está executando
 2. Testar conexão: `mysql -u app_user -p`
 3. Verificar firewall do MySQL (porta 3306)
@@ -164,6 +180,7 @@ O sistema já inclui backup automático configurado em:
 ### Upload de Arquivos Falha
 
 **Solução**:
+
 1. Verificar permissões em `C:\IntranetData\Documents`
 2. Verificar tamanho máximo no `web.config`
 3. Verificar espaço em disco
@@ -171,6 +188,7 @@ O sistema já inclui backup automático configurado em:
 ### Performance Lenta
 
 **Solução**:
+
 1. Aumentar RAM do servidor
 2. Otimizar queries do banco
 3. Configurar cache do IIS
@@ -179,6 +197,7 @@ O sistema já inclui backup automático configurado em:
 ## 📞 Suporte
 
 ### Logs Importantes
+
 - **Event Viewer**: Windows Logs → Application → Source: "IntranetDocumentos"
 - **IIS Logs**: `%SystemDrive%\inetpub\logs\LogFiles`
 - **Application Logs**: `C:\IntranetData\Logs\`
