@@ -43,11 +43,31 @@ namespace IntranetDocumentos.Services.Background
 
                     await Task.Delay(_checkInterval, stoppingToken);
                 }
+                catch (TaskCanceledException)
+                {
+                    // Serviço foi cancelado - esperado durante o shutdown
+                    _logger.LogInformation("Serviço de lembretes de reunião foi cancelado");
+                    break;
+                }
+                catch (OperationCanceledException)
+                {
+                    // Operação foi cancelada - esperado durante o shutdown
+                    _logger.LogInformation("Operação de lembretes de reunião foi cancelada");
+                    break;
+                }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Erro no serviço de lembretes de reunião");
                     // Aguarda um tempo menor em caso de erro antes de tentar novamente
-                    await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        // Se cancelado durante o delay, sair do loop
+                        break;
+                    }
                 }
             }
 

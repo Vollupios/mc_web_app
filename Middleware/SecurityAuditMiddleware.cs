@@ -81,6 +81,8 @@ namespace IntranetDocumentos.Middleware
 
         private async Task LogSecurityEvent(HttpContext context, string eventType, string action, object? details)
         {
+            await Task.CompletedTask; // Fix CS1998 warning
+            
             try
             {
                 var auditInfo = new

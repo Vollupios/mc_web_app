@@ -43,13 +43,34 @@ namespace IntranetDocumentos.Services
                         _logger.LogInformation("Backup automático executado com sucesso");
                     }
                 }
+                catch (TaskCanceledException)
+                {
+                    // Serviço foi cancelado - esperado durante o shutdown
+                    _logger.LogInformation("Serviço de backup automático foi cancelado");
+                    break;
+                }
+                catch (OperationCanceledException)
+                {
+                    // Operação foi cancelada - esperado durante o shutdown
+                    _logger.LogInformation("Operação de backup automático foi cancelada");
+                    break;
+                }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Erro durante backup automático");
                 }
 
                 // Aguarda próximo backup
-                await Task.Delay(_backupInterval, stoppingToken);
+                try
+                {
+                    await Task.Delay(_backupInterval, stoppingToken);
+                }
+                catch (TaskCanceledException)
+                {
+                    // Se cancelado durante o delay, sair do loop
+                    _logger.LogInformation("Delay do backup automático foi cancelado");
+                    break;
+                }
             }
         }
     }

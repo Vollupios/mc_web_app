@@ -4,7 +4,8 @@
 > Desenvolvido em ASP.NET Core MVC com foco em segurança, performance e escalabilidade
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-blue.svg)](https://dotnet.microsoft.com/)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0+-orange.svg)](https://www.mysql.com/)
+[![SQL Server](https://img.shields.io/badge/SQL%20Server-2019+-orange.svg)](https://www.microsoft.com/sql-server/)
+[![SQLite](https://img.shields.io/badge/SQLite-3.0+-blue.svg)](https://www.sqlite.org/)
 [![Redis](https://img.shields.io/badge/Redis-7.0+-red.svg)](https://redis.io/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -52,15 +53,18 @@ cd IntranetDocumentos
 ## 📖 **Documentação**
 
 ### **📚 Documentação Completa:**
+
 - [**Parte 1: Informações Gerais e Instalação**](DOCUMENTACAO-UNIFICADA.md)
 - [**Parte 2: Segurança, Performance e Funcionalidades**](DOCUMENTACAO-UNIFICADA-PARTE2.md)  
 - [**Parte 3: Desenvolvimento e Troubleshooting**](DOCUMENTACAO-UNIFICADA-PARTE3.md)
 
 ### **🔧 Scripts e Automação:**
+
 - [**Guia de Scripts Unificados**](SCRIPTS-UNIFICADOS.md)
 - [**Status dos Scripts**](STATUS-SCRIPTS-FINAL.md)
 
 ### **📋 Status do Projeto:**
+
 - [**Correções SQL**](STATUS-CORRECOES-SQL.md)
 - [**Implementação Redis**](REDIS-IMPLEMENTADO.md)
 - [**Correções de Rotas**](STATUS-CORRECAO-ROTA.md)
@@ -70,14 +74,16 @@ cd IntranetDocumentos
 ## 🏗️ **Arquitetura**
 
 ### **Stack Tecnológico:**
+
 - **Backend**: ASP.NET Core 9.0 MVC
 - **Frontend**: Bootstrap 5 + Bootstrap Icons
-- **Database**: MySQL 8.0+ (Produção) / SQLite (Desenvolvimento)
+- **Database**: SQL Server 2019+ (Produção) / SQLite (Desenvolvimento)
 - **Cache**: Redis 7.0+
 - **ORM**: Entity Framework Core 9.0
 - **Auth**: ASP.NET Core Identity
 
 ### **Estrutura do Projeto:**
+
 ```
 📁 IntranetDocumentos/
 ├── 📁 Controllers/          # Controladores MVC
@@ -102,6 +108,7 @@ cd IntranetDocumentos
 | **Usuario** | Acesso ao próprio departamento | Próprio + Geral |
 
 ### **Departamentos:**
+
 - Pessoal, Fiscal, Contábil, Cadastro, Apoio, TI
 - **Geral**: Acessível por todos os usuários
 
@@ -132,8 +139,9 @@ cd IntranetDocumentos
 ## 🛠️ **Desenvolvimento**
 
 ### **Pré-requisitos:**
+
 - .NET 9.0 SDK
-- MySQL 8.0+ ou SQLite
+- SQL Server 2019+ ou SQLite
 - Redis (opcional para desenvolvimento)
 - Visual Studio 2022+ ou VS Code
 
@@ -158,6 +166,7 @@ dotnet test
 ## 📊 **Status Atual**
 
 ### **✅ Funcionalidades Implementadas:**
+
 - [x] Sistema de documentos completo
 - [x] Busca avançada funcionando
 - [x] Redis cache integrado
@@ -168,6 +177,7 @@ dotnet test
 - [x] Scripts de deploy automatizados
 
 ### **🚀 Próximos Passos:**
+
 - [ ] Notificações em tempo real
 - [ ] API REST para integração
 - [ ] App mobile (futuro)
@@ -188,25 +198,30 @@ dotnet test
 ## � **Correções Aplicadas**
 
 ### ✅ Scripts Unificados e Organizados
+
 - Criada estrutura `/Scripts/` para organização
 - Corrigidos warnings PSScriptAnalyzer nos scripts PowerShell
 - Removidos scripts duplicados e desnecessários
 
 ### ✅ Workflow Restrito a Admins
+
 - Acesso ao WorkflowController limitado apenas a usuários Admin
 - Menu e colunas de workflow ocultados para usuários não-admin
 
 ### ✅ Visualização de Documentos Corrigida
+
 - PDFs e imagens agora são exibidos no navegador (inline)
 - Outros tipos de arquivo são baixados automaticamente
 - Corrigida codificação UTF-8 para nomes de arquivos com acentos
 
 ### ✅ Dashboard de Analytics Funcionando
+
 - Corrigido erro LINQ no cálculo de tempo médio de reuniões
 - Dashboard agora carrega corretamente via menu "Dados > Dashboard"
 - Exibe estatísticas de documentos, reuniões e departamentos
 
 ### 📁 Arquivos Removidos
+
 Consulte `ANALISE-ARQUIVOS-DUPLICADOS.md` para lista completa dos 27 arquivos removidos.
 
 ---

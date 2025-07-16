@@ -117,25 +117,20 @@ namespace IntranetDocumentos.Services
                 Directory.CreateDirectory(autoBackupPath);
 
                 var connectionString = _context.Database.GetConnectionString();
-                var builder = new SqlConnectionStringBuilder(connectionString);
-                var databaseName = builder.InitialCatalog;
-
-                using var connection = new SqlConnection(connectionString);
-                await connection.OpenAsync();
-
-                // Comando SQL Server para backup
-                var backupCommand = $@"
-                    BACKUP DATABASE [{databaseName}] 
-                    TO DISK = N'{backupPath}' 
-                    WITH FORMAT, INIT, 
-                         NAME = 'IntranetDocumentos-Auto Database Backup', 
-                         SKIP, NOREWIND, NOUNLOAD, STATS = 10";
-
-                using var command = new SqlCommand(backupCommand, connection);
-                command.CommandTimeout = 600; // 10 minutos timeout
-
-                _logger.LogInformation($"Iniciando backup automático SQL Server: {backupPath}");
-                await command.ExecuteNonQueryAsync();
+                
+                // Detectar o provider do banco de dados
+                var providerName = _context.Database.ProviderName;
+                
+                if (providerName.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
+                {
+                    // SQLite - usar backup por cópia de arquivo
+                    await CreateSqliteBackupAsync(backupPath);
+                }
+                else
+                {
+                    // SQL Server - usar backup T-SQL
+                    await CreateSqlServerBackupAsync(connectionString, backupPath);
+                }
 
                 _logger.LogInformation($"Backup automático criado: {backupPath}");
                 return backupPath;
@@ -145,6 +140,53 @@ namespace IntranetDocumentos.Services
                 _logger.LogError(ex, "Erro ao criar backup automático do banco de dados");
                 throw;
             }
+        }
+
+        private async Task CreateSqliteBackupAsync(string backupPath)
+        {
+            var connectionString = _context.Database.GetConnectionString();
+            
+            // Para SQLite, extrair o caminho do arquivo de dados
+            var dataSourceMatch = System.Text.RegularExpressions.Regex.Match(
+                connectionString, @"Data Source=([^;]+)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                
+            if (!dataSourceMatch.Success)
+                throw new InvalidOperationException("Não foi possível encontrar o Data Source na connection string SQLite");
+                
+            var sqliteFilePath = dataSourceMatch.Groups[1].Value;
+            
+            if (!File.Exists(sqliteFilePath))
+                throw new FileNotFoundException($"Arquivo SQLite não encontrado: {sqliteFilePath}");
+            
+            // Fazer cópia do arquivo SQLite
+            await Task.Run(() => File.Copy(sqliteFilePath, backupPath, true));
+            
+            _logger.LogInformation($"Backup SQLite criado por cópia de arquivo: {backupPath}");
+        }
+
+        private async Task CreateSqlServerBackupAsync(string connectionString, string backupPath)
+        {
+            var builder = new SqlConnectionStringBuilder(connectionString);
+            var databaseName = builder.InitialCatalog;
+
+            using var connection = new SqlConnection(connectionString);
+            await connection.OpenAsync();
+
+            // Comando SQL Server para backup
+            var backupCommand = $@"
+                BACKUP DATABASE [{databaseName}] 
+                TO DISK = N'{backupPath}' 
+                WITH FORMAT, INIT, 
+                     NAME = 'IntranetDocumentos-Auto Database Backup', 
+                     SKIP, NOREWIND, NOUNLOAD, STATS = 10";
+
+            using var command = new SqlCommand(backupCommand, connection);
+            command.CommandTimeout = 600; // 10 minutos timeout
+
+            _logger.LogInformation($"Iniciando backup automático SQL Server: {backupPath}");
+            await command.ExecuteNonQueryAsync();
+            
+            _logger.LogInformation($"Backup SQL Server criado: {backupPath}");
         }
 
         /// <summary>
