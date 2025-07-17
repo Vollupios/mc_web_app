@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using IntranetDocumentos.Models;
 using IntranetDocumentos.Models.ViewModels;
+using IntranetDocumentos.Models.ValueObjects;
 using IntranetDocumentos.Services;
 using IntranetDocumentos.Services.Security;
 
@@ -117,18 +118,21 @@ namespace IntranetDocumentos.Controllers
                     return View(model);
                 }
 
-                // Validar tamanho do arquivo (10MB max)
-                if (model.File.Length > 10 * 1024 * 1024)
+                // Validar tamanho do arquivo usando Value Object (10MB max)
+                var fileSize = FileSize.FromBytes(model.File.Length);
+                var maxSize = FileSize.FromMegabytes(10);
+                
+                if (fileSize.Bytes > maxSize.Bytes)
                 {
-                    ModelState.AddModelError("File", "O arquivo deve ter no máximo 10MB.");
+                    ModelState.AddModelError("File", $"O arquivo deve ter no máximo {maxSize.ToHumanReadableString()}. Tamanho atual: {fileSize.ToHumanReadableString()}");
                     model.AvailableDepartments = await _documentService.GetDepartmentsForUserAsync(user);
                     return View(model);
                 }
 
                 try
                 {
-                    _logger.LogInformation("🔒 Iniciando upload de documento - Arquivo: {FileName}, Tamanho: {FileSize} bytes, Usuário: {UserId}, Departamento: {DepartmentId}", 
-                        model.File.FileName, model.File.Length, user.Id, model.DepartmentId);
+                    _logger.LogInformation("🔒 Iniciando upload de documento - Arquivo: {FileName}, Tamanho: {FileSize}, Usuário: {UserId}, Departamento: {DepartmentId}", 
+                        model.File.FileName, fileSize.ToHumanReadableString(), user.Id, model.DepartmentId);
                     
                     await _documentService.SaveDocumentAsync(model.File, user, model.DepartmentId);
                     

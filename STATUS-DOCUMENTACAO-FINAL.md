@@ -24,6 +24,7 @@
    - ✅ Estrutura final limpa e sem confusão
 
 3. **🔗 Estrutura Final**
+
    ```
    IntranetDocumentos/
    ├── README.md                              # ✅ Visão geral + link oficial

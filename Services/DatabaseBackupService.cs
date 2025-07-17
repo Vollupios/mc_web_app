@@ -57,6 +57,19 @@ namespace IntranetDocumentos.Services
                 Directory.CreateDirectory(_backupBasePath);
 
                 var connectionString = _context.Database.GetConnectionString();
+                
+                // Detectar o provider do banco de dados
+                var providerName = _context.Database.ProviderName;
+                
+                if (providerName.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
+                {
+                    // SQLite - usar backup por cópia de arquivo
+                    var sqliteBackupPath = backupPath.Replace(".bak", ".db");
+                    await CreateSqliteBackupAsync(sqliteBackupPath);
+                    return sqliteBackupPath;
+                }
+                
+                // SQL Server - continuar com lógica existente
                 var builder = new SqlConnectionStringBuilder(connectionString);
                 var databaseName = builder.InitialCatalog;
 
@@ -164,6 +177,51 @@ namespace IntranetDocumentos.Services
             _logger.LogInformation($"Backup SQLite criado por cópia de arquivo: {backupPath}");
         }
 
+        private async Task RestoreSqliteBackupAsync(string backupPath)
+        {
+            var connectionString = _context.Database.GetConnectionString();
+            
+            // Para SQLite, extrair o caminho do arquivo de dados
+            var dataSourceMatch = System.Text.RegularExpressions.Regex.Match(
+                connectionString, @"Data Source=([^;]+)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                
+            if (!dataSourceMatch.Success)
+                throw new InvalidOperationException("Não foi possível encontrar o Data Source na connection string SQLite");
+                
+            var sqliteFilePath = dataSourceMatch.Groups[1].Value;
+            
+            if (!File.Exists(backupPath))
+                throw new FileNotFoundException($"Arquivo de backup SQLite não encontrado: {backupPath}");
+            
+            // Fechar conexões ativas
+            await _context.Database.CloseConnectionAsync();
+            
+            // Fazer backup do arquivo atual antes de substituir
+            var currentBackupPath = sqliteFilePath + ".backup_before_restore";
+            if (File.Exists(sqliteFilePath))
+            {
+                File.Copy(sqliteFilePath, currentBackupPath, true);
+                _logger.LogInformation($"Backup de segurança criado: {currentBackupPath}");
+            }
+            
+            try
+            {
+                // Restaurar o arquivo SQLite
+                await Task.Run(() => File.Copy(backupPath, sqliteFilePath, true));
+                _logger.LogInformation($"Banco SQLite restaurado de: {backupPath}");
+            }
+            catch (Exception ex)
+            {
+                // Em caso de erro, restaurar o backup de segurança
+                if (File.Exists(currentBackupPath))
+                {
+                    File.Copy(currentBackupPath, sqliteFilePath, true);
+                    _logger.LogWarning("Erro na restauração. Banco anterior restaurado.");
+                }
+                throw new InvalidOperationException($"Erro ao restaurar backup SQLite: {ex.Message}", ex);
+            }
+        }
+
         private async Task CreateSqlServerBackupAsync(string connectionString, string backupPath)
         {
             var builder = new SqlConnectionStringBuilder(connectionString);
@@ -199,6 +257,18 @@ namespace IntranetDocumentos.Services
                 _logger.LogInformation($"Iniciando restauração do backup: {backupPath}");
 
                 var connectionString = _context.Database.GetConnectionString();
+                
+                // Detectar o provider do banco de dados
+                var providerName = _context.Database.ProviderName;
+                
+                if (providerName.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
+                {
+                    // SQLite - restaurar por cópia de arquivo
+                    await RestoreSqliteBackupAsync(backupPath);
+                    return;
+                }
+                
+                // SQL Server - continuar com lógica existente
                 var builder = new SqlConnectionStringBuilder(connectionString);
                 var databaseName = builder.InitialCatalog;
 

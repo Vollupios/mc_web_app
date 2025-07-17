@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using IntranetDocumentos.Models.ValueObjects;
 
 namespace IntranetDocumentos.Models
 {
@@ -82,6 +83,22 @@ namespace IntranetDocumentos.Models
         // Workflow relationships
         public virtual ICollection<DocumentWorkflow> Workflows { get; set; } = new List<DocumentWorkflow>();
         public virtual ICollection<DocumentHistory> History { get; set; } = new List<DocumentHistory>();
+        
+        // Métodos helper para trabalhar com FileSize Value Object
+        public ValueObjects.FileSize GetFileSizeValueObject()
+        {
+            return ValueObjects.FileSize.FromBytes(FileSize);
+        }
+        
+        public string GetFormattedFileSize(int decimalPlaces = 2)
+        {
+            return GetFileSizeValueObject().ToHumanReadableString(decimalPlaces);
+        }
+        
+        public void SetFileSize(ValueObjects.FileSize fileSize)
+        {
+            FileSize = fileSize.Bytes;
+        }
     }
 
     public class DocumentWorkflow

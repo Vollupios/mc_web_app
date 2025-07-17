@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using IntranetDocumentos.Models.ValueObjects;
 
 namespace IntranetDocumentos.Models
 {
@@ -79,6 +80,25 @@ namespace IntranetDocumentos.Models
             TipoFuncionario.Externo => "Externo",
             _ => "Externo"
         };
+        
+        // Métodos helper para trabalhar com PhoneNumber Value Object
+        public PhoneNumber? GetPhoneNumberValueObject()
+        {
+            if (PhoneNumber.TryCreate(Numero ?? string.Empty, out var phoneNumber))
+                return phoneNumber;
+            return null;
+        }
+        
+        public void SetPhoneNumber(PhoneNumber phoneNumber)
+        {
+            Numero = phoneNumber.Value;
+        }
+        
+        public string GetFormattedPhoneNumber()
+        {
+            var phone = GetPhoneNumberValueObject();
+            return phone?.ToFormattedString() ?? Numero;
+        }
     }
 
     /// <summary>

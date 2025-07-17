@@ -73,7 +73,7 @@ else
                                 </td>
                                 <td>@document.Uploader.Email</td>
                                 <td>@document.UploadDate.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>@GetFileSize(document.FileSize)</td>
+                                <td>@document.GetFormattedFileSize()</td>
                                 <td>
                                     @{
                                         var statusClass = document.Status switch
@@ -210,16 +210,8 @@ else
         };
     }
 
-    private string GetFileSize(long bytes)
-    {
-        string[] sizes = { "B", "KB", "MB", "GB" };
-        double len = bytes;
-        int order = 0;
-        while (len >= 1024 && order < sizes.Length - 1)
-        {
-            order++;
-            len = len / 1024;
-        }
-        return $"{len:0.##} {sizes[order]}";
-    }
+}
+
+@{
+    // Função GetFileSize removida - agora usamos o Value Object FileSize diretamente no modelo
 }

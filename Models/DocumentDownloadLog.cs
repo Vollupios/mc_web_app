@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using IntranetDocumentos.Models.ValueObjects;
 
 namespace IntranetDocumentos.Models
 {
@@ -65,6 +66,20 @@ namespace IntranetDocumentos.Models
                 ErrorMessage = errorMessage,
                 DownloadedAt = DateTime.UtcNow
             };
+        }
+        
+        // Métodos helper para trabalhar com FileSize Value Object
+        public ValueObjects.FileSize? GetFileSizeValueObject()
+        {
+            if (FileSizeAtDownload.HasValue)
+                return ValueObjects.FileSize.FromBytes(FileSizeAtDownload.Value);
+            return null;
+        }
+        
+        public string GetFormattedFileSize(int decimalPlaces = 2)
+        {
+            var fileSize = GetFileSizeValueObject();
+            return fileSize?.ToHumanReadableString(decimalPlaces) ?? "N/A";
         }
     }
 }
