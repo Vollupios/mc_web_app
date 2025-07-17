@@ -1,13 +1,159 @@
 # 📚 Intranet Documentos
 
 > **Sistema de Gestão de Documentos Corporativos**  
-> Desenvolvido em ASP.NET Core MVC com foco em segurança, performance e escalabilidade
+> ASP.NET Core 9.0 | SQL Server/SQLite | Redis | Bootstrap 5
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-blue.svg)](https://dotnet.microsoft.com/)
 [![SQL Server](https://img.shields.io/badge/SQL%20Server-2019+-orange.svg)](https://www.microsoft.com/sql-server/)
 [![SQLite](https://img.shields.io/badge/SQLite-3.0+-blue.svg)](https://www.sqlite.org/)
 [![Redis](https://img.shields.io/badge/Redis-7.0+-red.svg)](https://redis.io/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+---
+
+## 🎯 Visão Geral
+
+Sistema web corporativo para gestão centralizada de documentos, reuniões e ramais telefônicos da **Marcos Contabilidade**.
+
+### ✨ Principais Funcionalidades
+
+- **📄 Gestão de Documentos**: Upload, download, organização por departamentos
+- **🔍 Busca Avançada**: Pesquisa full-text com filtros inteligentes
+- **👥 Controle de Acesso**: Baseado em departamentos e roles
+- **📅 Sistema de Reuniões**: Agendamento e notificações
+- **📞 Ramais Telefônicos**: Catálogo interno
+- **📊 Analytics**: Dashboard com relatórios
+- **🔴 Cache Redis**: Performance otimizada
+- **🔒 Segurança Enterprise**: Rate limiting, auditoria
+
+---
+
+## 🚀 Instalação Rápida
+
+### Desenvolvimento
+
+```bash
+# Clonar e instalar
+git clone https://github.com/Vollupios/mc_web_app.git
+cd IntranetDocumentos
+./Scripts/install-quick.sh    # Linux
+.\Scripts\install-quick.bat   # Windows
+
+# Executar
+dotnet run
+```
+
+### Produção
+
+```powershell
+# Windows Server
+.\Scripts\Install-IntranetDocumentos.ps1 -InstallType Production
+```
+
+### Docker
+
+```bash
+docker-compose up -d
+```
+
+---
+
+## 📋 Documentação
+
+| Documento | Descrição |
+|-----------|-----------|
+| **[📖 Documentação Principal](DOCUMENTACAO-PRINCIPAL.md)** | **Guia completo e unificado** |
+| [🔧 Value Objects Guide](VALUE_OBJECTS_GUIDE.md) | Implementação DDD |
+| [📦 Scripts](Scripts/README.md) | Automação e deploy |
+
+---
+
+## 🏗️ Arquitetura
+
+### Stack
+
+- **Backend**: ASP.NET Core 9.0 MVC
+- **ORM**: Entity Framework Core 9.0
+- **Banco**: SQL Server (prod) / SQLite (dev)
+- **Cache**: Redis (opcional)
+- **Auth**: ASP.NET Core Identity
+
+### Departamentos
+
+- **Pessoal**, **Fiscal**, **Contábil**, **Cadastro**, **Apoio**, **TI**
+- **Geral**: Acessível por todos
+
+### Roles
+
+- **Admin**: Acesso total + gerenciamento
+- **Gestor**: Acesso a todos os documentos
+- **Usuario**: Acesso ao próprio departamento + Geral
+
+---
+
+## 🛡️ Segurança
+
+- **Rate Limiting** por usuário e IP
+- **Headers de Segurança** (HSTS, CSP, etc.)
+- **Upload Security** (validação de tipos/tamanhos)
+- **Path Traversal Protection**
+- **Value Objects** (DDD) para type safety
+
+---
+
+## 📞 Suporte
+
+- **Desenvolvedor**: [GitHub](https://github.com/Vollupios)
+- **Empresa**: Marcos Contabilidade
+- **Documentação**: [DOCUMENTACAO-PRINCIPAL.md](DOCUMENTACAO-PRINCIPAL.md)
+
+---
+
+## 📄 Licença
+
+MIT License - veja [LICENSE](LICENSE) para detalhes.
+
+---
+
+**© 2024 Marcos Contabilidade**  
+*Sistema Intranet Documentos*
+
+---
+
+## 📊 Features Avançados
+
+### Value Objects (DDD)
+
+- **Email**: Validação automática
+- **FileSize**: Formatação humana (`2.5 MB`)
+- **PhoneNumber**: Telefones brasileiros formatados
+- **Money**: Valores monetários com moeda
+- **StatusValue**: Estados de workflow
+
+### Backup Automático
+
+- **SQLite**: Cópia de arquivo (desenvolvimento)
+- **SQL Server**: Backup T-SQL (produção)
+- **Agendamento**: 24h (configurável)
+- **Retenção**: 30 dias
+
+---
+
+## 📞 Suporte
+
+- **GitHub**: [mc_web_app](https://github.com/Vollupios/mc_web_app)
+- **Documentação**: [DOCUMENTACAO-PRINCIPAL.md](DOCUMENTACAO-PRINCIPAL.md)
+
+---
+
+## 📄 Licença
+
+MIT License
+
+---
+
+**Status**: ✅ **Produção**  
+**Versão**: 2.0.0  
+**Última Atualização**: 17 de julho de 2025
 
 ---
 
