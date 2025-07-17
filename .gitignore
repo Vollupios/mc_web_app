@@ -394,3 +394,27 @@ appsettings.Development.json
 DatabaseBackups/
 *.bak
 *.db.old
+
+# Temporary documentation files
+ANALISE-*.md
+CONSOLIDACAO-*.md
+CORRECAO-*.md
+CORRECOES-*.md
+DEPLOY-GUIDE.md
+DEPLOYMENT-FILES.md
+DOCUMENTACAO-OFICIAL-*.md
+DOCUMENTACAO-UNIFICADA*.md
+FINAL_*.md
+GUIA-*.md
+INDICE-*.md
+INSTALL-GUIDE.md
+LIMPEZA-*.md
+MIGRATION_*.md
+MYSQL-*.md
+PACKAGE-*.md
+PROXIMOS-*.md
+REDIS-*.md
+RESUMO-*.md
+SCRIPTS-*.md
+STATUS-*.md
+VALUE_*.md
