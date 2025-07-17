@@ -62,7 +62,7 @@
 
 ### **Arquivos Markdown Vazios (0 bytes)**
 
-```
+```texttext
 ❌ REMOVER TODOS:
 ├── ANALISE-SEGURANCA.md           (0 bytes)
 ├── DEPLOY-GUIDE.md                (0 bytes) 
@@ -75,7 +75,7 @@
 ├── PROXIMOS-PASSOS.md             (0 bytes)
 ├── RESUMO-UNIFICACAO.md           (0 bytes)
 └── STATUS-FINAL.md                (0 bytes)
-```
+```text
 
 ### **Documentação Unificada com Sobreposição**
 
@@ -100,7 +100,7 @@
 
 ## 🗑️ **ARQUIVOS TEMPORÁRIOS**
 
-```
+```text
 ❌ REMOVER:
 └── temp_login_method.txt          # Arquivo temporário esquecido
 ```
@@ -132,13 +132,13 @@ rm fix-markdown.sh
 rm setup-mysql.sql
 rm setup-database.mysql.sql
 rm check-departments.sql
-```
+```text
 
 #### **2. Remover Arquivos Temporários**
 
 ```bash
 rm temp_login_method.txt
-```
+```text
 
 #### **3. Remover Documentação Vazia**
 
@@ -154,7 +154,7 @@ rm PACKAGE-README.md
 rm PROXIMOS-PASSOS.md
 rm RESUMO-UNIFICACAO.md
 rm STATUS-FINAL.md
-```
+```text
 
 ### **🎯 PRIORIDADE MÉDIA (Organização)**
 
@@ -162,7 +162,7 @@ rm STATUS-FINAL.md
 
 ```bash
 # Criar README.md com informações essenciais do projeto
-```
+```text
 
 #### **5. Avaliar Documentação Sobreposta**
 

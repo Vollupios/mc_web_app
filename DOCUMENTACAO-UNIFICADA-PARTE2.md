@@ -21,7 +21,7 @@ services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequireLowercase = true;
 });
-```
+```text
 
 #### **2. Headers de Segurança**
 
@@ -35,7 +35,7 @@ X-XSS-Protection: 1; mode=block
 X-Content-Type-Options: nosniff
 Referrer-Policy: strict-origin-when-cross-origin
 Permissions-Policy: geolocation=(), microphone=(), camera=()
-```
+```text
 
 #### **3. Proteção contra Ataques**
 
@@ -58,7 +58,7 @@ public class SecurityAuditMiddleware
     // - Alterações de dados
     // - Acessos negados
 }
-```
+```text
 
 ---
 
@@ -77,7 +77,7 @@ public class UserRateLimitingService : IUserRateLimitingService
     // Rate limiting por usuário/email
     // Compartilhado entre servidores via Redis
 }
-```
+```text
 
 #### **📊 Limites Configurados**
 
@@ -95,7 +95,7 @@ public class UserRateLimitingService : IUserRateLimitingService
     }
   }
 }
-```
+```text
 
 #### **🛡️ Proteção Implementada**
 
@@ -117,7 +117,7 @@ public class UserRateLimitingService : IUserRateLimitingService
 # - Políticas de senha
 # - Atualizações automáticas
 # - Logs de auditoria
-```
+```text
 
 ### **🛡️ Configurações IIS**
 
@@ -134,7 +134,7 @@ public class UserRateLimitingService : IUserRateLimitingService
     </requestFiltering>
   </security>
 </system.webServer>
-```
+```text
 
 ### **🔐 Certificados SSL**
 
@@ -142,7 +142,7 @@ public class UserRateLimitingService : IUserRateLimitingService
 # Configuração HTTPS obrigatório
 New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443
 # Redirecionamento HTTP → HTTPS
-```
+```text
 
 ---
 
@@ -158,7 +158,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443
 # ✅ Headers de segurança
 # ✅ Logs de acesso
 # ✅ Backup e integridade
-```
+```text
 
 ### **📊 Logs de Auditoria**
 
@@ -174,7 +174,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443
   "Method": "GET",
   "Details": {"DocumentId": 42}
 }
-```
+```text
 
 ### **🔍 Monitoramento Contínuo**
 
@@ -202,7 +202,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 // Fallback para MemoryCache se Redis não disponível
 services.AddMemoryCache();
-```
+```text
 
 #### **💾 Uso do Cache**
 
@@ -215,7 +215,7 @@ await _distributedCache.SetStringAsync($"user_session:{userId}", sessionData);
 
 // Cache de dados frequentes
 await _distributedCache.SetStringAsync($"departments", departmentsJson);
-```
+```text
 
 ### **📊 Benefícios Obtidos**
 
@@ -239,7 +239,7 @@ redis-cli monitor
 
 # Estatísticas de memória
 redis-cli info memory
-```
+```text
 
 ---
 
@@ -258,7 +258,7 @@ foreach (var month in monthlyUploads)
 {
     month.MonthName = cultureInfo.DateTimeFormat.GetMonthName(month.Month);
 }
-```
+```text
 
 ### **🗄️ Otimizações MySQL**
 
@@ -272,7 +272,7 @@ SET GLOBAL innodb_log_file_size = 67108864; -- 64MB
 CREATE INDEX idx_documents_department ON Documents(DepartmentId);
 CREATE INDEX idx_documents_upload_date ON Documents(UploadDate);
 CREATE INDEX idx_download_logs_date ON DocumentDownloadLogs(DownloadDate);
-```
+```text
 
 ### **📁 Otimizações de Arquivo**
 
@@ -288,7 +288,7 @@ public async Task<string> SaveFileAsync(IFormFile file)
     
     return fileName;
 }
-```
+```text
 
 ---
 
@@ -304,7 +304,7 @@ public async Task<string> SaveFileAsync(IFormFile file)
 // - Atividade por usuário
 // - Estatísticas de reuniões
 // - Performance do sistema
-```
+```text
 
 ### **🔍 Logs Estruturados**
 
@@ -318,7 +318,7 @@ _logger.LogWarning("🔒 Tentativa de acesso negado - Documento: {DocId}, Usuár
 
 _logger.LogError("❌ Erro no upload - Arquivo: {FileName}, Erro: {Error}", 
     fileName, ex.Message);
-```
+```text
 
 ### **📈 Métricas de Performance**
 
@@ -340,7 +340,7 @@ _logger.LogError("❌ Erro no upload - Arquivo: {FileName}, Erro: {Error}",
     "HitRate": "98.5%"
   }
 }
-```
+```text
 
 ---
 
@@ -359,11 +359,11 @@ public class DocumentService : IDocumentService
     // ✅ Versionamento de documentos
     // ✅ Workflow de aprovação
 }
-```
+```text
 
 ### **📁 Organização de Arquivos**
 
-```
+```text
 DocumentsStorage/
 ├── Pessoal/
 │   ├── 12345678-1234-1234-1234-123456789abc.pdf
@@ -375,7 +375,7 @@ DocumentsStorage/
 ├── TI/
 └── Geral/
     └── manual-usuario.pdf
-```
+```text
 
 ### **🔒 Controle de Acesso**
 
@@ -396,7 +396,7 @@ public async Task<bool> CanUserAccessDocumentAsync(int documentId, ApplicationUs
     if (document.DepartmentId == null) return true; // Geral
     return document.DepartmentId == user.DepartmentId;
 }
-```
+```text
 
 ---
 
@@ -419,7 +419,7 @@ public async Task<IActionResult> AdvancedSearch(
     
     return View(documents);
 }
-```
+```text
 
 ### **🗄️ Query Otimizada**
 
@@ -449,7 +449,7 @@ public async Task<List<Document>> AdvancedSearchAsync(...)
     
     return await query.OrderByDescending(d => d.UploadDate).ToListAsync();
 }
-```
+```text
 
 ### **🎨 Interface da Busca**
 
@@ -489,7 +489,7 @@ public async Task<List<Document>> AdvancedSearchAsync(...)
     </div>
     <button type="submit" class="btn btn-primary">Buscar</button>
 </form>
-```
+```text
 
 ---
 
@@ -509,7 +509,7 @@ public enum TipoReuniao
     [Display(Name = "Reunião de Emergência")]
     Emergencial = 3
 }
-```
+```text
 
 ### **🔔 Sistema de Notificações**
 
@@ -531,7 +531,7 @@ public class NotificationService : INotificationService
             "Lembrete de Reunião", emailBody);
     }
 }
-```
+```text
 
 ### **📊 Analytics de Reuniões**
 
@@ -547,7 +547,7 @@ public class ReunioesMetricsViewModel
     public List<ReuniaoPorStatusViewModel> ReuniaoPorStatus { get; set; }
     public List<ReuniaoPorDepartamentoViewModel> ReuniaoPorDepartamento { get; set; }
 }
-```
+```text
 
 ---
 
@@ -567,7 +567,7 @@ public class Ramal
     public Department Department { get; set; }
     public bool Ativo { get; set; } = true;
 }
-```
+```text
 
 ### **🔍 Busca de Ramais**
 
@@ -592,7 +592,7 @@ public async Task<List<Ramal>> SearchRamaisAsync(string searchTerm, int? departm
     
     return await query.OrderBy(r => r.Nome).ToListAsync();
 }
-```
+```text
 
 ### **📱 Interface Responsiva**
 
@@ -621,7 +621,7 @@ public async Task<List<Ramal>> SearchRamaisAsync(string searchTerm, int? departm
         </div>
     }
 </div>
-```
+```text
 
 ---
 
@@ -638,7 +638,7 @@ public class DashboardViewModel
     public List<UserActivityViewModel> TopActiveUsers { get; set; }
     public SystemHealthViewModel SystemHealth { get; set; }
 }
-```
+```text
 
 ### **📈 Métricas de Documentos**
 
@@ -655,7 +655,7 @@ public class DocumentStatisticsViewModel
     public List<TopDownloadedDocumentViewModel> TopDownloadedDocuments { get; set; }
     public List<MonthlyDocumentStatsViewModel> MonthlyStats { get; set; }
 }
-```
+```text
 
 ### **🎯 Atividade por Departamento**
 
@@ -675,7 +675,7 @@ public class DepartmentStatsViewModel
     public int ReunioesCount { get; set; }
     public int ActivityScore { get; set; } // Pontuação calculada
 }
-```
+```text
 
 ### **📊 Visualização de Dados**
 
@@ -687,7 +687,7 @@ public class DepartmentStatsViewModel
 // - Downloads por tipo de arquivo (Bar Chart)
 // - Atividade de usuários (Horizontal Bar)
 // - Estatísticas de reuniões (Doughnut Chart)
-```
+```text
 
 ---
 

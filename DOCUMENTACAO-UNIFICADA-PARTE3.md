@@ -4,7 +4,7 @@
 
 ### **📁 Organização de Pastas**
 
-```
+```text
 IntranetDocumentos/
 ├── Controllers/          # Controladores MVC
 │   ├── AccountController.cs
@@ -38,7 +38,7 @@ IntranetDocumentos/
 ├── wwwroot/             # Arquivos estáticos
 ├── DocumentsStorage/    # Armazenamento de documentos
 └── DatabaseBackups/     # Backups automáticos
-```
+```text
 
 ### **🏗️ Padrões Arquiteturais**
 
@@ -53,7 +53,7 @@ public interface IDocumentRepository
     Task UpdateAsync(Document document);
     Task DeleteAsync(int id);
 }
-```
+```text
 
 #### **Service Pattern**
 
@@ -65,7 +65,7 @@ public interface IDocumentService
     Task<bool> CanUserAccessDocumentAsync(int documentId, ApplicationUser user);
     Task<Stream> GetDocumentStreamAsync(int documentId, ApplicationUser user);
 }
-```
+```text
 
 #### **Builder Pattern**
 
@@ -88,7 +88,7 @@ public class DocumentBuilder : IBuilder<Document>
     
     public Document Build() => _document;
 }
-```
+```text
 
 ---
 
@@ -116,7 +116,7 @@ public const int MaxFileSize = 10485760;
 
 // Interfaces: I + PascalCase
 public interface IDocumentService { }
-```
+```text
 
 #### **Async/Await Pattern**
 
@@ -141,7 +141,7 @@ public async Task<Document> SaveDocumentAsync(Document document)
         throw;
     }
 }
-```
+```text
 
 ### **📝 Logging Pattern**
 
@@ -155,7 +155,7 @@ _logger.LogWarning("🔒 Acesso negado - Documento: {DocumentId}, Usuário: {Use
 
 _logger.LogError(ex, "❌ Erro crítico - Operação: {Operation}, Usuário: {UserId}", 
     operation, userId);
-```
+```text
 
 ### **🔒 Security Patterns**
 
@@ -180,7 +180,7 @@ public async Task<IActionResult> Download(int id)
 [HttpPost]
 [ValidateAntiForgeryToken]
 public async Task<IActionResult> Upload(UploadViewModel model) { }
-```
+```text
 
 ---
 
@@ -188,7 +188,7 @@ public async Task<IActionResult> Upload(UploadViewModel model) { }
 
 ### **🧪 Estrutura de Testes**
 
-```
+```text
 Tests/
 ├── UnitTests/
 │   ├── Services/
@@ -207,7 +207,7 @@ Tests/
     ├── LoginFlowTests.cs
     ├── DocumentUploadTests.cs
     └── SearchTests.cs
-```
+```text
 
 ### **🔧 Exemplo de Teste Unitário**
 
@@ -257,7 +257,7 @@ public class DocumentServiceTests
         _context.Dispose();
     }
 }
-```
+```text
 
 ### **🌐 Teste de Integração**
 
@@ -293,7 +293,7 @@ public class DocumentUploadIntegrationTests : IClassFixture<WebApplicationFactor
         Assert.AreEqual(HttpStatusCode.Redirect, response.StatusCode);
     }
 }
-```
+```text
 
 ---
 
@@ -320,7 +320,7 @@ dotnet test Tests/ --no-build --verbosity normal
 dotnet publish IntranetDocumentos.csproj --configuration Release --output ./publish
 
 echo "✅ Build completed successfully!"
-```
+```text
 
 #### **Deploy-WindowsServer.ps1**
 
@@ -357,7 +357,7 @@ Write-Host "▶️ Iniciando Application Pool..." -ForegroundColor Yellow
 Start-WebAppPool -Name "IntranetDocumentos"
 
 Write-Host "✅ Deploy concluído com sucesso!" -ForegroundColor Green
-```
+```text
 
 ### **📦 CI/CD Pipeline (GitHub Actions)**
 
@@ -399,7 +399,7 @@ jobs:
       with:
         name: published-app
         path: ./publish
-```
+```text
 
 ---
 
@@ -416,7 +416,7 @@ sudo kill -9 <PID>
 
 # Ou usar porta diferente
 dotnet run --urls "http://localhost:5001"
-```
+```text
 
 ### **🔴 Erro: "Connection string not found"**
 
@@ -427,7 +427,7 @@ dotnet run --urls "http://localhost:5001"
     "DefaultConnection": "Server=localhost;Database=IntranetDocumentos;Uid=app_user;Pwd=senha;"
   }
 }
-```
+```text
 
 ### **🔴 Erro: "Redis connection failed"**
 
@@ -440,7 +440,7 @@ redis-server
 
 # Verificar logs
 redis-cli info server
-```
+```text
 
 ### **🔴 Erro: "File upload size exceeded"**
 
@@ -453,7 +453,7 @@ redis-cli info server
     </requestFiltering>
   </security>
 </system.webServer>
-```
+```text
 
 ### **🔴 Erro: "Database migration failed"**
 
@@ -467,7 +467,7 @@ dotnet ef database update
 # Em caso de erro, resetar migrations
 dotnet ef database drop --force
 dotnet ef database update
-```
+```text
 
 ---
 
@@ -475,13 +475,13 @@ dotnet ef database update
 
 ### **📊 Estrutura de Logs**
 
-```
+```text
 Logs/
 ├── application-YYYYMMDD.log      # Logs da aplicação
 ├── security-YYYYMMDD.log         # Logs de segurança
 ├── performance-YYYYMMDD.log      # Logs de performance
 └── errors-YYYYMMDD.log           # Logs de erro
-```
+```text
 
 ### **🔍 Comandos de Diagnóstico**
 
@@ -501,7 +501,7 @@ Test-NetConnection -ComputerName localhost -Port 3306
 
 # Verificar conectividade Redis
 Test-NetConnection -ComputerName localhost -Port 6379
-```
+```text
 
 ### **📈 Monitoramento de Performance**
 
@@ -519,7 +519,7 @@ public class PerformanceMonitor
             memoryUsage, cpuTime);
     }
 }
-```
+```text
 
 ---
 
@@ -533,7 +533,7 @@ INSERT INTO Departments (Name) VALUES ('Novo Departamento');
 
 -- Ou via interface administrativa
 -- Admin → Departamentos → Adicionar Novo
-```
+```text
 
 ### **❓ Como resetar senha de usuário?**
 
@@ -542,7 +542,7 @@ INSERT INTO Departments (Name) VALUES ('Novo Departamento');
 var user = await _userManager.FindByEmailAsync("usuario@empresa.com");
 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 await _userManager.ResetPasswordAsync(user, token, "NovaSenha123!");
-```
+```text
 
 ### **❓ Como fazer backup manual?**
 
@@ -553,7 +553,7 @@ await _userManager.ResetPasswordAsync(user, token, "NovaSenha123!");
 # Ou comando direto
 mysqldump -u app_user -p IntranetDocumentos > backup.sql
 tar -czf DocumentsStorage_backup.tar.gz DocumentsStorage/
-```
+```text
 
 ### **❓ Como verificar se Redis está funcionando?**
 
@@ -567,7 +567,7 @@ redis-cli keys "*IntranetDocumentos*"
 
 # Monitorar comandos
 redis-cli monitor
-```
+```text
 
 ### **❓ Como configurar HTTPS em produção?**
 
@@ -587,7 +587,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
     }
   }
 }
-```
+```text
 
 ---
 

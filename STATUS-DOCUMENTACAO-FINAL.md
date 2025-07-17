@@ -169,19 +169,19 @@ cat DOCUMENTACAO-OFICIAL-UNIFICADA.md
 
 # Ver documentação técnica de builders
 cat Builders/BUILDER_ARCHITECTURE.md
-```
+```text
 
 ### **Deploy Rápido:**
 
 ```batch
 # Windows Server (como Admin)
 deploy-quick.bat
-```
+```text
 
 ```bash
 # Desenvolvimento
 dotnet run --project IntranetDocumentos.csproj
-```
+```text
 
 ---
 

@@ -77,7 +77,7 @@ Scripts/                                   # 📁 Pasta principal unificada
     ├── test-analytics.sh                 # Testes analytics
     └── fix-markdown.sh                   # Correção markdown
 
-```
+```text
 Scripts/                                   # 📁 Pasta principal unificada
 ├── README.md                             # 📖 Documentação completa dos scripts
 ├── install-quick.bat                     # 🚀 Instalação ultra-rápida
@@ -111,7 +111,7 @@ Scripts/                                   # 📁 Pasta principal unificada
     ├── build-analytics.sh                # Build analytics
     ├── test-analytics.sh                 # Testes analytics
     └── fix-markdown.sh                   # Correção markdown
-```
+```text
 
 ---
 
@@ -142,7 +142,7 @@ deploy-quick.bat
 
 # Ou diretamente (da pasta Scripts)
 Scripts\install-quick.bat
-```
+```text
 
 ### **Para Administradores:**
 
@@ -152,7 +152,7 @@ Scripts\Install-IntranetDocumentos.ps1
 
 # Instalação personalizada
 Scripts\Install-IntranetDocumentos.ps1 -InstallType Production -WithRedis:$true
-```
+```text
 
 ### **Para Desenvolvedores:**
 
@@ -162,7 +162,7 @@ Scripts\Development\Dev-Tools.ps1
 
 # Execução direta
 Scripts\Development\Dev-Tools.ps1 run -Watch
-```
+```text
 
 ---
 
@@ -190,7 +190,7 @@ Scripts\Development\Dev-Tools.ps1 run -Watch
 -WithIIS          # Configurar IIS (padrão: true)
 -WithVerification # Verificar instalação (padrão: true)
 -Silent           # Modo silencioso (padrão: false)
-```
+```text
 
 ### **install-quick.bat (Acesso Rápido)**
 
@@ -259,7 +259,7 @@ Get-Help Scripts\Development\Dev-Tools.ps1 -Full
 
 # Help do configurador de banco
 Get-Help Scripts\Database\Setup-Database.ps1 -Full
-```
+```text
 
 ---
 
@@ -284,7 +284,7 @@ deploy-quick.bat
 
 # Instalação completa com todas as opções
 Scripts\Install-IntranetDocumentos.ps1
-```
+```text
 
 ---
 

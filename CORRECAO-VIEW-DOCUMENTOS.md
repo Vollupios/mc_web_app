@@ -9,12 +9,12 @@
 ## ❌ **PROBLEMA IDENTIFICADO**
 
 ### **Erro Original:**
-```
+```text
 Não é possível acessar esse site
 A página http://localhost:5098/Documents/View/9 pode estar temporariamente indisponível 
 ou pode ter sido movida permanentemente para um novo endereço da Web.
 ERR_INVALID_RESPONSE
-```
+```text
 
 ### **Causa Raiz:**
 - **Método ausente**: `DocumentsController` não possuía o método `View(int id)`
@@ -56,7 +56,7 @@ public async Task<IActionResult> View(int id)
 
     return File(fileStream, contentType, document.OriginalFileName);
 }
-```
+```text
 
 ### **2. Funcionalidades Implementadas**
 
@@ -88,7 +88,7 @@ private static bool IsViewableInBrowser(string fileName)
         _ => false
     };
 }
-```
+```text
 
 #### **GetContentTypeFromExtension()** - Content-Type correto:
 ```csharp
@@ -97,7 +97,7 @@ private static string GetContentTypeFromExtension(string fileName)
     // Mapeamento completo de extensões para MIME types
     // Inclui Office, imagens, PDFs, arquivos compactados, etc.
 }
-```
+```text
 
 ---
 

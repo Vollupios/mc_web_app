@@ -38,7 +38,7 @@ mysql -u root -p < setup-database.mysql.sql
 # http://seu-servidor/
 # Login: admin@intranet.com
 # Senha: Admin@123
-```
+```text
 
 #### **Desenvolvimento Local**
 
@@ -51,7 +51,7 @@ cd mc_web_app
 dotnet run --project IntranetDocumentos.csproj
 
 # 3. Acesse: http://localhost:5000
-```
+```text
 
 ### **✅ Verificação Rápida**
 
@@ -88,13 +88,13 @@ Sistema web corporativo para gestão centralizada de documentos, reuniões e ram
 
 ### **🔧 Tecnologias Utilizadas**
 
-```
+```text
 Frontend:     Bootstrap 5 + JavaScript + Razor Views
 Backend:      ASP.NET Core 9.0 MVC
 Database:     MySQL 8.0+
 Cache:        Redis 6.0+ (opcional)
 Web Server:   IIS (Produção) / Kestrel (Dev)
-```
+```text
 
 ---
 
@@ -138,7 +138,7 @@ Web Server:   IIS (Produção) / Kestrel (Dev)
 
 # Verificação pós-instalação
 .\Verificacao-Pos-Instalacao.ps1
-```
+```text
 
 #### **2. Configuração MySQL**
 
@@ -151,7 +151,7 @@ CREATE DATABASE `IntranetDocumentos` CHARACTER SET utf8mb4;
 CREATE USER `app_user`@`localhost` IDENTIFIED BY 'SuaSenhaSegura123!';
 GRANT ALL PRIVILEGES ON `IntranetDocumentos`.* TO `app_user`@`localhost`;
 FLUSH PRIVILEGES;
-```
+```text
 
 #### **3. Configuração da Aplicação**
 
@@ -163,7 +163,7 @@ FLUSH PRIVILEGES;
     "Redis": "localhost:6379"
   }
 }
-```
+```text
 
 ### **🌐 Configuração IIS**
 
@@ -173,21 +173,21 @@ FLUSH PRIVILEGES;
 # Criar Application Pool
 New-WebAppPool -Name "IntranetDocumentos"
 Set-ItemProperty IIS:\AppPools\IntranetDocumentos managedRuntimeVersion ""
-```
+```text
 
 #### **Website**
 
 ```powershell
 # Criar Website
 New-Website -Name "IntranetDocumentos" -ApplicationPool "IntranetDocumentos" -PhysicalPath "C:\inetpub\wwwroot\IntranetDocumentos" -Port 80
-```
+```text
 
 #### **HTTPS (Recomendado)**
 
 ```powershell
 # Configurar HTTPS
 New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
-```
+```text
 
 ---
 
@@ -218,7 +218,7 @@ X-XSS-Protection: 1; mode=block
 X-Content-Type-Options: nosniff
 Referrer-Policy: strict-origin-when-cross-origin
 Permissions-Policy: geolocation=(), microphone=(), camera=()
-```
+```text
 
 ### **⚡ Rate Limiting**
 
@@ -244,7 +244,7 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
     }
   }
 }
-```
+```text
 
 ### **📋 Auditoria**
 
@@ -259,7 +259,7 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
   "Success": true,
   "Details": {"LoginMethod": "Password"}
 }
-```
+```text
 
 #### **Eventos Auditados**
 
@@ -277,7 +277,7 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 
 # Hardening do Windows Server
 .\Hardening-Seguranca.ps1
-```
+```text
 
 ---
 
@@ -295,18 +295,18 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 
 #### **🔍 Busca Avançada**
 
-```
+```text
 Filtros disponíveis:
 ✅ Termo de busca (nome do arquivo/conteúdo)
 ✅ Departamento específico
 ✅ Tipo de arquivo (PDF, Word, Excel, etc.)
 ✅ Período de data (início/fim)
 ✅ Usuário que fez upload
-```
+```text
 
 #### **📁 Organização de Arquivos**
 
-```
+```text
 DocumentsStorage/
 ├── Pessoal/
 ├── Fiscal/
@@ -315,7 +315,7 @@ DocumentsStorage/
 ├── Apoio/
 ├── TI/
 └── Geral/
-```
+```text
 
 ### **📅 Sistema de Reuniões**
 
@@ -366,7 +366,7 @@ DocumentsStorage/
 
 ### **📁 Estrutura do Projeto**
 
-```
+```text
 IntranetDocumentos/
 ├── Controllers/          # Controladores MVC
 ├── Models/              # Entidades e ViewModels
@@ -379,7 +379,7 @@ IntranetDocumentos/
 ├── wwwroot/             # Arquivos estáticos
 ├── DocumentsStorage/    # Armazenamento documentos
 └── DatabaseBackups/     # Backups automáticos
-```
+```text
 
 ### **🏗️ Padrões Arquiteturais**
 
@@ -392,7 +392,7 @@ public interface IDocumentRepository
     Task<List<Document>> GetByDepartmentAsync(int departmentId);
     Task<Document> AddAsync(Document document);
 }
-```
+```text
 
 #### **Service Pattern**
 
@@ -403,7 +403,7 @@ public interface IDocumentService
     Task<bool> CanUserAccessDocumentAsync(int documentId, ApplicationUser user);
     Task SaveDocumentAsync(IFormFile file, ApplicationUser user, int departmentId);
 }
-```
+```text
 
 ### **🔧 Convenções de Código**
 
@@ -424,7 +424,7 @@ var documentId = 123;
 
 // Interfaces: I + PascalCase
 public interface IDocumentService { }
-```
+```text
 
 #### **Logging Estruturado**
 
@@ -434,16 +434,16 @@ _logger.LogInformation("📄 Upload iniciado - Arquivo: {FileName}, Usuário: {U
 
 _logger.LogWarning("🔒 Acesso negado - Documento: {DocumentId}, Usuário: {UserId}", 
     documentId, userId);
-```
+```text
 
 ### **🧪 Testes**
 
-```
+```text
 Tests/
 ├── UnitTests/           # Testes unitários
 ├── IntegrationTests/    # Testes de integração  
 └── EndToEndTests/       # Testes E2E
-```
+```text
 
 ### **📦 Build e Deploy**
 
@@ -456,7 +456,7 @@ dotnet publish --configuration Release --output ./publish
 
 # Deploy automatizado
 .\Deploy-WindowsServer.ps1
-```
+```text
 
 ---
 
@@ -472,7 +472,7 @@ netstat -tulpn | grep :5000
 
 # Usar porta diferente
 dotnet run --urls "http://localhost:5001"
-```
+```text
 
 #### **🔴 "Connection string not found"**
 
@@ -483,7 +483,7 @@ dotnet run --urls "http://localhost:5001"
     "DefaultConnection": "Server=localhost;Database=IntranetDocumentos;Uid=app_user;Pwd=senha;"
   }
 }
-```
+```text
 
 #### **🔴 "Redis connection failed"**
 
@@ -494,7 +494,7 @@ redis-cli ping
 
 # Se não funcionar, Redis é opcional
 # Aplicação usa MemoryCache como fallback
-```
+```text
 
 #### **🔴 "File upload size exceeded"**
 
@@ -507,7 +507,7 @@ redis-cli ping
     </requestFiltering>
   </security>
 </system.webServer>
-```
+```text
 
 ### **📊 Diagnóstico**
 
@@ -525,7 +525,7 @@ Test-NetConnection -ComputerName localhost -Port 3306
 
 # Conectividade Redis
 Test-NetConnection -ComputerName localhost -Port 6379
-```
+```text
 
 ### **💾 Backup e Restore**
 
@@ -537,7 +537,7 @@ Test-NetConnection -ComputerName localhost -Port 6379
 
 # Agendador do Windows
 schtasks /create /tn "Backup Intranet" /tr "C:\path\backup-database.ps1" /sc daily /st 02:00
-```
+```text
 
 #### **Backup Manual**
 
@@ -547,7 +547,7 @@ mysqldump -u app_user -p IntranetDocumentos > backup.sql
 
 # Backup arquivos
 tar -czf DocumentsStorage_backup.tar.gz DocumentsStorage/
-```
+```text
 
 #### **Restore**
 
@@ -557,7 +557,7 @@ mysql -u app_user -p IntranetDocumentos < backup.sql
 
 # Restore arquivos
 tar -xzf DocumentsStorage_backup.tar.gz
-```
+```text
 
 ---
 

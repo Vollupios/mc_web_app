@@ -4,9 +4,9 @@
 
 ### **❌ Erro Original**
 
-```
+```text
 HTTP 404 - A página http://localhost:5099/Documents/AdvancedSearch pode estar temporariamente indisponível
-```
+```text
 
 ### **✅ Solução Implementada**
 
@@ -44,7 +44,7 @@ public async Task<IActionResult> AdvancedSearch(
 {
     // Implementação completa com logs, validação e tratamento de erros
 }
-```
+```text
 
 #### **2. Funcionalidades Implementadas**
 
@@ -72,7 +72,7 @@ public async Task<IActionResult> AdvancedSearch(
 // ERRO: Métodos não traduzíveis pelo EF Core em queries LINQ
 MonthName = cultureInfo.DateTimeFormat.GetMonthName(g.Key.Month),
 TipoReuniao = g.Key.GetDisplayName(),
-```
+```text
 
 ### **✅ Soluções Implementadas**
 
@@ -90,7 +90,7 @@ foreach (var month in monthlyUploads)
 {
     month.MonthName = cultureInfo.DateTimeFormat.GetMonthName(month.Month);
 }
-```
+```text
 
 #### **2. Correção GetReuniaoPorTipoAsync()**
 
@@ -109,7 +109,7 @@ foreach (var item in reunioesPorTipo)
         item.TipoReuniao = tipoEnum.GetDisplayName();
     }
 }
-```
+```text
 
 ---
 

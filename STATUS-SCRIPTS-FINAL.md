@@ -12,7 +12,7 @@
 
 ### 📁 **Organização Hierárquica Perfeita**
 
-```
+```text
 📦 IntranetDocumentos/
 ├── deploy-quick.bat                      # 🚀 Acesso rápido da raiz
 ├── SCRIPTS-UNIFICADOS.md                 # 📋 Índice completo
@@ -49,7 +49,7 @@
         ├── build-analytics.sh            # Build analytics
         ├── test-analytics.sh             # Testes analytics
         └── fix-markdown.sh               # Correção markdown
-```
+```text
 
 ---
 
@@ -82,7 +82,7 @@
 -WithIIS          # Configurar IIS (padrão: $true)
 -WithVerification # Verificar instalação (padrão: $true)
 -Silent           # Modo silencioso (padrão: $false)
-```
+```text
 
 ### **2. ⚡ install-quick.bat (ACESSO RÁPIDO)**
 
@@ -184,7 +184,7 @@
 ```batch
 # Instalação mais simples possível
 deploy-quick.bat
-```
+```text
 
 ### **👔 Para Administradores:**
 
@@ -194,7 +194,7 @@ Scripts\Install-IntranetDocumentos.ps1
 
 # Instalação customizada
 Scripts\Install-IntranetDocumentos.ps1 -InstallType Production -WithRedis:$true -WithSecurity:$true
-```
+```text
 
 ### **🛠️ Para Desenvolvedores:**
 
@@ -207,7 +207,7 @@ Scripts\Development\Dev-Tools.ps1 run -Watch
 
 # Build para produção
 Scripts\Development\Dev-Tools.ps1 build -Configuration Release
-```
+```text
 
 ### **🔧 Para DevOps:**
 
@@ -220,7 +220,7 @@ Scripts\Deploy\Configuracao-IIS.ps1
 
 # Hardening de segurança
 Scripts\Security\Hardening-Seguranca.ps1
-```
+```text
 
 ---
 
@@ -243,7 +243,7 @@ Get-Help Scripts\Development\Dev-Tools.ps1 -Detailed
 
 # Help do configurador de banco
 Get-Help Scripts\Database\Setup-Database.ps1 -Examples
-```
+```text
 
 ---
 
@@ -290,21 +290,21 @@ Get-Help Scripts\Database\Setup-Database.ps1 -Examples
 ```batch
 # Da raiz do projeto - MAIS SIMPLES POSSÍVEL
 deploy-quick.bat
-```
+```text
 
 ### **Para Administradores:**
 
 ```powershell
 # Instalação completa com todas as opções
 Scripts\Install-IntranetDocumentos.ps1
-```
+```text
 
 ### **Para Desenvolvedores:**
 
 ```powershell
 # Ferramentas completas de desenvolvimento
 Scripts\Development\Dev-Tools.ps1
-```
+```text
 
 ---
 

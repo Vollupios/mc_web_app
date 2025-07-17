@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using IntranetDocumentos.Models;
 
 namespace IntranetDocumentos.Controllers;

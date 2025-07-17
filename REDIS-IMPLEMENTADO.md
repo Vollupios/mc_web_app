@@ -23,7 +23,7 @@ _memoryCache.Set($"login_attempts_{email}", attempts);
 
 // Agora (Redis - distribuído entre servidores)
 await _distributedCache.SetStringAsync($"login_attempts:{email}", json);
-```
+```text
 
 ### **2. Cache de Sessões Persistentes**
 
@@ -34,7 +34,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = "localhost:6379";
     options.InstanceName = "IntranetDocumentos";
 });
-```
+```text
 
 ### **3. Fallback Automático**
 
@@ -79,7 +79,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
     "Database": 0
   }
 }
-```
+```text
 
 ### **Production (Windows Server)**
 
@@ -96,7 +96,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
     "SyncTimeout": 10000
   }
 }
-```
+```text
 
 ---
 
@@ -107,7 +107,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 ```powershell
 # Execute como Administrador
 .\Install-Redis-Windows.ps1
-```
+```text
 
 ### **Instalação Manual**
 
@@ -125,28 +125,28 @@ builder.Services.AddStackExchangeRedisCache(options =>
 ```bash
 redis-cli ping
 # Resultado esperado: PONG
-```
+```text
 
 ### **2. Ver chaves da aplicação**
 
 ```bash
 redis-cli keys "*"
 # Mostra: IntranetDocumentoslogin_attempts:email@domain.com
-```
+```text
 
 ### **3. Monitorar comandos em tempo real**
 
 ```bash
 redis-cli monitor
 # Mostra todos os comandos sendo executados
-```
+```text
 
 ### **4. Ver informações do servidor**
 
 ```bash
 redis-cli info memory
 # Mostra uso de memória
-```
+```text
 
 ---
 
@@ -172,7 +172,7 @@ redis-cli info memory
 
 # Ver número de conexões
 redis-cli info clients
-```
+```text
 
 ---
 
@@ -188,7 +188,7 @@ Para ambientes com alta disponibilidade:
     "Redis": "server1:6379,server2:6379,server3:6379"
   }
 }
-```
+```text
 
 ### **2. Persistência**
 
@@ -202,7 +202,7 @@ Redis salva dados automaticamente:
 ```bash
 # Configurado para remover chaves antigas quando memória esgota
 maxmemory-policy allkeys-lru
-```
+```text
 
 ---
 

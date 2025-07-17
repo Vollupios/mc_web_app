@@ -37,7 +37,7 @@ Este documento detalha todas as correções, melhorias e migrações realizadas 
 
 ### 1. Estrutura de Scripts (`/Scripts/`)
 
-```
+```text
 Scripts/
 ├── Database/
 │   ├── Setup-Database.ps1       # Setup automatizado (SQL Server + SQLite)
@@ -55,7 +55,7 @@ Scripts/
 └── Security/
     ├── Auditoria-Seguranca.ps1
     └── Hardening-Seguranca.ps1
-```
+```text
 
 ### 2. Migração de Banco de Dados
 
@@ -78,7 +78,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(connectionString); // Produção
     }
 });
-```
+```text
 
 #### Connection Strings Configuradas
 ```json
@@ -87,7 +87,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Production (SQL Server)
 "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=IntranetDocumentosDb;..."
-```
+```text
 
 ### 3. Serviços Adaptados
 
@@ -111,7 +111,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 var metrics = documents.Select(d => new {
     // Complex LINQ expressions
 }).ToList();
-```
+```text
 
 **Solução**: Client-side evaluation
 ```csharp
@@ -120,7 +120,7 @@ var documents = await _context.Documents.ToListAsync();
 var metrics = documents.Select(d => new {
     // Processing on client-side
 }).ToList();
-```
+```text
 
 #### Visualização de Documentos
 - ✅ **PDFs**: `iframe` inline + fallback download
@@ -139,7 +139,7 @@ public class WorkflowController : Controller
 {
     <a href="/Workflow">Workflow</a>
 }
-```
+```text
 
 ## 🔧 Configuração Técnica
 
@@ -148,7 +148,7 @@ public class WorkflowController : Controller
 <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
 <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.7" />
 <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
-```
+```text
 
 ### Variáveis de Ambiente
 ```json
@@ -162,22 +162,22 @@ public class WorkflowController : Controller
     "Password": "SuperUser2025!#@Strong"  // Senha forte configurada
   }
 }
-```
+```text
 
 ### Estrutura de Departamentos
-```
+```text
 1. Pessoal    4. Cadastro
 2. Fiscal     5. Apoio  
 3. Contábil   6. TI
 7. Geral      (Acessível por todos)
-```
+```text
 
 ### Roles de Usuário
-```
+```text
 - Admin:    Acesso total + gerenciamento
 - Gestor:   Acesso a todos os documentos
 - Usuario:  Acesso por departamento + Geral
-```
+```text
 
 ## 🧪 Testes e Validação
 
@@ -228,7 +228,7 @@ cd IntranetDocumentos
 # Acesse: https://localhost:7168
 # Login: admin@intranet.com
 # Senha: SuperUser2025!#@Strong
-```
+```text
 
 ### Deploy Produção
 ```bash
@@ -240,7 +240,7 @@ cd IntranetDocumentos
 
 # Verificação pós-instalação
 ./Scripts/Deploy/Verificacao-Pos-Instalacao.ps1
-```
+```text
 
 ## 🔒 Segurança Implementada
 

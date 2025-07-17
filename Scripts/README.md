@@ -60,7 +60,7 @@ install-quick.bat
 
 # Opção 2: Instalação completa com opções
 powershell -ExecutionPolicy Bypass -File Install-IntranetDocumentos.ps1
-```
+```text
 
 ### **Para Desenvolvedores**
 
@@ -73,7 +73,7 @@ powershell -ExecutionPolicy Bypass -File Install-IntranetDocumentos.ps1
 
 # Build da aplicação
 .\Development\Dev-Tools.ps1 build -Configuration Release
-```
+```text
 
 ### **Para DevOps/Produção**
 
@@ -86,7 +86,7 @@ powershell -ExecutionPolicy Bypass -File Install-IntranetDocumentos.ps1
 
 # Aplicar hardening de segurança
 .\Security\Hardening-Seguranca.ps1
-```
+```text
 
 ---
 
@@ -97,7 +97,7 @@ powershell -ExecutionPolicy Bypass -File Install-IntranetDocumentos.ps1
 ```batch
 # Execute como Administrador
 install-quick.bat
-```
+```text
 
 **O que faz:**
 
@@ -121,7 +121,7 @@ install-quick.bat
 
 # Instalação silenciosa
 .\Install-IntranetDocumentos.ps1 -Silent
-```
+```text
 
 **Parâmetros disponíveis:**
 
@@ -147,7 +147,7 @@ install-quick.bat
 
 # Recriar banco (ATENÇÃO: apaga dados!)
 .\Database\Setup-Database.ps1 -Recreate
-```
+```text
 
 ### **Backup e Manutenção**
 
@@ -157,7 +157,7 @@ install-quick.bat
 
 # Verificar integridade
 .\Database\check-departments.sql
-```
+```text
 
 ---
 
@@ -171,7 +171,7 @@ install-quick.bat
 
 # Auditoria de segurança
 .\Security\Auditoria-Seguranca.ps1
-```
+```text
 
 **Configurações aplicadas:**
 
@@ -191,7 +191,7 @@ install-quick.bat
 ```powershell
 # Abre menu com todas as opções
 .\Development\Dev-Tools.ps1
-```
+```text
 
 ### **Comandos Diretos**
 
@@ -216,7 +216,7 @@ install-quick.bat
 
 # Reset completo
 .\Development\Dev-Tools.ps1 reset
-```
+```text
 
 ---
 
@@ -233,14 +233,14 @@ install-quick.bat
 
 # Verificação pós-deploy
 .\Deploy\Verificacao-Pos-Instalacao.ps1
-```
+```text
 
 ### **Redis Cache**
 
 ```powershell
 # Instalar Redis no Windows
 .\Deploy\Install-Redis-Windows.ps1
-```
+```text
 
 ---
 
@@ -251,7 +251,7 @@ install-quick.bat
 ```powershell
 # Verificação completa
 .\Deploy\Verificacao-Pos-Instalacao.ps1
-```
+```text
 
 **Verifica:**
 
@@ -273,7 +273,7 @@ install-quick.bat
 
 # Auditoria de segurança
 .\Security\Auditoria-Seguranca.ps1
-```
+```text
 
 ---
 
@@ -281,13 +281,13 @@ install-quick.bat
 
 ### **Localização dos Logs**
 
-```
+```text
 Logs/
 ├── install-*.log           # Logs de instalação
 ├── application-*.log       # Logs da aplicação
 ├── security-*.log          # Logs de segurança
 └── deploy-*.log           # Logs de deploy
-```
+```text
 
 ### **Verificar Logs**
 
@@ -297,7 +297,7 @@ Get-Content (Get-ChildItem Logs\install-*.log | Sort-Object LastWriteTime -Desce
 
 # Monitorar logs da aplicação
 Get-Content Logs\application-latest.log -Wait
-```
+```text
 
 ---
 
@@ -310,27 +310,27 @@ Get-Content Logs\application-latest.log -Wait
 ```powershell
 # Execute como Administrador
 # Clique direito no PowerShell → "Executar como administrador"
-```
+```text
 
 #### **".NET não encontrado"**
 
 ```powershell
 # Instale .NET 8.0+ de: https://dotnet.microsoft.com/download
-```
+```text
 
 #### **"Não é possível executar scripts"**
 
 ```powershell
 # Execute uma vez:
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
+```text
 
 #### **Erro de conexão com banco**
 
 ```powershell
 # Reconfigure o banco:
 .\Database\Setup-Database.ps1 -Recreate
-```
+```text
 
 #### **Aplicação não inicia**
 
@@ -340,7 +340,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 # Reset completo:
 .\Development\Dev-Tools.ps1 reset
-```
+```text
 
 ---
 

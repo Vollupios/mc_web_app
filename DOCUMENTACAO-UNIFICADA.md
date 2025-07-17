@@ -64,17 +64,17 @@ Sistema web para gestão centralizada de documentos corporativos, reuniões e ra
 
 ### **🏗️ Stack Tecnológico**
 
-```
+```text
 Frontend:     Bootstrap 5 + Razor Views + JavaScript
 Backend:      ASP.NET Core 9.0 MVC
 Database:     MySQL 8.0+
 Cache:        Redis 6.0+
 Web Server:   IIS (Produção) / Kestrel (Desenvolvimento)
-```
+```text
 
 ### **📁 Arquitetura de Camadas**
 
-```
+```text
 ┌─────────────────────┐
 │   Presentation      │ Controllers + Views (MVC)
 ├─────────────────────┤
@@ -84,7 +84,7 @@ Web Server:   IIS (Produção) / Kestrel (Desenvolvimento)
 ├─────────────────────┤
 │   Infrastructure    │ MySQL + Redis + File System
 └─────────────────────┘
-```
+```text
 
 ### **🔧 Padrões Implementados**
 
@@ -143,40 +143,40 @@ Web Server:   IIS (Produção) / Kestrel (Desenvolvimento)
 
 ### **💻 Servidor Windows (Produção)**
 
-```
+```text
 Sistema:      Windows Server 2019/2022
 RAM:          Mínimo 8GB (Recomendado 16GB)
 Disco:        100GB+ SSD
 Processador:  4+ cores
 Rede:         1Gbps
-```
+```text
 
 ### **🗄️ Banco de Dados MySQL**
 
-```
+```text
 Versão:       MySQL 8.0+
 RAM:          Mínimo 2GB
 Conexões:     100+ simultâneas
 InnoDB:       Buffer Pool 128MB+
-```
+```text
 
 ### **🔴 Redis Cache**
 
-```
+```text
 Versão:       Redis 6.0+
 RAM:          Mínimo 512MB
 Persistência: RDB + AOF
 Política:     allkeys-lru
-```
+```text
 
 ### **🌐 IIS (Produção)**
 
-```
+```text
 Versão:       IIS 10+
 .NET:         ASP.NET Core Runtime 9.0
 Módulos:      ASP.NET Core Module v2
 SSL:          Certificado válido
-```
+```text
 
 ---
 
@@ -193,7 +193,7 @@ mysql --version   # Verificar instalação
 
 # 3. Instalar Redis (opcional para desenvolvimento)
 redis-server --version
-```
+```text
 
 ### **⚡ Setup Rápido**
 
@@ -213,15 +213,15 @@ dotnet ef database update
 
 # 5. Iniciar aplicação
 dotnet run --project IntranetDocumentos.csproj
-```
+```text
 
 ### **🌐 Acesso Padrão**
 
-```
+```text
 URL:      http://localhost:5000
 Admin:    admin@intranet.com
 Senha:    Admin@123
-```
+```text
 
 ---
 
@@ -241,7 +241,7 @@ Senha:    Admin@123
 
 # 4. Verificar instalação
 .\Verificacao-Pos-Instalacao.ps1
-```
+```text
 
 ### **🔧 Deploy Manual**
 
@@ -256,7 +256,7 @@ dotnet publish -c Release -o C:\inetpub\wwwroot\IntranetDocumentos
 
 # 3. Configurar permissões
 icacls "C:\inetpub\wwwroot\IntranetDocumentos" /grant "IIS_IUSRS:F"
-```
+```text
 
 ---
 
@@ -269,7 +269,7 @@ Use o arquivo `setup-database.mysql.sql`:
 ```sql
 -- Executar como root
 mysql -u root -p < setup-database.mysql.sql
-```
+```text
 
 ### **🔧 Configuração Manual**
 
@@ -285,7 +285,7 @@ CREATE USER `app_user`@`localhost` IDENTIFIED BY 'SuaSenhaSegura123!';
 -- 3. Conceder permissões
 GRANT ALL PRIVILEGES ON `IntranetDocumentos`.* TO `app_user`@`localhost`;
 FLUSH PRIVILEGES;
-```
+```text
 
 ### **⚙️ Configurações de Produção**
 
@@ -294,7 +294,7 @@ FLUSH PRIVILEGES;
 SET GLOBAL max_allowed_packet = 52428800; -- 50MB
 SET GLOBAL innodb_buffer_pool_size = 134217728; -- 128MB
 SET GLOBAL innodb_log_file_size = 67108864; -- 64MB
-```
+```text
 
 ---
 
@@ -311,7 +311,7 @@ SET GLOBAL innodb_log_file_size = 67108864; -- 64MB
 # 2. Instalar como serviço
 # 3. Configurar redis.conf
 # 4. Iniciar serviço
-```
+```text
 
 ### **⚙️ Configuração de Produção**
 
@@ -323,7 +323,7 @@ save 900 1
 save 300 10
 save 60 10000
 appendonly yes
-```
+```text
 
 ### **🧪 Teste de Funcionamento**
 
@@ -337,7 +337,7 @@ redis-cli keys "*"
 
 # Monitorar comandos
 redis-cli monitor
-```
+```text
 
 ---
 
@@ -348,7 +348,7 @@ redis-cli monitor
 ```powershell
 # Script completo de configuração IIS
 .\Configuracao-IIS.ps1
-```
+```text
 
 ### **📝 Configuração Manual**
 
@@ -359,21 +359,21 @@ redis-cli monitor
 New-WebAppPool -Name "IntranetDocumentos" -Force
 Set-ItemProperty IIS:\AppPools\IntranetDocumentos processModel.identityType ApplicationPoolIdentity
 Set-ItemProperty IIS:\AppPools\IntranetDocumentos managedRuntimeVersion ""
-```
+```text
 
 #### **2. Criar Website**
 
 ```powershell
 # Via PowerShell
 New-Website -Name "IntranetDocumentos" -ApplicationPool "IntranetDocumentos" -PhysicalPath "C:\inetpub\wwwroot\IntranetDocumentos" -Port 80
-```
+```text
 
 #### **3. Configurar HTTPS**
 
 ```powershell
 # Adicionar binding HTTPS
 New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
-```
+```text
 
 ### **🔒 Headers de Segurança (web.config)**
 
@@ -389,7 +389,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
     </customHeaders>
   </httpProtocol>
 </system.webServer>
-```
+```text
 
 ---
 
@@ -419,7 +419,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
     }
   }
 }
-```
+```text
 
 ### **📄 appsettings.Production.json**
 
@@ -442,7 +442,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
     }
   }
 }
-```
+```text
 
 ### **⚙️ Configurações Avançadas**
 
@@ -465,7 +465,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
     "EnableAuditLogging": true
   }
 }
-```
+```text
 
 ---
 
@@ -475,7 +475,7 @@ New-WebBinding -Name "IntranetDocumentos" -Protocol https -Port 443 -SslFlags 1
 
 #### **🔑 Admin (Administrador)**
 
-```
+```text
 Acesso: Total ao sistema
 Permissões:
 - ✅ Gestão de usuários
@@ -483,11 +483,11 @@ Permissões:
 - ✅ Configurações do sistema
 - ✅ Logs e auditoria
 - ✅ Backup e restore
-```
+```text
 
 #### **👔 Gestor**
 
-```
+```text
 Acesso: Amplo (exceto administração)
 Permissões:
 - ✅ Todos os documentos
@@ -495,11 +495,11 @@ Permissões:
 - ✅ Analytics completo
 - ❌ Gestão de usuários
 - ❌ Configurações do sistema
-```
+```text
 
 #### **👤 Usuario (Funcionário)**
 
-```
+```text
 Acesso: Departamento próprio + Geral
 Permissões:
 - ✅ Documentos do seu departamento
@@ -507,11 +507,11 @@ Permissões:
 - ✅ Reuniões que participa
 - ❌ Outros departamentos
 - ❌ Administração
-```
+```text
 
 ### **🏢 Departamentos**
 
-```
+```text
 1. Pessoal       - Documentos de RH e pessoal
 2. Fiscal        - Documentos fiscais e tributários
 3. Contábil      - Documentos contábeis e financeiros
@@ -519,7 +519,7 @@ Permissões:
 5. Apoio         - Documentos de apoio administrativo
 6. TI            - Documentos técnicos e de TI
 7. Geral         - Documentos acessíveis por todos
-```
+```text
 
 ### **🔧 Criação de Usuários**
 
@@ -533,7 +533,7 @@ INSERT INTO AspNetUserRoles (UserId, RoleId)
 SELECT u.Id, r.Id 
 FROM AspNetUsers u, AspNetRoles r 
 WHERE u.Email = 'usuario@empresa.com' AND r.Name = 'Usuario';
-```
+```text
 
 ---
 
@@ -551,7 +551,7 @@ INSERT INTO Departments (Name) VALUES
 ('Apoio'),
 ('TI'),
 ('Geral');
-```
+```text
 
 ### **🔒 Controle de Acesso por Departamento**
 
@@ -571,11 +571,11 @@ public bool CanUserAccessDocument(Document doc, ApplicationUser user)
     
     return false;
 }
-```
+```text
 
 ### **📁 Organização de Arquivos**
 
-```
+```text
 DocumentsStorage/
 ├── Pessoal/
 ├── Fiscal/
@@ -584,7 +584,7 @@ DocumentsStorage/
 ├── Apoio/
 ├── TI/
 └── Geral/
-```
+```text
 
 ---
 
@@ -598,7 +598,7 @@ DocumentsStorage/
 
 # Configuração no agendador de tarefas do Windows
 schtasks /create /tn "Backup IntranetDocumentos" /tr "C:\Path\backup-database.ps1" /sc daily /st 02:00
-```
+```text
 
 ### **💾 Backup Manual**
 
@@ -611,7 +611,7 @@ redis-cli BGSAVE
 
 # Backup arquivos
 tar -czf DocumentsStorage_backup.tar.gz DocumentsStorage/
-```
+```text
 
 ### **🔄 Restore**
 
@@ -621,7 +621,7 @@ mysql -u app_user -p IntranetDocumentos < backup_20250716_120000.sql
 
 # Restore arquivos
 tar -xzf DocumentsStorage_backup.tar.gz
-```
+```text
 
 ### **☁️ Backup em Nuvem (Opcional)**
 
@@ -631,7 +631,7 @@ az storage blob upload-batch --destination backups --source ./DatabaseBackups/ -
 
 # Upload para AWS S3
 aws s3 sync ./DatabaseBackups/ s3://bucket-backups/intranet/
-```
+```text
 
 ---
 

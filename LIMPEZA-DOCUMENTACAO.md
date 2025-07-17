@@ -74,13 +74,13 @@ rm -f DOCUMENTACAO-UNIFICADA.md \
       ANALISE-SEGURANCA.md \
       DEPLOYMENT-FILES.md \
       PACKAGE-README.md
-```
+```text
 
 ## ✅ Resultado Final
 
 Após a limpeza, a documentação ficará organizada assim:
 
-```
+```text
 /IntranetDocumentos/
 ├── README.md                              # ✅ Visão geral + link para doc oficial
 ├── DOCUMENTACAO-OFICIAL-UNIFICADA.md     # ✅ DOCUMENTAÇÃO PRINCIPAL
@@ -90,7 +90,7 @@ Após a limpeza, a documentação ficará organizada assim:
 └── Builders/
     ├── BUILDER_ARCHITECTURE.md           # ✅ Arquitetura dos builders
     └── BUILDER_USAGE_EXAMPLES.md         # ✅ Exemplos de uso dos builders
-```
+```text
 
 ## 🎯 Próximos Passos
 

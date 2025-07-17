@@ -19,7 +19,7 @@ public async Task<IActionResult> AdvancedSearch()
 [HttpPost]
 [ValidateAntiForgeryToken]  
 public async Task<IActionResult> AdvancedSearch(parameters...)
-```
+```text
 
 #### **2. Corrigidos problemas LINQ no AnalyticsService**
 

@@ -24,7 +24,7 @@ O VS Code estava interpretando o arquivo `setup-mysql.sql` como **SQL Server (MS
 -- Uso de backticks (`) para nomes MySQL
 CREATE DATABASE IF NOT EXISTS `IntranetDocumentos`;
 CREATE USER IF NOT EXISTS `app_user`@`localhost`;
-```
+```text
 
 ### **2. Configuração do VS Code (`.vscode/settings.json`)**
 
@@ -38,7 +38,7 @@ CREATE USER IF NOT EXISTS `app_user`@`localhost`;
     "mssql.enableIntelliSense": false,
     "mysql.connections": [...]
 }
-```
+```text
 
 ### **3. Arquivo alternativo com extensão específica**
 
@@ -56,7 +56,7 @@ CREATE DATABASE IF NOT EXISTS `database_name`;
 CREATE USER `user`@`host` IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON `database`.* TO `user`@`host`;
 SHOW DATABASES LIKE 'pattern';
-```
+```text
 
 ### **SQL Server Syntax:**
 
@@ -66,7 +66,7 @@ CREATE DATABASE [database_name];
 CREATE LOGIN [user] WITH PASSWORD = 'password';
 CREATE USER [user] FOR LOGIN [user];
 GRANT ALL ON [database] TO [user];
-```
+```text
 
 ## 🛠️ **COMO USAR OS ARQUIVOS**
 
@@ -74,13 +74,13 @@ GRANT ALL ON [database] TO [user];
 
 ```bash
 mysql -u root -p < setup-mysql.sql
-```
+```text
 
 ### **Opção 2: Arquivo com Extensão Específica**
 
 ```bash
 mysql -u root -p < setup-database.mysql.sql
-```
+```text
 
 ### **Opção 3: Via MySQL Workbench**
 

@@ -42,12 +42,14 @@
 ## 🎯 **Funcionalidades Validadas**
 
 ### **✅ Banco de Dados**
+
 - [x] Auto-detecção SQL Server vs SQLite
 - [x] Migrations funcionando para ambos
 - [x] Connection strings dinâmicas
 - [x] Backup automático (SQLite = cópia, SQL Server = backup nativo)
 
 ### **✅ Aplicação Web**
+
 - [x] Build sem warnings/erros
 - [x] Startup em desenvolvimento (SQLite)
 - [x] Dashboard e analytics funcionais
@@ -95,28 +97,30 @@
 ## 🗂️ **Arquivos Principais Modificados**
 
 ### **Core Application:**
-```
+
+```text
 ├── Program.cs                              # ✅ Smart provider detection
 ├── appsettings.json                        # ✅ SQL Server default
 ├── appsettings.Development.json            # ✅ SQLite for dev
 ├── IntranetDocumentos.csproj              # ✅ SQL Server + SQLite packages
 └── Services/DatabaseBackupService.cs      # ✅ Multi-provider backup logic
-```
+```text
 
 ### **Database:**
-```
+
+```text
 ├── Migrations/SqlServer/                   # ✅ SQL Server migrations
 ├── Migrations/Sqlite/                      # ✅ SQLite migrations  
 └── Data/ApplicationDbContext.cs            # ✅ Provider-agnostic
-```
+```text
 
 ### **Scripts:**
-```
+```text
 ├── Scripts/Database/Setup-Database.ps1     # ✅ Multi-provider setup
 ├── Scripts/Database/backup-database.ps1    # ✅ Auto-detect backup method
 ├── Scripts/Development/start-app.ps1       # ✅ Smart environment detection
 └── Scripts/Production/deploy.ps1           # ✅ Production deployment
-```
+```text
 
 ---
 
@@ -153,19 +157,19 @@
 ```bash
 # Automaticamente usa SQLite
 dotnet run --environment Development
-```
+```text
 
 ### **Produção (SQL Server):**
 ```bash
 # Configurar connection string SQL Server em appsettings.Production.json
 dotnet run --environment Production
-```
+```text
 
 ### **Backup:**
 ```powershell
 # Detecta automaticamente o provider e faz backup apropriado
 .\Scripts\Database\backup-database.ps1
-```
+```text
 
 ---
 

@@ -39,14 +39,14 @@ cd IntranetDocumentos
 
 # 2. Executar instalação automatizada
 .\Scripts\install-quick.bat
-```
+```text
 
 ### **Para Produção (Windows Server):**
 
 ```powershell
 # Executar instalador principal
 .\Scripts\Install-IntranetDocumentos.ps1 -InstallType Production
-```
+```text
 
 ---
 
@@ -84,7 +84,7 @@ cd IntranetDocumentos
 
 ### **Estrutura do Projeto:**
 
-```
+```texttext
 📁 IntranetDocumentos/
 ├── 📁 Controllers/          # Controladores MVC
 ├── 📁 Models/              # Entidades e ViewModels  
@@ -95,7 +95,7 @@ cd IntranetDocumentos
 ├── 📁 Middleware/          # Middlewares customizados
 ├── 📁 Extensions/          # Extensões de funcionalidade
 └── 📁 DocumentsStorage/    # Armazenamento de arquivos
-```
+```text
 
 ---
 
@@ -159,7 +159,7 @@ dotnet test
 
 # Scripts de desenvolvimento
 .\Scripts\Development\Dev-Tools.ps1
-```
+```text
 
 ---
 

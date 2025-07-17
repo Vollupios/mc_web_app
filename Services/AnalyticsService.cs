@@ -66,7 +66,7 @@ namespace IntranetDocumentos.Services
                 {
                     DocumentId = documentId,
                     UserId = userId,
-                    DownloadDate = DateTime.UtcNow,
+                    DownloadedAt = DateTime.UtcNow,
                     UserAgent = userAgent,
                     IpAddress = ipAddress
                 };
@@ -94,7 +94,7 @@ namespace IntranetDocumentos.Services
                     .Where(d => d.UploadDate.Month == DateTime.Now.Month && d.UploadDate.Year == DateTime.Now.Year)
                     .CountAsync();                var totalDownloads = await _context.DocumentDownloadLogs.CountAsync();
                 var downloadsThisMonth = await _context.DocumentDownloadLogs
-                    .Where(d => d.DownloadDate.Month == DateTime.Now.Month && d.DownloadDate.Year == DateTime.Now.Year)
+                    .Where(d => d.DownloadedAt.Month == DateTime.Now.Month && d.DownloadedAt.Year == DateTime.Now.Year)
                     .CountAsync();
 
                 var totalStorageUsed = await _context.Documents.SumAsync(d => d.FileSize);
@@ -258,7 +258,7 @@ namespace IntranetDocumentos.Services
                     FileName = g.Key.OriginalFileName,
                     DepartmentName = g.Key.Department != null ? g.Key.Department.Name : "Geral",
                     DownloadCount = g.Count(),
-                    LastDownload = g.Max(dd => dd.DownloadDate)
+                    LastDownload = g.Max(dd => dd.DownloadedAt)
                 })
                 .OrderByDescending(x => x.DownloadCount)
                 .Take(10)
@@ -293,7 +293,7 @@ namespace IntranetDocumentos.Services
             foreach (var month in monthlyUploads)
             {
                 month.TotalDownloads = await _context.DocumentDownloadLogs
-                    .Where(dd => dd.DownloadDate.Year == month.Year && dd.DownloadDate.Month == month.Month)
+                    .Where(dd => dd.DownloadedAt.Year == month.Year && dd.DownloadedAt.Month == month.Month)
                     .CountAsync();
             }
 

@@ -514,7 +514,7 @@ public static class SeedData
                     {
                         DocumentId = doc.Id,
                         UserId = adminUser.Id,
-                        DownloadDate = DateTime.Now.AddDays(-i * 3),
+                        DownloadedAt = DateTime.Now.AddDays(-i * 3),
                         UserAgent = $"Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.{i}",
                         IpAddress = $"192.168.1.{100 + i}"
                     });

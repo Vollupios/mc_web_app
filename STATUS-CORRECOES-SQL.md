@@ -22,7 +22,7 @@
 -- Sintaxe MySQL com backticks
 CREATE DATABASE IF NOT EXISTS `IntranetDocumentos`;
 CREATE USER IF NOT EXISTS `app_user`@`localhost`;
-```
+```text
 
 #### **2. Configuração VS Code (`.vscode/settings.json`)**
 
@@ -34,7 +34,7 @@ CREATE USER IF NOT EXISTS `app_user`@`localhost`;
     },
     "mssql.enableIntelliSense": false
 }
-```
+```text
 
 #### **3. Arquivo Alternativo (`setup-database.mysql.sql`)**
 
@@ -72,7 +72,7 @@ function Setup-SQLiteDatabase
 # DEPOIS (CORRETO):
 [switch]$Recreate,
 function Initialize-SQLiteDatabase
-```
+```text
 
 ## 🔧 **PRINCIPAIS CORREÇÕES**
 
@@ -82,7 +82,7 @@ function Initialize-SQLiteDatabase
 CREATE DATABASE IntranetDocumentos
 CREATE USER 'app_user'@'localhost'
 SELECT User, Host FROM mysql.user
-```
+```text
 
 ### **Depois (MySQL syntax - CORRETO):**
 
@@ -90,7 +90,7 @@ SELECT User, Host FROM mysql.user
 CREATE DATABASE IF NOT EXISTS `IntranetDocumentos`
 CREATE USER IF NOT EXISTS `app_user`@`localhost`
 SELECT `User`, `Host` FROM `mysql`.`user`
-```
+```text
 
 ## 📊 **COMPARAÇÃO DE ERROS**
 

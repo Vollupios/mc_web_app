@@ -36,7 +36,7 @@ namespace IntranetDocumentos.Controllers
                     SizeFormatted = FormatBytes(new FileInfo(path).Length)
                 }).OrderByDescending(b => b.CreatedDate).ToList();
 
-                ViewBag.BackupInfo = backupInfo;
+                ViewBag.BackupInfo = (dynamic)backupInfo!;
                 return View();
             }
             catch (Exception ex)
