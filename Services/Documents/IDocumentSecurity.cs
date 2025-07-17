@@ -29,5 +29,10 @@ namespace IntranetDocumentos.Services.Documents
         /// Verifica se usuário está em uma role específica
         /// </summary>
         Task<bool> IsUserInRoleAsync(ApplicationUser user, string role);
+
+        /// <summary>
+        /// Verifica se usuário pode acessar uma pasta específica
+        /// </summary>
+        Task<bool> CanUserAccessFolderAsync(DocumentFolder folder, ApplicationUser user);
     }
 }

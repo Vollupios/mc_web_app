@@ -58,7 +58,7 @@
                         <label asp-for="DepartmentId" class="form-label fw-bold">
                             <i class="bi bi-building"></i> Departamento
                         </label>
-                        <select asp-for="DepartmentId" class="form-select form-select-lg">
+                        <select asp-for="DepartmentId" class="form-select form-select-lg" id="departmentSelect">
                             <option value="">🌐 Geral (Todos os usuários)</option>
                             @foreach (var department in Model.AvailableDepartments)
                             {
@@ -69,6 +69,32 @@
                         <div class="form-text">
                             <i class="bi bi-info-circle"></i>
                             Selecione um departamento específico ou deixe em branco para "Geral"
+                        </div>
+                    </div>
+
+                    <!-- Pasta de Destino -->
+                    <div class="form-group mb-4">
+                        <label for="FolderId" class="form-label fw-bold">
+                            <i class="bi bi-folder"></i> Pasta de Destino
+                            <span class="text-muted">(opcional)</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-folder" id="folderIcon"></i>
+                            </span>
+                            <select name="FolderId" id="folderSelect" class="form-select form-select-lg">
+                                <option value="">📁 Raiz do departamento</option>
+                                <!-- As opções de pastas serão carregadas dinamicamente -->
+                            </select>
+                            <button type="button" class="btn btn-outline-secondary" 
+                                    data-bs-toggle="modal" data-bs-target="#createFolderModal"
+                                    title="Criar nova pasta">
+                                <i class="bi bi-folder-plus"></i>
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i>
+                            Escolha uma pasta específica ou deixe em branco para enviar para a raiz do departamento
                         </div>
                     </div>
                     
@@ -145,10 +171,187 @@
     </div>
 </div>
 
+<!-- Modal para Criar Nova Pasta -->
+<div class="modal fade" id="createFolderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-folder-plus me-2"></i>
+                    Criar Nova Pasta
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="quickCreateFolderForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="modalFolderName" class="form-label">Nome da Pasta</label>
+                        <input type="text" class="form-control" id="modalFolderName" required />
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="modalFolderDescription" class="form-label">Descrição (opcional)</label>
+                        <textarea class="form-control" id="modalFolderDescription" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="modalFolderColor" class="form-label">Cor</label>
+                            <select class="form-select" id="modalFolderColor">
+                                <option value="#0d6efd">🔵 Azul</option>
+                                <option value="#198754">🟢 Verde</option>
+                                <option value="#dc3545">🔴 Vermelho</option>
+                                <option value="#fd7e14">🟠 Laranja</option>
+                                <option value="#6f42c1">🟣 Roxo</option>
+                                <option value="#20c997">🟡 Turquesa</option>
+                                <option value="#6c757d">⚫ Cinza</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="modalFolderIcon" class="form-label">Ícone</label>
+                            <select class="form-select" id="modalFolderIcon">
+                                <option value="bi bi-folder-fill">📁 Pasta Padrão</option>
+                                <option value="bi bi-briefcase-fill">💼 Trabalho</option>
+                                <option value="bi bi-file-earmark-medical-fill">🏥 Médico</option>
+                                <option value="bi bi-shield-fill-check">🛡️ Segurança</option>
+                                <option value="bi bi-gear-fill">⚙️ Configurações</option>
+                                <option value="bi bi-people-fill">👥 Pessoas</option>
+                                <option value="bi bi-bank">🏦 Financeiro</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-folder-plus me-1"></i>
+                        Criar Pasta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
     <script>
+        // Gerenciamento de pastas
+        $(document).ready(function() {
+            // Carregar pastas quando departamento mudar
+            $('#departmentSelect').on('change', function() {
+                const departmentId = $(this).val();
+                loadFoldersForDepartment(departmentId);
+            });
+
+            // Criar nova pasta via modal
+            $('#quickCreateFolderForm').on('submit', function(e) {
+                e.preventDefault();
+                createNewFolder();
+            });
+        });
+
+        function loadFoldersForDepartment(departmentId) {
+            const $folderSelect = $('#folderSelect');
+            
+            // Limpar opções atuais
+            $folderSelect.empty().append('<option value="">📁 Raiz do departamento</option>');
+            
+            if (!departmentId) {
+                return;
+            }
+            
+            // Carregar pastas via AJAX
+            $.get('@Url.Action("GetFoldersJson", "Documents")', { departmentId: departmentId })
+                .done(function(folders) {
+                    folders.forEach(function(folder) {
+                        const icon = getFolderIcon(folder.icon);
+                        const option = `<option value="${folder.id}">${icon} ${folder.path}</option>`;
+                        $folderSelect.append(option);
+                    });
+                })
+                .fail(function() {
+                    console.error('Erro ao carregar pastas do departamento');
+                    showAlert('Erro ao carregar pastas. Tente novamente.', 'danger');
+                });
+        }
+
+        function createNewFolder() {
+            const departmentId = $('#departmentSelect').val();
+            
+            if (!departmentId) {
+                showAlert('Selecione um departamento antes de criar uma pasta.', 'warning');
+                return;
+            }
+
+            const folderData = {
+                Name: $('#modalFolderName').val(),
+                Description: $('#modalFolderDescription').val(),
+                DepartmentId: departmentId,
+                Color: $('#modalFolderColor').val(),
+                Icon: $('#modalFolderIcon').val()
+            };
+
+            $.post('@Url.Action("CreateFolder", "Documents")', folderData)
+                .done(function(response) {
+                    if (response.success) {
+                        // Fechar modal
+                        $('#createFolderModal').modal('hide');
+                        
+                        // Limpar formulário
+                        $('#quickCreateFolderForm')[0].reset();
+                        
+                        // Recarregar pastas
+                        loadFoldersForDepartment(departmentId);
+                        
+                        // Mostrar sucesso
+                        showAlert('Pasta criada com sucesso!', 'success');
+                        
+                        // Selecionar a nova pasta
+                        setTimeout(() => {
+                            $('#folderSelect').val(response.folderId);
+                        }, 500);
+                    } else {
+                        showAlert(response.message || 'Erro ao criar pasta.', 'danger');
+                    }
+                })
+                .fail(function() {
+                    showAlert('Erro ao criar pasta. Tente novamente.', 'danger');
+                });
+        }
+
+        function getFolderIcon(iconClass) {
+            const iconMap = {
+                'bi bi-folder-fill': '📁',
+                'bi bi-briefcase-fill': '💼',
+                'bi bi-file-earmark-medical-fill': '🏥',
+                'bi bi-shield-fill-check': '🛡️',
+                'bi bi-gear-fill': '⚙️',
+                'bi bi-people-fill': '👥',
+                'bi bi-bank': '🏦'
+            };
+            return iconMap[iconClass] || '📁';
+        }
+
+        function showAlert(message, type) {
+            // Criar alerta temporário
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Adicionar no topo do formulário
+            $('.card-body').prepend(alertHtml);
+            
+            // Remover automaticamente após 5 segundos
+            setTimeout(() => {
+                $('.alert').fadeOut();
+            }, 5000);
+        }
+
         // Mobile-first file upload com preview aprimorado
         const fileInput = document.getElementById('fileInput');
         const filePreview = document.getElementById('filePreview');

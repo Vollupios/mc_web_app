@@ -1,217 +1,642 @@
-@model List<IntranetDocumentos.Models.Document>
+@model IntranetDocumentos.Models.ViewModels.DocumentTreeViewModel
+
 @{
     ViewData["Title"] = "Documentos";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 style="color: var(--primary-color);">
-            <i class="bi bi-file-text" style="color: var(--secondary-color);"></i> 
-            Gestão de Documentos
-        </h2>
-        <p class="text-muted mb-0">Gerencie todos os documentos da Marcos Contabilidade</p>
-    </div>
-    <div class="d-flex gap-2">
-        <a asp-action="AdvancedSearch" class="btn btn-outline-primary">
-            <i class="bi bi-search"></i> Busca Avançada
-        </a>
-        <a asp-action="Upload" class="btn btn-primary btn-lg shadow-sm">
-            <i class="bi bi-cloud-upload"></i> Enviar Documento
-        </a>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="bi bi-folder2-open text-primary"></i>
+                    Gestão de Documentos
+                </h1>
+                <div class="btn-group" role="group">
+                    <a href="@Url.Action("Upload")" class="btn btn-primary">
+                        <i class="bi bi-cloud-upload"></i> Enviar Documento
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#createFolderModal">
+                        <i class="bi bi-folder-plus"></i> Nova Pasta
+                    </button>
+                    <a href="@Url.Action("Tree")" class="btn btn-outline-info">
+                        <i class="bi bi-diagram-3"></i> Visualização em Árvore
+                    </a>
+                </div>
+            </div>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle"></i> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Navegação Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item active">
+                        <i class="bi bi-house"></i> Raiz
+                    </li>
+                </ol>
+            </nav>
+
+            <!-- Pastas -->
+            @if (Model.RootFolders.Any())
+            {
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-folder text-warning"></i> Pastas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @foreach (var folder in Model.RootFolders)
+                            {
+                                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3">
+                                    <div class="card h-100 folder-card">
+                                        <div class="card-body text-center">
+                                            <i class="bi bi-folder-fill text-warning" style="font-size: 3rem;"></i>
+                                            <h6 class="card-title mt-2">@folder.Folder.Name</h6>
+                                            @if (!string.IsNullOrEmpty(folder.Folder.Description))
+                                            {
+                                                <p class="card-text text-muted small">@folder.Folder.Description</p>
+                                            }
+                                            <div class="d-flex justify-content-center gap-1">
+                                                <a href="@Url.Action("Browse", new { folderId = folder.Folder.Id })" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-folder-open"></i> Abrir
+                                                </a>
+                                                @if (User.IsInRole("Admin") || User.IsInRole("Gestor"))
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                                            onclick="editFolder('@folder.Folder.Id', '@folder.Folder.Name', '@folder.Folder.Description')">>
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Documentos na raiz -->
+            @if (Model.RootDocuments.Any())
+            {
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-file-text text-primary"></i> Documentos na Raiz
+                        </h5>
+                    </div>
+                    
+                    <!-- Barra de ferramentas para ações em lote -->
+                    <div class="bulk-actions-toolbar" id="bulkActionsToolbar" style="display: none;">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="bulk-icon me-3">
+                                    <i class="bi bi-check-square-fill text-primary fs-5"></i>
+                                </div>
+                                <div>
+                                    <span id="selectedCount" class="fw-bold text-primary fs-5">0</span>
+                                    <span class="text-muted ms-1">documento(s) selecionado(s)</span>
+                                </div>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-primary btn-sm" 
+                                        onclick="bulkMoveDocuments()" id="bulkMoveBtn">
+                                    <i class="bi bi-arrow-left-right me-2"></i>Mover Selecionados
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                        onclick="clearSelection()">
+                                    <i class="bi bi-x-circle me-2"></i>Limpar Seleção
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover documents-table">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th style="width: 50px;" class="text-center">
+                                            <input type="checkbox" class="form-check-input" id="selectAllDocs" title="Selecionar todos">
+                                        </th>
+                                        <th style="min-width: 250px;">
+                                            <i class="bi bi-file-text me-2"></i>Documento
+                                        </th>
+                                        <th style="width: 140px;" class="text-center">
+                                            <i class="bi bi-building me-2"></i>Departamento
+                                        </th>
+                                        <th style="width: 120px;" class="text-center">
+                                            <i class="bi bi-person me-2"></i>Enviado por
+                                        </th>
+                                        <th style="width: 140px;" class="text-center">
+                                            <i class="bi bi-calendar me-2"></i>Data
+                                        </th>
+                                        <th style="width: 100px;" class="text-center">
+                                            <i class="bi bi-hdd me-2"></i>Tamanho
+                                        </th>
+                                        <th style="width: 180px;" class="text-center actions-column">
+                                            <i class="bi bi-gear me-2"></i>Ações
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var document in Model.RootDocuments)
+                                    {
+                                        <tr class="align-middle">
+                                            <td class="text-center">
+                                                @if (User.IsInRole("Admin") || User.IsInRole("Gestor") || document.UploaderId == ViewBag.CurrentUserId)
+                                                {
+                                                    <input type="checkbox" class="form-check-input document-checkbox" 
+                                                           value="@document.Id" data-document-name="@document.OriginalFileName">
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="file-icon me-3">
+                                                        <i class="bi bi-file-@GetFileIcon(document.OriginalFileName) fs-4 text-primary"></i>
+                                                    </div>
+                                                    <div class="file-info">
+                                                        <div class="fw-semibold text-dark">@document.OriginalFileName</div>
+                                                        @if (!string.IsNullOrEmpty(document.Description))
+                                                        {
+                                                            <small class="text-muted">@document.Description</small>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary bg-gradient">@(document.Department?.Name ?? "Geral")</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <small class="text-muted">@document.Uploader.UserName</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="text-nowrap">
+                                                    <div class="fw-semibold">@document.UploadDate.ToString("dd/MM/yyyy")</div>
+                                                    <small class="text-muted">@document.UploadDate.ToString("HH:mm")</small>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-light text-dark">@FormatFileSize(document.FileSize)</span>
+                                            </td>
+                                            <td class="text-center actions-column">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a href="@Url.Action("Download", new { id = document.Id })" 
+                                                       class="btn btn-outline-primary" title="Download" data-bs-toggle="tooltip">
+                                                        <i class="bi bi-download"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("View", new { id = document.Id })" 
+                                                       class="btn btn-outline-info" title="Visualizar" data-bs-toggle="tooltip">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    @if (User.IsInRole("Admin") || User.IsInRole("Gestor") || document.UploaderId == ViewBag.CurrentUserId)
+                                                    {
+                                                        <div class="btn-group btn-group-sm">
+                                                            <button type="button" class="btn btn-outline-secondary dropdown-toggle" 
+                                                                    data-bs-toggle="dropdown" aria-expanded="false" title="Mais opções">
+                                                                <i class="bi bi-three-dots"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <li>
+                                                                    <button class="dropdown-item" type="button" 
+                                                                            onclick="moveDocument('@document.Id')">
+                                                                        <i class="bi bi-arrow-left-right me-2"></i>Mover para...
+                                                                    </button>
+                                                                </li>
+                                                                <li><hr class="dropdown-divider"></li>
+                                                                <li>
+                                                                    <button class="dropdown-item text-danger" type="button" 
+                                                                            onclick="confirmDelete('@document.Id', '@document.OriginalFileName')">
+                                                                        <i class="bi bi-trash me-2"></i>Excluir
+                                                                    </button>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (!Model.RootFolders.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+                    <h4 class="text-muted mt-3">Nenhum documento encontrado</h4>
+                    <p class="text-muted">Comece enviando seu primeiro documento ou criando uma pasta.</p>
+                    <a href="@Url.Action("Upload")" class="btn btn-primary">
+                        <i class="bi bi-cloud-upload"></i> Enviar Primeiro Documento
+                    </a>
+                </div>
+            }
+        </div>
     </div>
 </div>
 
-@if (Model.Count == 0)
-{
-    <div class="text-center py-5">
-        <i class="bi bi-inbox" style="font-size: 3rem; color: #6c757d;"></i>
-        <h4 class="text-muted mt-3">Nenhum documento encontrado</h4>
-        <p class="text-muted">Comece enviando seu primeiro documento.</p>
-        <a asp-action="Upload" class="btn btn-primary">
-            <i class="bi bi-cloud-upload"></i> Enviar Documento
-        </a>
-    </div>
-}
-else
-{
-    <div class="card">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover documents-table mb-0">
-                    <thead>
-                        <tr>
-                            <th><i class="bi bi-file"></i> Nome do Arquivo</th>
-                            <th><i class="bi bi-building"></i> Departamento</th>
-                            <th><i class="bi bi-person"></i> Enviado por</th>
-                            <th><i class="bi bi-calendar"></i> Data</th>
-                            <th><i class="bi bi-file-earmark-bar-graph"></i> Tamanho</th>
-                            <th><i class="bi bi-check-circle"></i> Status</th>
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <th><i class="bi bi-git"></i> Workflow</th>
-                            }
-                            <th class="actions-column"><i class="bi bi-gear"></i> Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var document in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <i class="bi @GetFileIcon(document.ContentType)"></i>
-                                    @document.OriginalFileName
-                                </td>
-                                <td>
-                                    @if (document.Department != null)
-                                    {
-                                        <span class="badge bg-primary">@document.Department.Name</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">Geral</span>
-                                    }
-                                </td>
-                                <td>@document.Uploader.Email</td>
-                                <td>@document.UploadDate.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>@document.GetFormattedFileSize()</td>
-                                <td>
-                                    @{
-                                        var statusClass = document.Status switch
-                                        {
-                                            DocumentStatus.Draft => "secondary",
-                                            DocumentStatus.PendingReview => "warning",
-                                            DocumentStatus.InReview => "info",
-                                            DocumentStatus.PendingApproval => "primary",
-                                            DocumentStatus.Approved => "success",
-                                            DocumentStatus.Rejected => "danger",
-                                            DocumentStatus.Archived => "dark",
-                                            _ => "secondary"
-                                        };
-                                        
-                                        var statusText = document.Status switch
-                                        {
-                                            DocumentStatus.Draft => "Rascunho",
-                                            DocumentStatus.PendingReview => "Aguardando Revisão",
-                                            DocumentStatus.InReview => "Em Revisão",
-                                            DocumentStatus.PendingApproval => "Aguardando Aprovação",
-                                            DocumentStatus.Approved => "Aprovado",
-                                            DocumentStatus.Rejected => "Rejeitado",
-                                            DocumentStatus.Archived => "Arquivado",
-                                            _ => "Rascunho"
-                                        };
-                                    }
-                                    <span class="badge bg-@statusClass">@statusText</span>
-                                </td>
-                                @if (User.IsInRole("Admin"))
-                                {
-                                    <td>
-                                        <a asp-controller="Workflow" asp-action="Document" asp-route-id="@document.Id" 
-                                           class="btn btn-sm btn-outline-secondary" title="Ver Workflow">
-                                            <i class="bi bi-diagram-3"></i>
-                                        </a>
-                                    </td>
-                                }
-                                <td class="actions-column">
-                                    <div class="btn-group" role="group">
-                                        @{
-                                            var extension = System.IO.Path.GetExtension(document.OriginalFileName).ToLowerInvariant();
-                                            bool canView = extension == ".pdf" || 
-                                                         extension == ".jpg" || extension == ".jpeg" || extension == ".png" || 
-                                                         extension == ".gif" || extension == ".bmp" || extension == ".webp" ||
-                                                         extension == ".txt";
-                                        }
-                                        
-                                        @if (canView)
-                                        {
-                                            <a asp-action="View" asp-route-id="@document.Id" 
-                                               class="btn btn-sm btn-outline-success" title="Visualizar" target="_blank">
-                                                <i class="bi bi-eye-fill"></i>
-                                            </a>
-                                        }
-                                        
-                                        <a asp-action="Download" asp-route-id="@document.Id" 
-                                           class="btn btn-sm btn-outline-primary" title="Download">
-                                            <i class="bi bi-download"></i>
-                                        </a>
-                                        
-                                        <a asp-action="Details" asp-route-id="@document.Id" 
-                                           class="btn btn-sm btn-outline-info" title="Detalhes">
-                                            <i class="bi bi-info-circle"></i>
-                                        </a>
-                                        
-                                        @if (User.IsInRole("Admin") || document.UploaderId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
-                                        {
-                                            <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                    onclick="confirmDelete(@document.Id, '@document.OriginalFileName')" 
-                                                    title="Excluir">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-}
-
-<!-- Modal de confirmação de exclusão -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
+<!-- Modal para criar pasta -->
+<div class="modal fade" id="createFolderModal" tabindex="-1" aria-labelledby="createFolderModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirmar Exclusão</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Tem certeza que deseja excluir o documento <strong id="fileName"></strong>?</p>
-                <p class="text-danger"><small>Esta ação não pode ser desfeita.</small></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <form id="deleteForm" method="post" asp-action="Delete" class="d-inline">
-                    <input type="hidden" id="documentId" name="id" />
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Excluir
+            <form id="createFolderForm" method="post" action="@Url.Action("CreateFolderAjax")">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createFolderModalLabel">
+                        <i class="bi bi-folder-plus"></i> Nova Pasta
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="folderName" class="form-label">Nome da Pasta *</label>
+                        <input type="text" class="form-control" id="folderName" name="Name" required maxlength="100">
+                        <div class="invalid-feedback" id="nameError"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="folderDescription" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="folderDescription" name="Description" rows="3" maxlength="500"></textarea>
+                        <div class="invalid-feedback" id="descriptionError"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="departmentSelect" class="form-label">Departamento</label>
+                        <select class="form-select" id="departmentSelect" name="DepartmentId">
+                            <option value="">Geral (Todos os usuários)</option>
+                            @if (ViewBag.Departments != null)
+                            {
+                                @foreach (var dept in ViewBag.Departments as IEnumerable<IntranetDocumentos.Models.Department>)
+                                {
+                                    <option value="@dept.Id">@dept.Name</option>
+                                }
+                            }
+                        </select>
+                        <div class="invalid-feedback" id="departmentError"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="createFolderBtn">
+                        <i class="bi bi-folder-plus"></i> 
+                        <span class="btn-text">Criar Pasta</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     </button>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        function confirmDelete(id, fileName) {
-            document.getElementById('documentId').value = id;
-            document.getElementById('fileName').textContent = fileName;
-            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            modal.show();
-        }
-    </script>
-}
-
 @functions {
-    private string GetFileIcon(string contentType)
+    string GetFileIcon(string fileName)
     {
-        return contentType.ToLower() switch
+        if (string.IsNullOrEmpty(fileName)) return "text";
+        
+        var extension = System.IO.Path.GetExtension(fileName).ToLower();
+        return extension switch
         {
-            var ct when ct.Contains("pdf") => "bi-file-earmark-pdf",
-            var ct when ct.Contains("word") => "bi-file-earmark-word",
-            var ct when ct.Contains("excel") => "bi-file-earmark-excel",
-            var ct when ct.Contains("powerpoint") => "bi-file-earmark-ppt",
-            var ct when ct.Contains("image") => "bi-file-earmark-image",
-            var ct when ct.Contains("text") => "bi-file-earmark-text",
-            var ct when ct.Contains("zip") => "bi-file-earmark-zip",
-            _ => "bi-file-earmark"
+            ".pdf" => "pdf",
+            ".doc" or ".docx" => "word",
+            ".xls" or ".xlsx" => "excel",
+            ".ppt" or ".pptx" => "ppt",
+            ".jpg" or ".jpeg" or ".png" or ".gif" => "image",
+            ".zip" or ".rar" => "archive",
+            _ => "text"
         };
     }
 
+    string FormatFileSize(long bytes)
+    {
+        if (bytes == 0) return "0 B";
+        
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        int order = 0;
+        double len = bytes;
+        
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        
+        return $"{len:0.##} {sizes[order]}";
+    }
 }
 
-@{
-    // Função GetFileSize removida - agora usamos o Value Object FileSize diretamente no modelo
+<!-- Container para modal de mover documento -->
+<div id="moveDocumentModalContainer"></div>
+
+@section Scripts {
+    <script>
+        // Função para obter ícone do arquivo
+        function getFileIcon(fileName) {
+            const extension = fileName.split('.').pop().toLowerCase();
+            switch (extension) {
+                case 'pdf': return 'pdf';
+                case 'doc':
+                case 'docx': return 'word';
+                case 'xls':
+                case 'xlsx': return 'excel';
+                case 'ppt':
+                case 'pptx': return 'ppt';
+                case 'jpg':
+                case 'jpeg':
+                case 'png':
+                case 'gif': return 'image';
+                case 'zip':
+                case 'rar': return 'archive';
+                default: return 'text';
+            }
+        }
+
+        // Função para mover documento
+        function moveDocument(documentId) {
+            // Fazer requisição AJAX para carregar o modal
+            $.get('@Url.Action("MoveDocumentModal")', { id: documentId })
+                .done(function(data) {
+                    if (data.success === false) {
+                        alert(data.message || 'Erro ao carregar modal de movimentação');
+                        return;
+                    }
+                    
+                    // Inserir modal no DOM
+                    $('#moveDocumentModalContainer').html(data);
+                    
+                    // Mostrar modal
+                    $('#moveDocumentModal').modal('show');
+                })
+                .fail(function() {
+                    alert('Erro ao carregar modal de movimentação');
+                });
+        }
+
+        // Função para editar pasta
+        function editFolder(folderId, folderName, folderDescription) {
+            // Redirecionar para o formulário de edição de pasta
+            window.location.href = '@Url.Action("EditFolder")' + '?id=' + folderId;
+        }
+
+        // Função para confirmar exclusão
+        function confirmDelete(documentId, fileName) {
+            if (confirm(`Tem certeza que deseja excluir o documento "${fileName}"?`)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("Delete")';
+                
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id';
+                input.value = documentId;
+                form.appendChild(input);
+                
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    form.appendChild(token.cloneNode());
+                }
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Limpar formulário quando modal é fechado
+        document.getElementById('createFolderModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('createFolderForm').reset();
+            clearValidationErrors();
+        });
+
+        // Lidar com envio do formulário de criar pasta via AJAX
+        document.getElementById('createFolderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            createFolderAjax();
+        });
+
+        function createFolderAjax() {
+            const form = document.getElementById('createFolderForm');
+            const formData = new FormData(form);
+            const createBtn = document.getElementById('createFolderBtn');
+            const btnText = createBtn.querySelector('.btn-text');
+            const spinner = createBtn.querySelector('.spinner-border');
+
+            // Mostrar loading
+            createBtn.disabled = true;
+            btnText.textContent = 'Criando...';
+            spinner.classList.remove('d-none');
+            clearValidationErrors();
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Sucesso - fechar modal e recarregar página
+                    $('#createFolderModal').modal('hide');
+                    
+                    // Mostrar mensagem de sucesso
+                    showAlert('success', data.message);
+                    
+                    // Recarregar página para mostrar nova pasta
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    // Erro - mostrar mensagens de validação
+                    if (data.errors && data.errors.length > 0) {
+                        showValidationErrors(data.errors);
+                    } else {
+                        showAlert('danger', data.message || 'Erro ao criar pasta');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showAlert('danger', 'Erro interno do servidor');
+            })
+            .finally(() => {
+                // Remover loading
+                createBtn.disabled = false;
+                btnText.textContent = 'Criar Pasta';
+                spinner.classList.add('d-none');
+            });
+        }
+
+        function clearValidationErrors() {
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
+        }
+
+        function showValidationErrors(errors) {
+            errors.forEach(error => {
+                if (error.includes('Nome')) {
+                    document.getElementById('folderName').classList.add('is-invalid');
+                    document.getElementById('nameError').textContent = error;
+                } else if (error.includes('Descrição')) {
+                    document.getElementById('folderDescription').classList.add('is-invalid');
+                    document.getElementById('descriptionError').textContent = error;
+                }
+            });
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Inserir no topo da página
+            const container = document.querySelector('.container-fluid');
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            // Auto-remover após 5 segundos
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Função para seleção em lote
+        function initBulkSelection() {
+            const selectAllCheckbox = document.getElementById('selectAllDocs');
+            const documentCheckboxes = document.querySelectorAll('.document-checkbox');
+            const bulkToolbar = document.getElementById('bulkActionsToolbar');
+            const selectedCountSpan = document.getElementById('selectedCount');
+
+            // Selecionar/Deselecionar todos
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function() {
+                    documentCheckboxes.forEach(checkbox => {
+                        checkbox.checked = this.checked;
+                    });
+                    updateBulkToolbar();
+                });
+            }
+
+            // Monitorar mudanças nos checkboxes individuais
+            documentCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateBulkToolbar();
+                    
+                    // Atualizar estado do "selecionar todos"
+                    const checkedCount = document.querySelectorAll('.document-checkbox:checked').length;
+                    if (selectAllCheckbox) {
+                        selectAllCheckbox.checked = checkedCount === documentCheckboxes.length;
+                        selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < documentCheckboxes.length;
+                    }
+                });
+            });
+
+            function updateBulkToolbar() {
+                const checkedBoxes = document.querySelectorAll('.document-checkbox:checked');
+                const count = checkedBoxes.length;
+                
+                if (selectedCountSpan) {
+                    selectedCountSpan.textContent = count;
+                }
+                
+                if (bulkToolbar) {
+                    bulkToolbar.style.display = count > 0 ? 'block' : 'none';
+                }
+            }
+        }
+
+        // Função para movimentação em lote
+        function bulkMoveDocuments() {
+            const checkedBoxes = document.querySelectorAll('.document-checkbox:checked');
+            
+            if (checkedBoxes.length === 0) {
+                alert('Nenhum documento selecionado');
+                return;
+            }
+
+            const documentIds = Array.from(checkedBoxes).map(cb => cb.value);
+            const documentNames = Array.from(checkedBoxes).map(cb => cb.getAttribute('data-document-name'));
+
+            // Carregar modal de movimentação em lote
+            $.get('@Url.Action("GetBulkMoveModal")')
+                .done(function(data) {
+                    if (data.success === false) {
+                        alert(data.message || 'Erro ao carregar modal de movimentação em lote');
+                        return;
+                    }
+                    
+                    // Inserir modal no DOM
+                    $('#moveDocumentModalContainer').html(data);
+                    
+                    // Preencher dados do modal
+                    $('#bulkDocumentIds').val(documentIds.join(','));
+                    $('#bulkDocumentList').text(documentNames.join(', '));
+                    
+                    // Mostrar modal
+                    $('#bulkMoveModal').modal('show');
+                })
+                .fail(function() {
+                    alert('Erro ao carregar modal de movimentação em lote');
+                });
+        }
+
+        // Função para limpar seleção
+        function clearSelection() {
+            document.querySelectorAll('.document-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            const selectAllCheckbox = document.getElementById('selectAllDocs');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            }
+            
+            document.getElementById('bulkActionsToolbar').style.display = 'none';
+        }
+
+        $(document).ready(function() {
+            // Inicializar funcionalidades
+            initBulkSelection();
+            
+            // Tooltip para botões
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+
+        // Funções de feedback para o usuário
+        function showSuccess(message) {
+            console.log('SUCCESS:', message);
+            if (typeof toastr !== 'undefined') {
+                toastr.success(message);
+            } else {
+                alert('✅ ' + message);
+            }
+        }
+
+        function showError(message) {
+            console.log('ERROR:', message);
+            if (typeof toastr !== 'undefined') {
+                toastr.error(message);
+            } else {
+                alert('❌ ' + message);
+            }
+        }
+    </script>
 }

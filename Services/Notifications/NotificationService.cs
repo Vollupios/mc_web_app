@@ -372,6 +372,55 @@ namespace IntranetDocumentos.Services.Notifications
             }
         }
 
+        public async Task SendDocumentMovedNotificationAsync(Document document, string? oldLocation, string newLocation, ApplicationUser movedBy)
+        {
+            try
+            {
+                if (!_emailService.IsConfigured)
+                {
+                    _logger.LogInformation("Email não configurado. Notificação de movimentação de documento não enviada.");
+                    return;
+                }
+
+                var recipients = await GetDocumentNotificationRecipientsAsync(document);
+                
+                if (!recipients.Any())
+                {
+                    _logger.LogInformation("Nenhum destinatário encontrado para notificação de movimentação {DocumentId}", document.Id);
+                    return;
+                }
+
+                var emailAddresses = recipients.Select(u => u.Email).Where(e => !string.IsNullOrEmpty(e)).Cast<string>().ToList();
+                
+                if (!emailAddresses.Any())
+                {
+                    _logger.LogWarning("Nenhum email válido encontrado para notificação de movimentação {DocumentId}", document.Id);
+                    return;
+                }
+
+                var body = GenerateDocumentMovedEmailBody(document.OriginalFileName, oldLocation ?? "Localização anterior", newLocation, movedBy.Email ?? "");
+
+                var success = await _emailService.SendEmailToMultipleAsync(
+                    emailAddresses,
+                    "📋 Documento Movimentado - Sistema Intranet",
+                    body,
+                    true);
+
+                if (success)
+                {
+                    _logger.LogInformation("Notificação de movimentação de documento enviada para {Count} usuários", emailAddresses.Count);
+                }
+                else
+                {
+                    _logger.LogWarning("Falha ao enviar notificação de movimentação para alguns destinatários");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao enviar notificação de movimentação de documento {DocumentId}", document.Id);
+            }
+        }
+
         #region Métodos privados para geração de emails
 
         private string GenerateNewDocumentEmailBody(string fileName, string department, string uploader, DateTime uploadDate)
@@ -544,6 +593,48 @@ namespace IntranetDocumentos.Services.Notifications
             {
                 return $"em {(int)timeSpan.TotalDays} dias";
             }
+        }
+
+        private string GenerateDocumentMovedEmailBody(string fileName, string oldLocation, string newLocation, string movedBy)
+        {
+            return $@"
+                <html>
+                <head>
+                    <style>
+                        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                        .header {{ background-color: #007bff; color: white; padding: 20px; text-align: center; }}
+                        .content {{ padding: 20px; background-color: #f8f9fa; }}
+                        .details {{ background-color: white; padding: 15px; border-radius: 5px; margin: 10px 0; }}
+                        .footer {{ text-align: center; padding: 20px; font-size: 12px; color: #666; }}
+                        .highlight {{ background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0; }}
+                        .arrow {{ font-size: 18px; color: #28a745; }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <div class='header'>
+                            <h2>📋 Documento Movimentado</h2>
+                        </div>
+                        <div class='content'>
+                            <div class='details'>
+                                <h3>📄 {fileName}</h3>
+                                <p><strong>Movimentado por:</strong> {movedBy}</p>
+                                <p><strong>Data da movimentação:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</p>
+                            </div>
+                            <div class='highlight'>
+                                <h4>Localização:</h4>
+                                <p><strong>De:</strong> {oldLocation}</p>
+                                <p class='arrow'>⬇️</p>
+                                <p><strong>Para:</strong> {newLocation}</p>
+                            </div>
+                        </div>
+                        <div class='footer'>
+                            <p>Sistema de Gestão de Documentos - Intranet Corporativa</p>
+                        </div>
+                    </div>
+                </body>
+                </html>";
         }
 
         #endregion

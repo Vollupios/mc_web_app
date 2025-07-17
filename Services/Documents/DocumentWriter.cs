@@ -427,6 +427,163 @@ namespace IntranetDocumentos.Services.Documents
             }
         }
 
+        public async Task<(bool Success, string? Message)> MoveDocumentAsync(int documentId, int? newFolderId, int? newDepartmentId, string userId)
+        {
+            try
+            {
+                _logger.LogInformation("Iniciando movimentação do documento {DocumentId} para pasta {FolderId} e departamento {DepartmentId} por usuário {UserId}", 
+                    documentId, newFolderId, newDepartmentId, userId);
+
+                var document = await _context.Documents
+                    .Include(d => d.Department)
+                    .Include(d => d.Folder)
+                    .FirstOrDefaultAsync(d => d.Id == documentId);
+
+                if (document == null)
+                {
+                    return (false, "Documento não encontrado");
+                }
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return (false, "Usuário não encontrado");
+                }
+
+                // Verificar permissões para movimentação
+                var userRoles = await _userManager.GetRolesAsync(user);
+                if (!userRoles.Contains("Admin") && !userRoles.Contains("Gestor") && document.UploaderId != userId)
+                {
+                    return (false, "Sem permissão para mover este documento");
+                }
+
+                // Validar se a pasta de destino existe e o usuário tem acesso
+                if (newFolderId.HasValue)
+                {
+                    var targetFolder = await _context.DocumentFolders
+                        .Include(f => f.Department)
+                        .FirstOrDefaultAsync(f => f.Id == newFolderId.Value && f.IsActive);
+
+                    if (targetFolder == null)
+                    {
+                        return (false, "Pasta de destino não encontrada");
+                    }
+
+                    // Verificar permissões na pasta de destino
+                    if (!await _documentSecurity.CanUserAccessFolderAsync(targetFolder, user))
+                    {
+                        return (false, "Sem permissão para acessar a pasta de destino");
+                    }
+
+                    // Se a pasta tem departamento específico, usar esse departamento
+                    if (targetFolder.DepartmentId.HasValue)
+                    {
+                        newDepartmentId = targetFolder.DepartmentId;
+                    }
+                }
+
+                // Validar departamento de destino
+                if (newDepartmentId.HasValue)
+                {
+                    var targetDepartment = await _context.Departments.FindAsync(newDepartmentId.Value);
+                    if (targetDepartment == null)
+                    {
+                        return (false, "Departamento de destino não encontrado");
+                    }
+
+                    // Verificar permissões no departamento de destino
+                    if (!await _documentSecurity.CanUserUploadToDepartmentAsync(newDepartmentId, user))
+                    {
+                        return (false, "Sem permissão para mover documento para este departamento");
+                    }
+                }
+
+                // Verificar se é necessário mover arquivo físico
+                var oldDepartmentName = document.Department?.Name ?? "Geral";
+                var newDepartmentName = newDepartmentId.HasValue 
+                    ? (await _context.Departments.FindAsync(newDepartmentId.Value))?.Name ?? "Geral"
+                    : "Geral";
+
+                // Obter nomes das pastas para notificação
+                var oldFolderName = "";
+                var newFolderName = "";
+                
+                if (document.FolderId.HasValue)
+                {
+                    var oldFolder = await _context.DocumentFolders.FindAsync(document.FolderId.Value);
+                    oldFolderName = oldFolder?.Name ?? "";
+                }
+                
+                if (newFolderId.HasValue)
+                {
+                    var newFolder = await _context.DocumentFolders.FindAsync(newFolderId.Value);
+                    newFolderName = newFolder?.Name ?? "";
+                }
+
+                var needsPhysicalMove = oldDepartmentName != newDepartmentName;
+
+                // Mover arquivo físico se necessário
+                if (needsPhysicalMove)
+                {
+                    var oldPath = Path.Combine(_environment.ContentRootPath, "DocumentsStorage", oldDepartmentName, document.StoredFileName);
+                    var newPath = Path.Combine(_environment.ContentRootPath, "DocumentsStorage", newDepartmentName, document.StoredFileName);
+
+                    // Criar diretório de destino se não existir
+                    var newDirectory = Path.GetDirectoryName(newPath);
+                    if (!Directory.Exists(newDirectory))
+                    {
+                        Directory.CreateDirectory(newDirectory!);
+                    }
+
+                    if (File.Exists(oldPath))
+                    {
+                        File.Move(oldPath, newPath);
+                        _logger.LogInformation("Arquivo físico movido de {OldPath} para {NewPath}", oldPath, newPath);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Arquivo físico não encontrado em {OldPath}", oldPath);
+                    }
+                }
+
+                // Atualizar registro no banco
+                var oldFolderId = document.FolderId;
+                var oldDepartmentId = document.DepartmentId;
+
+                document.FolderId = newFolderId;
+                document.DepartmentId = newDepartmentId;
+                document.LastModified = DateTime.UtcNow;
+                document.LastModifiedById = userId;
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Documento {DocumentId} movido com sucesso. Pasta: {OldFolder} → {NewFolder}, Departamento: {OldDept} → {NewDept}", 
+                    documentId, oldFolderId, newFolderId, oldDepartmentId, newDepartmentId);
+
+                // Enviar notificação se configurado
+                if (_notificationService != null)
+                {
+                    try
+                    {
+                        var oldLocation = $"{oldDepartmentName}{(string.IsNullOrEmpty(oldFolderName) ? "" : " → " + oldFolderName)}";
+                        var newLocation = $"{newDepartmentName}{(string.IsNullOrEmpty(newFolderName) ? "" : " → " + newFolderName)}";
+                        await _notificationService.SendDocumentMovedNotificationAsync(document, oldLocation, newLocation, user);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Erro ao enviar notificação de movimentação do documento {DocumentId}", documentId);
+                    }
+                }
+
+                return (true, "Documento movido com sucesso");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao mover documento {DocumentId}", documentId);
+                return (false, "Erro interno ao mover documento");
+            }
+        }
+
         #region Métodos Privados de Validação
 
         private static bool IsFileTypeAllowed(string extension)

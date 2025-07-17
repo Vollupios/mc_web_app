@@ -1,0 +1,218 @@
+@model IntranetDocumentos.Models.ViewModels.BulkMoveDocumentViewModel
+
+<div class="modal fade" id="bulkMoveModal" tabindex="-1" aria-labelledby="bulkMoveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="@Url.Action("MoveBulkDocuments")" id="bulkMoveForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="bulkDocumentIds" name="documentIds" value="" />
+                
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bulkMoveModalLabel">
+                        <i class="bi bi-arrow-left-right text-primary"></i>
+                        Mover Documentos em Lote
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>Documentos selecionados:</strong>
+                                <span id="bulkDocumentList"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <!-- Seleção de Departamento -->
+                            <div class="mb-3">
+                                <label for="bulkNewDepartmentSelect" class="form-label">
+                                    <i class="bi bi-building"></i> Departamento de Destino
+                                </label>
+                                <select class="form-select" id="bulkNewDepartmentSelect" name="newDepartmentId">
+                                    <option value="">Geral (Todos os usuários)</option>
+                                    @if (ViewBag.Departments != null)
+                                    {
+                                        @foreach (var dept in ViewBag.Departments as IEnumerable<IntranetDocumentos.Models.Department>)
+                                        {
+                                            <option value="@dept.Id" data-department-id="@dept.Id">
+                                                @dept.Name
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <!-- Seleção de Pasta -->
+                            <div class="mb-3">
+                                <label for="bulkNewFolderSelect" class="form-label">
+                                    <i class="bi bi-folder"></i> Pasta de Destino
+                                </label>
+                                <select class="form-select" id="bulkNewFolderSelect" name="newFolderId">
+                                    <option value="">Pasta Raiz</option>
+                                    <!-- Pastas serão carregadas via AJAX baseado no departamento -->
+                                </select>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle"></i>
+                                    Selecione um departamento para ver as pastas disponíveis
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <!-- Motivo (opcional) -->
+                            <div class="mb-3">
+                                <label for="bulkMoveReason" class="form-label">
+                                    <i class="bi bi-chat-text"></i> Motivo da Movimentação
+                                    <small class="text-muted">(opcional)</small>
+                                </label>
+                                <textarea class="form-control" id="bulkMoveReason" name="reason" 
+                                          rows="2" maxlength="500" 
+                                          placeholder="Descreva o motivo da movimentação em lote (para auditoria)"></textarea>
+                                <div class="form-text">
+                                    Máximo 500 caracteres
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview da movimentação -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-warning d-none" id="bulkMovePreview">
+                                <i class="bi bi-arrow-right-circle"></i>
+                                <strong>Movimentação:</strong>
+                                <span id="bulkPreviewText"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success" id="confirmBulkMoveBtn" disabled>
+                        <i class="bi bi-arrow-left-right"></i> Mover Documentos
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Carregar pastas quando departamento muda
+    $('#bulkNewDepartmentSelect').on('change', function() {
+        const departmentId = $(this).val();
+        loadFoldersForDepartment(departmentId, '#bulkNewFolderSelect');
+        updateBulkPreview();
+    });
+
+    // Atualizar preview quando pasta muda
+    $('#bulkNewFolderSelect').on('change', updateBulkPreview);
+
+    // Função para carregar pastas via AJAX
+    function loadFoldersForDepartment(departmentId, selectElementId) {
+        const folderSelect = $(selectElementId);
+        
+        // Limpar opções existentes (exceto a primeira)
+        folderSelect.find('option:not(:first)').remove();
+        folderSelect.prop('disabled', true);
+        
+        if (!departmentId) {
+            folderSelect.prop('disabled', false);
+            return;
+        }
+        
+        // Fazer requisição AJAX para obter pastas
+        $.get('@Url.Action("GetFoldersJson")', { departmentId: departmentId })
+            .done(function(response) {
+                console.log('Response from GetFoldersJson:', response);
+                if (response.success && response.folders && response.folders.length > 0) {
+                    response.folders.forEach(function(folder) {
+                        const indent = '&nbsp;'.repeat(folder.level * 4);
+                        folderSelect.append(
+                            `<option value="${folder.id}">${indent}📁 ${folder.name}</option>`
+                        );
+                    });
+                } else {
+                    folderSelect.append('<option value="" disabled>Nenhuma pasta encontrada</option>');
+                }
+                folderSelect.prop('disabled', false);
+            })
+            .fail(function(xhr, status, error) {
+                console.error('Erro ao carregar pastas:', error);
+                folderSelect.append('<option value="" disabled>Erro ao carregar pastas</option>');
+                folderSelect.prop('disabled', false);
+            });
+    }
+
+    // Função para atualizar preview da movimentação em lote
+    function updateBulkPreview() {
+        const deptId = $('#bulkNewDepartmentSelect').val();
+        const folderId = $('#bulkNewFolderSelect').val();
+        
+        if (!deptId && !folderId) {
+            $('#bulkMovePreview').addClass('d-none');
+            $('#confirmBulkMoveBtn').prop('disabled', true);
+            return;
+        }
+        
+        const deptName = deptId ? $('#bulkNewDepartmentSelect option:selected').text() : 'Geral';
+        const folderName = folderId ? $('#bulkNewFolderSelect option:selected').text().trim() : 'Pasta Raiz';
+        
+        const previewText = `Documentos serão movidos para: <strong>${deptName}</strong> → <strong>${folderName}</strong>`;
+        
+        $('#bulkPreviewText').html(previewText);
+        $('#bulkMovePreview').removeClass('d-none');
+        $('#confirmBulkMoveBtn').prop('disabled', false);
+    }
+
+    // Limpar formulário quando modal fecha
+    $('#bulkMoveModal').on('hidden.bs.modal', function() {
+        $('#bulkMoveForm')[0].reset();
+        $('#bulkMovePreview').addClass('d-none');
+        $('#confirmBulkMoveBtn').prop('disabled', true);
+    });
+
+    // Processar formulário via AJAX
+    $('#bulkMoveForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = $(this).serialize();
+        const submitBtn = $('#confirmBulkMoveBtn');
+        const originalText = submitBtn.html();
+        
+        // Desabilitar botão e mostrar loading
+        submitBtn.prop('disabled', true).html('<i class="bi bi-hourglass-split"></i> Movendo...');
+        
+        $.post($(this).attr('action'), formData)
+            .done(function(response) {
+                if (response.success) {
+                    $('#bulkMoveModal').modal('hide');
+                    showSuccess(response.message);
+                    location.reload(); // Recarregar página para atualizar lista
+                } else {
+                    showError(response.message || 'Erro ao mover documentos');
+                }
+            })
+            .fail(function() {
+                showError('Erro ao processar movimentação em lote');
+            })
+            .always(function() {
+                // Restaurar botão
+                submitBtn.prop('disabled', false).html(originalText);
+            });
+    });
+});
+</script>

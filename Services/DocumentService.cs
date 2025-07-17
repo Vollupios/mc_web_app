@@ -202,6 +202,16 @@ namespace IntranetDocumentos.Services
             return await _documentReader.AdvancedSearchAsync(searchTerm, departmentId, contentType, startDate, endDate, user);
         }
 
+        public async Task<(bool Success, string? Message)> MoveDocumentAsync(int documentId, int? newFolderId, int? newDepartmentId, string userId)
+        {
+            return await _documentWriter.MoveDocumentAsync(documentId, newFolderId, newDepartmentId, userId);
+        }
+
+        public async Task<bool> CanUserAccessFolderAsync(DocumentFolder folder, ApplicationUser user)
+        {
+            return await _documentSecurity.CanUserAccessFolderAsync(folder, user);
+        }
+
         #endregion
     }
 }

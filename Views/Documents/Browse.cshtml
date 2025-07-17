@@ -1,0 +1,627 @@
+@using System.IO
+@model IntranetDocumentos.Models.ViewModels.FolderNavigationViewModel
+
+@{
+    ViewData["Title"] = Model.CurrentFolder?.Name ?? "Documentos";
+    ViewData["Description"] = $"Navegando na pasta: {ViewData["Title"]}";
+}
+
+<div class="container-fluid">
+    <!-- Breadcrumb e Ações -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item">
+                            <a href="@Url.Action("Index")">
+                                <i class="bi bi-house-door me-1"></i>
+                                Início
+                            </a>
+                        </li>
+                        @if (Model.Breadcrumbs?.Any() == true)
+                        {
+                            @foreach (var breadcrumb in Model.Breadcrumbs.SkipLast(1))
+                            {
+                                <li class="breadcrumb-item">
+                                    <a href="@Url.Action("Browse", new { folderId = breadcrumb.FolderId })">
+                                        @breadcrumb.Name
+                                    </a>
+                                </li>
+                            }
+                            <li class="breadcrumb-item active" aria-current="page">
+                                @Model.Breadcrumbs.Last().Name
+                            </li>
+                        }
+                    </ol>
+                </nav>
+
+                <!-- Ações -->
+                <div class="btn-group" role="group">
+                    <a href="@Url.Action("Upload", new { folderId = Model.CurrentFolder?.Id })" 
+                       class="btn btn-success btn-sm">
+                        <i class="bi bi-upload me-1"></i>
+                        Enviar
+                    </a>
+                    <button type="button" class="btn btn-primary btn-sm" 
+                            data-bs-toggle="modal" data-bs-target="#createFolderModal">
+                        <i class="bi bi-folder-plus me-1"></i>
+                        Nova Pasta
+                    </button>
+                    <a href="@Url.Action("Tree")" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-diagram-3 me-1"></i>
+                        Árvore
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações da Pasta Atual -->
+    @if (Model.CurrentFolder != null)
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-start border-4" style="border-left-color: @Model.CurrentFolder.Color !important;">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="@Model.CurrentFolder.Icon fs-2 me-3" style="color: @Model.CurrentFolder.Color;"></i>
+                            <div class="flex-grow-1">
+                                <h4 class="mb-1">@Model.CurrentFolder.Name</h4>
+                                @if (!string.IsNullOrEmpty(Model.CurrentFolder.Description))
+                                {
+                                    <p class="text-muted mb-0">@Model.CurrentFolder.Description</p>
+                                }
+                            </div>
+                            <div class="text-end">
+                                <div class="small text-muted">
+                                    <div>
+                                        <i class="bi bi-files me-1"></i>
+                                        @Model.Documents.Count documentos
+                                    </div>
+                                    <div>
+                                        <i class="bi bi-folder me-1"></i>
+                                        @Model.SubFolders.Count pastas
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Filtros e Busca -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control" id="searchInput" 
+                       placeholder="Buscar arquivos e pastas...">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" id="typeFilter">
+                <option value="">Todos</option>
+                <option value="folder">Pastas</option>
+                <option value="document">Documentos</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" id="sortBy">
+                <option value="name">Nome</option>
+                <option value="date">Data</option>
+                <option value="size">Tamanho</option>
+                <option value="type">Tipo</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" id="sortOrder">
+                <option value="asc">Crescente</option>
+                <option value="desc">Decrescente</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <div class="btn-group w-100" role="group">
+                <input type="radio" class="btn-check" name="viewMode" id="gridView" autocomplete="off">
+                <label class="btn btn-outline-secondary" for="gridView" title="Visualização em Grade">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                </label>
+
+                <input type="radio" class="btn-check" name="viewMode" id="listView" autocomplete="off" checked>
+                <label class="btn btn-outline-secondary" for="listView" title="Visualização em Lista">
+                    <i class="bi bi-list-ul"></i>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="row">
+        <div class="col-12">
+            <!-- Subpastas -->
+            @if (Model.SubFolders.Any())
+            {
+                <div class="mb-4" id="foldersSection">
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-folder me-1"></i>
+                        Pastas (@Model.SubFolders.Count)
+                    </h6>
+                    <div class="row" id="foldersContainer">
+                        @foreach (var folder in Model.SubFolders)
+                        {
+                            <div class="col-lg-3 col-md-4 col-sm-6 mb-3 folder-item" 
+                                 data-name="@folder.Name.ToLower()" 
+                                 data-type="folder">
+                                <div class="card h-100 folder-card border-0 shadow-sm"
+                                     style="border-left: 4px solid @folder.Color !important;">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-start">
+                                            <i class="@folder.Icon fs-1 me-3" style="color: @folder.Color;"></i>
+                                            <div class="flex-grow-1">
+                                                <h6 class="card-title mb-1">
+                                                    <a href="@Url.Action("Browse", new { folderId = folder.Id })" 
+                                                       class="text-decoration-none stretched-link">
+                                                        @folder.Name
+                                                    </a>
+                                                </h6>
+                                                @if (!string.IsNullOrEmpty(folder.Description))
+                                                {
+                                                    <p class="card-text text-muted small mb-2">
+                                                        @(folder.Description.Length > 60 ? 
+                                                          folder.Description.Substring(0, 60) + "..." : 
+                                                          folder.Description)
+                                                    </p>
+                                                }
+                                                <div class="small text-muted">
+                                                    <span class="me-2">
+                                                        <i class="bi bi-files me-1"></i>
+                                                        @folder.DocumentsCount
+                                                    </span>
+                                                    @if (folder.SubFoldersCount > 0)
+                                                    {
+                                                        <span>
+                                                            <i class="bi bi-folder me-1"></i>
+                                                            @folder.SubFoldersCount
+                                                        </span>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="dropdown position-relative" style="z-index: 1;">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle border-0" 
+                                                        type="button" data-bs-toggle="dropdown" 
+                                                        onclick="event.stopPropagation();">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a class="dropdown-item" 
+                                                           href="@Url.Action("EditFolder", new { id = folder.Id })">
+                                                            <i class="bi bi-pencil me-2"></i>Editar
+                                                        </a>
+                                                    </li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <button class="dropdown-item text-danger" 
+                                                                onclick="confirmDeleteFolder(@folder.Id, '@folder.Name')">
+                                                            <i class="bi bi-trash me-2"></i>Excluir
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Documentos -->
+            @if (Model.Documents.Any())
+            {
+                <div id="documentsSection">
+                    <h6 class="text-muted mb-3">
+                        <i class="bi bi-file-earmark me-1"></i>
+                        Documentos (@Model.Documents.Count)
+                    </h6>
+                    
+                    <!-- Visualização em Lista (padrão) -->
+                    <div class="table-responsive" id="listViewContainer">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Tipo</th>
+                                    <th>Tamanho</th>
+                                    <th>Data Upload</th>
+                                    <th>Enviado por</th>
+                                    <th width="120">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var doc in Model.Documents)
+                                {
+                                    <tr class="document-item" 
+                                        data-name="@doc.OriginalFileName.ToLower()" 
+                                        data-type="document"
+                                        data-date="@doc.UploadDate.Ticks"
+                                        data-size="@doc.FileSize">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="@GetFileIcon(doc.ContentType) me-2 text-primary"></i>
+                                                <div>
+                                                    <div class="fw-medium">@doc.OriginalFileName</div>
+                                                    @if (!string.IsNullOrEmpty(doc.Description))
+                                                    {
+                                                        <small class="text-muted">@doc.Description</small>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark">
+                                                @GetFileExtension(doc.OriginalFileName)
+                                            </span>
+                                        </td>
+                                        <td>@FormatFileSize(doc.FileSize)</td>
+                                        <td>
+                                            <span title="@doc.UploadDate.ToString("dd/MM/yyyy HH:mm:ss")">
+                                                @doc.UploadDate.ToString("dd/MM/yyyy")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span title="@doc.Uploader?.Email">
+                                                @(doc.Uploader?.Email?.Split('@')[0] ?? "N/A")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="@Url.Action("Download", new { id = doc.Id })" 
+                                                   class="btn btn-outline-primary btn-sm" title="Download">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                                <a href="@Url.Action("View", new { id = doc.Id })" 
+                                                   class="btn btn-outline-info btn-sm" title="Visualizar">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" 
+                                                            type="button" data-bs-toggle="dropdown">
+                                                        <i class="bi bi-three-dots"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li>
+                                                            <button class="dropdown-item" onclick="moveDocument(@doc.Id)">
+                                                                <i class="bi bi-folder me-2"></i>Mover para...
+                                                            </button>
+                                                        </li>
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li>
+                                                            <form asp-action="Delete" method="post" class="d-inline">
+                                                                <input type="hidden" name="id" value="@doc.Id" />
+                                                                <button type="submit" class="dropdown-item text-danger" 
+                                                                        onclick="return confirm('Tem certeza que deseja excluir este documento?')">
+                                                                    <i class="bi bi-trash me-2"></i>Excluir
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Visualização em Grade -->
+                    <div class="row d-none" id="gridViewContainer">
+                        @foreach (var doc in Model.Documents)
+                        {
+                            <div class="col-lg-3 col-md-4 col-sm-6 mb-3 document-item" 
+                                 data-name="@doc.OriginalFileName.ToLower()" 
+                                 data-type="document">
+                                <div class="card h-100 document-card">
+                                    <div class="card-body p-3 text-center">
+                                        <i class="@GetFileIcon(doc.ContentType) display-4 text-primary mb-2"></i>
+                                        <h6 class="card-title small">@doc.OriginalFileName</h6>
+                                        <p class="card-text text-muted small">
+                                            @FormatFileSize(doc.FileSize)<br>
+                                            @doc.UploadDate.ToString("dd/MM/yyyy")
+                                        </p>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="@Url.Action("Download", new { id = doc.Id })" 
+                                               class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                            <a href="@Url.Action("View", new { id = doc.Id })" 
+                                               class="btn btn-outline-info btn-sm">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Estado Vazio -->
+            @if (!Model.SubFolders.Any() && !Model.Documents.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-folder-x display-1 text-muted"></i>
+                    <h5 class="mt-3 text-muted">Pasta vazia</h5>
+                    <p class="text-muted">Esta pasta não contém documentos ou subpastas.</p>
+                    <div class="mt-4">
+                        <a href="@Url.Action("Upload", new { folderId = Model.CurrentFolder?.Id })" 
+                           class="btn btn-primary me-2">
+                            <i class="bi bi-upload me-1"></i>
+                            Enviar Documento
+                        </a>
+                        <button type="button" class="btn btn-outline-primary" 
+                                data-bs-toggle="modal" data-bs-target="#createFolderModal">
+                            <i class="bi bi-folder-plus me-1"></i>
+                            Criar Pasta
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Criar Pasta -->
+<div class="modal fade" id="createFolderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-folder-plus me-2"></i>
+                    Nova Pasta
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="CreateFolder" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="ParentFolderId" value="@Model.CurrentFolder?.Id" />
+                    <input type="hidden" name="DepartmentId" value="@Model.CurrentFolder?.DepartmentId" />
+                    
+                    <div class="mb-3">
+                        <label for="folderName" class="form-label">Nome da Pasta</label>
+                        <input type="text" class="form-control" id="folderName" name="Name" required />
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="folderDescription" class="form-label">Descrição (opcional)</label>
+                        <textarea class="form-control" id="folderDescription" name="Description" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="folderColor" class="form-label">Cor</label>
+                            <select class="form-select" id="folderColor" name="Color">
+                                <option value="#0d6efd">Azul</option>
+                                <option value="#198754">Verde</option>
+                                <option value="#dc3545">Vermelho</option>
+                                <option value="#fd7e14">Laranja</option>
+                                <option value="#6f42c1">Roxo</option>
+                                <option value="#20c997">Turquesa</option>
+                                <option value="#6c757d">Cinza</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="folderIcon" class="form-label">Ícone</label>
+                            <select class="form-select" id="folderIcon" name="Icon">
+                                <option value="bi bi-folder-fill">Pasta Padrão</option>
+                                <option value="bi bi-briefcase-fill">Briefcase</option>
+                                <option value="bi bi-file-earmark-medical-fill">Médico</option>
+                                <option value="bi bi-shield-fill-check">Segurança</option>
+                                <option value="bi bi-gear-fill">Configurações</option>
+                                <option value="bi bi-people-fill">Pessoas</option>
+                                <option value="bi bi-bank">Financeiro</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-folder-plus me-1"></i>
+                        Criar Pasta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetFileIcon(string contentType)
+    {
+        return contentType?.ToLower() switch
+        {
+            var ct when ct.Contains("pdf") => "bi bi-file-earmark-pdf",
+            var ct when ct.Contains("word") => "bi bi-file-earmark-word",
+            var ct when ct.Contains("excel") => "bi bi-file-earmark-excel",
+            var ct when ct.Contains("powerpoint") => "bi bi-file-earmark-ppt",
+            var ct when ct.Contains("image") => "bi bi-file-earmark-image",
+            var ct when ct.Contains("zip") => "bi bi-file-earmark-zip",
+            _ => "bi bi-file-earmark"
+        };
+    }
+
+    private string GetFileExtension(string fileName)
+    {
+        var extension = System.IO.Path.GetExtension(fileName);
+        return extension?.ToUpper().TrimStart('.') ?? "FILE";
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        return IntranetDocumentos.Models.ValueObjects.FileSize.FromBytes(bytes).ToHumanReadableString();
+    }
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Busca
+            $('#searchInput').on('input', function() {
+                var searchTerm = $(this).val().toLowerCase();
+                filterItems();
+            });
+
+            // Filtros
+            $('#typeFilter, #sortBy, #sortOrder').on('change', function() {
+                filterItems();
+            });
+
+            // Alternar visualização
+            $('#gridView').on('change', function() {
+                if (this.checked) {
+                    $('#listViewContainer').addClass('d-none');
+                    $('#gridViewContainer').removeClass('d-none');
+                }
+            });
+
+            $('#listView').on('change', function() {
+                if (this.checked) {
+                    $('#gridViewContainer').addClass('d-none');
+                    $('#listViewContainer').removeClass('d-none');
+                }
+            });
+
+            function filterItems() {
+                var searchTerm = $('#searchInput').val().toLowerCase();
+                var typeFilter = $('#typeFilter').val();
+                var sortBy = $('#sortBy').val();
+                var sortOrder = $('#sortOrder').val();
+
+                // Filtrar itens
+                $('.folder-item, .document-item').each(function() {
+                    var $item = $(this);
+                    var name = $item.data('name') || '';
+                    var type = $item.data('type') || '';
+                    
+                    var showItem = true;
+                    
+                    // Filtro de busca
+                    if (searchTerm && !name.includes(searchTerm)) {
+                        showItem = false;
+                    }
+                    
+                    // Filtro de tipo
+                    if (typeFilter && type !== typeFilter) {
+                        showItem = false;
+                    }
+                    
+                    $item.toggle(showItem);
+                });
+
+                // Ordenar (implementação básica)
+                if (sortBy === 'name') {
+                    sortItemsByName(sortOrder);
+                } else if (sortBy === 'date') {
+                    sortItemsByDate(sortOrder);
+                }
+            }
+
+            function sortItemsByName(order) {
+                var $container = $('#foldersContainer');
+                var $items = $container.children('.folder-item').sort(function(a, b) {
+                    var nameA = $(a).data('name');
+                    var nameB = $(b).data('name');
+                    return order === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+                });
+                $container.append($items);
+            }
+
+            function sortItemsByDate(order) {
+                var $container = $('#documentsSection tbody');
+                var $items = $container.children('.document-item').sort(function(a, b) {
+                    var dateA = parseInt($(a).data('date')) || 0;
+                    var dateB = parseInt($(b).data('date')) || 0;
+                    return order === 'asc' ? dateA - dateB : dateB - dateA;
+                });
+                $container.append($items);
+            }
+        });
+
+        function confirmDeleteFolder(folderId, folderName) {
+            if (confirm(`Tem certeza que deseja excluir a pasta "${folderName}"?\n\nEsta ação não pode ser desfeita e todos os arquivos da pasta serão perdidos.`)) {
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("DeleteFolder")';
+                
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id';
+                input.value = folderId;
+                form.appendChild(input);
+                
+                var token = document.createElement('input');
+                token.type = 'hidden';
+                token.name = '__RequestVerificationToken';
+                token.value = $('input[name="__RequestVerificationToken"]').val();
+                form.appendChild(token);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function moveDocument(documentId) {
+            // TODO: Implementar modal para mover documento
+            alert('Funcionalidade de mover documento será implementada em breve.');
+        }
+    </script>
+}
+
+<style>
+    .folder-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+        transition: all 0.2s ease;
+    }
+
+    .document-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+        transition: all 0.2s ease;
+    }
+
+    .breadcrumb-item a {
+        text-decoration: none;
+    }
+
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+
+    .stretched-link::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1;
+        content: "";
+    }
+
+    .card .dropdown {
+        z-index: 2 !important;
+    }
+</style>

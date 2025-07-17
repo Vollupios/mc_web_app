@@ -154,6 +154,7 @@ public partial class Program
 
         // Add custom services
         builder.Services.AddScoped<IDocumentService, DocumentService>();
+        builder.Services.AddScoped<IDocumentFolderService, DocumentFolderService>();
         builder.Services.AddScoped<IDatabaseBackupService, DatabaseBackupService>();
         builder.Services.AddScoped<IFileUploadService, FileUploadService>();
         builder.Services.AddScoped<ISecureFileUploadService, SecureFileUploadService>(); // 🔒 Novo serviço seguro

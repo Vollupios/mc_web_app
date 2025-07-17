@@ -169,5 +169,45 @@ namespace IntranetDocumentos.Services.Documents
             var userRoles = await _userManager.GetRolesAsync(user);
             return userRoles.Contains(role);
         }
+
+        public async Task<bool> CanUserAccessFolderAsync(DocumentFolder folder, ApplicationUser user)
+        {
+            if (user == null || folder == null)
+            {
+                _logger.LogWarning("Usuário ou pasta nulos ao verificar acesso");
+                return false;
+            }
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            // Admin pode acessar qualquer pasta
+            if (userRoles.Contains("Admin"))
+            {
+                return true;
+            }
+
+            // Gestor pode acessar qualquer pasta
+            if (userRoles.Contains("Gestor"))
+            {
+                return true;
+            }
+
+            // Se a pasta não tem departamento específico (é geral), todos podem acessar
+            if (!folder.DepartmentId.HasValue)
+            {
+                return true;
+            }
+
+            // Usuário comum só pode acessar pastas do seu departamento
+            var hasAccess = folder.DepartmentId == user.DepartmentId;
+            
+            if (!hasAccess)
+            {
+                _logger.LogWarning("Usuário {UserId} tentou acessar pasta {FolderId} do departamento {DeptId} sem permissão", 
+                    user.Id, folder.Id, folder.DepartmentId);
+            }
+
+            return hasAccess;
+        }
     }
 }

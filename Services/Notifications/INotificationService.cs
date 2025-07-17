@@ -41,5 +41,10 @@ namespace IntranetDocumentos.Services.Notifications
         /// Obtém usuários que devem receber notificações de reuniões
         /// </summary>
         Task<List<ApplicationUser>> GetMeetingNotificationRecipientsAsync(Reuniao reuniao);
+
+        /// <summary>
+        /// Notifica sobre movimentação de documento
+        /// </summary>
+        Task SendDocumentMovedNotificationAsync(Document document, string? oldLocation, string newLocation, ApplicationUser movedBy);
     }
 }

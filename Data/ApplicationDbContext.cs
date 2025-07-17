@@ -11,6 +11,7 @@ namespace IntranetDocumentos.Data
         {
         }        public DbSet<Department> Departments { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<DocumentFolder> DocumentFolders { get; set; }
         public DbSet<DocumentDownloadLog> DocumentDownloadLogs { get; set; }
         public DbSet<Ramal> Ramais { get; set; }
         public DbSet<Reuniao> Reunioes { get; set; }
@@ -48,6 +49,49 @@ namespace IntranetDocumentos.Data
                 .WithMany()
                 .HasForeignKey(d => d.LastModifiedById)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // Configuração DocumentFolder
+            builder.Entity<DocumentFolder>()
+                .HasOne(f => f.ParentFolder)
+                .WithMany(f => f.ChildFolders)
+                .HasForeignKey(f => f.ParentFolderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<DocumentFolder>()
+                .HasOne(f => f.Department)
+                .WithMany()
+                .HasForeignKey(f => f.DepartmentId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<DocumentFolder>()
+                .HasOne(f => f.CreatedBy)
+                .WithMany()
+                .HasForeignKey(f => f.CreatedById)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<DocumentFolder>()
+                .HasOne(f => f.UpdatedBy)
+                .WithMany()
+                .HasForeignKey(f => f.UpdatedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<Document>()
+                .HasOne(d => d.Folder)
+                .WithMany(f => f.Documents)
+                .HasForeignKey(d => d.FolderId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Índices para DocumentFolder
+            builder.Entity<DocumentFolder>()
+                .HasIndex(f => new { f.ParentFolderId, f.Name })
+                .IsUnique()
+                .HasFilter("[ParentFolderId] IS NOT NULL");
+
+            builder.Entity<DocumentFolder>()
+                .HasIndex(f => f.Path);
+
+            builder.Entity<DocumentFolder>()
+                .HasIndex(f => f.DepartmentId);
 
             // Configuração das relações para DocumentDownloadLog
             builder.Entity<DocumentDownloadLog>()

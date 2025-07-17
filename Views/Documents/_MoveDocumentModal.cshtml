@@ -1,0 +1,274 @@
+@model IntranetDocumentos.Models.ViewModels.MoveDocumentViewModel
+
+<div class="modal fade" id="moveDocumentModal" tabindex="-1" aria-labelledby="moveDocumentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="@Url.Action("MoveDocument")" id="moveDocumentForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="DocumentId" />
+                
+                <div class="modal-header">
+                    <h5 class="modal-title" id="moveDocumentModalLabel">
+                        <i class="bi bi-arrow-left-right text-primary"></i>
+                        Mover Documento
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>Documento:</strong> @Model.DocumentName
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Localização Atual -->
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">
+                                        <i class="bi bi-geo-alt text-muted"></i> Localização Atual
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        <strong>Departamento:</strong><br>
+                                        <span class="badge bg-secondary">
+                                            @if (Model.CurrentDepartmentId.HasValue)
+                                            {
+                                                @(Model.Departments.FirstOrDefault(d => d.Id == Model.CurrentDepartmentId)?.Name ?? "Não encontrado")
+                                            }
+                                            else
+                                            {
+                                                <text>Geral</text>
+                                            }
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <strong>Pasta:</strong><br>
+                                        <span class="badge bg-warning">
+                                            @if (Model.CurrentFolderId.HasValue)
+                                            {
+                                                @(Model.AvailableFolders.FirstOrDefault(f => f.Id == Model.CurrentFolderId)?.Name ?? "Pasta removida")
+                                            }
+                                            else
+                                            {
+                                                <text>Raiz</text>
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nova Localização -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">
+                                        <i class="bi bi-arrow-right text-success"></i> Nova Localização
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Seleção de Departamento -->
+                                    <div class="mb-3">
+                                        <label for="newDepartmentSelect" class="form-label">
+                                            <i class="bi bi-building"></i> Departamento de Destino
+                                        </label>
+                                        <select class="form-select" id="newDepartmentSelect" asp-for="NewDepartmentId">
+                                            <option value="">Geral (Todos os usuários)</option>
+                                            @foreach (var dept in Model.Departments)
+                                            {
+                                                var isSelected = dept.Id == Model.CurrentDepartmentId;
+                                                <option value="@dept.Id" 
+                                                        data-department-id="@dept.Id"
+                                                        selected="@(isSelected ? "selected" : null)">
+                                                    @dept.Name
+                                                </option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <!-- Seleção de Pasta -->
+                                    <div class="mb-3">
+                                        <label for="newFolderSelect" class="form-label">
+                                            <i class="bi bi-folder"></i> Pasta de Destino
+                                        </label>
+                                        <select class="form-select" id="newFolderSelect" asp-for="NewFolderId">
+                                            <option value="">Pasta Raiz</option>
+                                            @foreach (var folder in Model.AvailableFolders.OrderBy(f => f.Level).ThenBy(f => f.Name))
+                                            {
+                                                var isSelected = folder.Id == Model.CurrentFolderId;
+                                                var indent = new string('-', folder.Level * 2);
+                                                <option value="@folder.Id" 
+                                                        data-department-id="@folder.DepartmentId"
+                                                        selected="@(isSelected ? "selected" : null)">
+                                                    @(indent)@folder.Name
+                                                </option>
+                                            }
+                                        </select>
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            As pastas mostradas são filtradas conforme o departamento selecionado
+                                        </div>
+                                    </div>
+
+                                    <!-- Motivo (opcional) -->
+                                    <div class="mb-3">
+                                        <label for="moveReason" class="form-label">
+                                            <i class="bi bi-chat-text"></i> Motivo da Movimentação
+                                            <small class="text-muted">(opcional)</small>
+                                        </label>
+                                        <textarea class="form-control" id="moveReason" asp-for="Reason" 
+                                                  rows="2" maxlength="500" 
+                                                  placeholder="Descreva o motivo da movimentação (para auditoria)"></textarea>
+                                        <div class="form-text">
+                                            Máximo 500 caracteres
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview da movimentação -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="alert alert-warning d-none" id="movePreview">
+                                <i class="bi bi-arrow-right-circle"></i>
+                                <strong>Movimentação:</strong>
+                                <span id="previewText"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success" id="confirmMoveBtn">
+                        <i class="bi bi-arrow-left-right"></i> Mover Documento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Carregar pastas quando departamento muda
+    $('#newDepartmentSelect').on('change', function() {
+        const departmentId = $(this).val();
+        loadFoldersForDepartment(departmentId, '#newFolderSelect');
+        updatePreview();
+    });
+
+    // Função para carregar pastas via AJAX
+    function loadFoldersForDepartment(departmentId, selectElementId) {
+        const folderSelect = $(selectElementId);
+        
+        // Salvar valor atual
+        const currentValue = folderSelect.val();
+        
+        // Limpar opções existentes (exceto a primeira)
+        folderSelect.find('option:not(:first)').remove();
+        folderSelect.prop('disabled', true);
+        
+        if (!departmentId) {
+            folderSelect.prop('disabled', false);
+            updatePreview();
+            return;
+        }
+        
+        // Fazer requisição AJAX para obter pastas
+        $.get('@Url.Action("GetFoldersJson")', { departmentId: departmentId })
+            .done(function(response) {
+                console.log('Response from GetFoldersJson:', response);
+                if (response.success && response.folders && response.folders.length > 0) {
+                    response.folders.forEach(function(folder) {
+                        const indent = '&nbsp;'.repeat(folder.level * 4);
+                        const isSelected = folder.id == currentValue;
+                        folderSelect.append(
+                            `<option value="${folder.id}" ${isSelected ? 'selected' : ''}>${indent}📁 ${folder.name}</option>`
+                        );
+                    });
+                } else {
+                    folderSelect.append('<option value="" disabled>Nenhuma pasta encontrada</option>');
+                }
+                folderSelect.prop('disabled', false);
+                updatePreview();
+            })
+            .fail(function(xhr, status, error) {
+                console.error('Erro ao carregar pastas:', error);
+                folderSelect.append('<option value="" disabled>Erro ao carregar pastas</option>');
+                folderSelect.prop('disabled', false);
+                updatePreview();
+            });
+    }
+
+    // Carregar pastas do departamento atual ao abrir o modal
+    const currentDeptId = $('#newDepartmentSelect').val();
+    if (currentDeptId) {
+        loadFoldersForDepartment(currentDeptId, '#newFolderSelect');
+    }
+
+    // Atualizar preview quando pasta muda
+    $('#newFolderSelect').on('change', updatePreview);
+
+    // Função para atualizar o preview da movimentação
+    function updatePreview() {
+        const newDeptId = $('#newDepartmentSelect').val();
+        const newFolderId = $('#newFolderSelect').val();
+        
+        const currentDeptId = '@Model.CurrentDepartmentId';
+        const currentFolderId = '@Model.CurrentFolderId';
+        
+        // Se não houve mudança, esconder preview
+        if (newDeptId == currentDeptId && newFolderId == currentFolderId) {
+            $('#movePreview').addClass('d-none');
+            $('#confirmMoveBtn').prop('disabled', true);
+            return;
+        }
+        
+        const newDeptName = newDeptId ? $('#newDepartmentSelect option:selected').text() : 'Geral';
+        const newFolderName = newFolderId ? $('#newFolderSelect option:selected').text().trim() : 'Pasta Raiz';
+        
+        const previewText = `Documento será movido para: <strong>${newDeptName}</strong> → <strong>${newFolderName}</strong>`;
+        
+        $('#previewText').html(previewText);
+        $('#movePreview').removeClass('d-none');
+        $('#confirmMoveBtn').prop('disabled', false);
+    }
+
+    // Inicializar preview
+    updatePreview();
+
+    // Validação antes de enviar
+    $('#moveDocumentForm').on('submit', function(e) {
+        const newDeptId = $('#newDepartmentSelect').val();
+        const newFolderId = $('#newFolderSelect').val();
+        const currentDeptId = '@Model.CurrentDepartmentId';
+        const currentFolderId = '@Model.CurrentFolderId';
+        
+        if (newDeptId == currentDeptId && newFolderId == currentFolderId) {
+            e.preventDefault();
+            alert('Nenhuma alteração foi feita. Selecione uma nova localização.');
+            return false;
+        }
+        
+        return true;
+    });
+
+    // Limpar formulário quando modal fecha
+    $('#moveDocumentModal').on('hidden.bs.modal', function() {
+        $('#moveDocumentForm')[0].reset();
+        $('#movePreview').addClass('d-none');
+    });
+});
+</script>

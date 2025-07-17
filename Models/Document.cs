@@ -56,6 +56,9 @@ namespace IntranetDocumentos.Models
         // Se DepartmentId for nulo, o documento é do setor "Geral"
         public int? DepartmentId { get; set; }
         
+        // Pasta onde o documento está armazenado (hierarquia)
+        public int? FolderId { get; set; }
+        
         // Texto extraído via OCR para indexação e busca
         public string? ContentText { get; set; }
         
@@ -78,6 +81,7 @@ namespace IntranetDocumentos.Models
         // Navigation properties
         public virtual ApplicationUser Uploader { get; set; } = null!;
         public virtual Department? Department { get; set; }
+        public virtual DocumentFolder? Folder { get; set; }
         public virtual ApplicationUser? LastModifiedBy { get; set; }
         
         // Workflow relationships

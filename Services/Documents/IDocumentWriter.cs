@@ -31,5 +31,10 @@ namespace IntranetDocumentos.Services.Documents
         /// Arquiva/desarquiva documento
         /// </summary>
         Task<bool> ArchiveDocumentAsync(int documentId, bool archive, ApplicationUser currentUser);
+
+        /// <summary>
+        /// Move documento para outra pasta e/ou departamento
+        /// </summary>
+        Task<(bool Success, string? Message)> MoveDocumentAsync(int documentId, int? newFolderId, int? newDepartmentId, string userId);
     }
 }
