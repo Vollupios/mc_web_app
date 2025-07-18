@@ -164,6 +164,16 @@ public partial class Program
         builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
         builder.Services.AddScoped<IWorkflowService, WorkflowService>();
 
+        // 🏗️ Registrar Repositórios - Repository Pattern aplicado
+        builder.Services.AddScoped<IntranetDocumentos.Interfaces.Repositories.IDocumentRepository, IntranetDocumentos.Repositories.DocumentRepository>();
+        builder.Services.AddScoped<IntranetDocumentos.Interfaces.Repositories.IDocumentFolderRepository, IntranetDocumentos.Repositories.DocumentFolderRepository>();
+        
+        // 🔧 Registrar Novos Serviços Refatorados - ISP aplicado  
+        builder.Services.AddScoped<IntranetDocumentos.Interfaces.Services.IDocumentReaderService, IntranetDocumentos.Services.Refactored.DocumentReaderService>();
+        builder.Services.AddScoped<IntranetDocumentos.Interfaces.Services.IDocumentWriterService, IntranetDocumentos.Services.Refactored.DocumentWriterService>();
+        builder.Services.AddScoped<IntranetDocumentos.Interfaces.Services.IDocumentSecurityService, IntranetDocumentos.Services.Refactored.DocumentSecurityService>();
+        builder.Services.AddScoped<IntranetDocumentos.Interfaces.Services.IDocumentDownloadService, IntranetDocumentos.Services.Refactored.DocumentDownloadService>();
+
         // Add notification services
         builder.Services.AddScoped<IntranetDocumentos.Services.Notifications.IEmailService, IntranetDocumentos.Services.Notifications.EmailService>();
         builder.Services.AddScoped<IntranetDocumentos.Services.Notifications.INotificationService, IntranetDocumentos.Services.Notifications.NotificationService>();

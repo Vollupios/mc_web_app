@@ -3,7 +3,6 @@ using IntranetDocumentos.Models;
 using IntranetDocumentos.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity;
 
 namespace IntranetDocumentos.Services
 {
