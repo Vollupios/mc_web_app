@@ -25,7 +25,7 @@ namespace IntranetDocumentos.Controllers
         }
 
         // Dashboard principal do workflow
-        public async Task<IActionResult> Index()
+        public async Task<ActionResult> Index()
         {
             try
             {
@@ -42,7 +42,7 @@ namespace IntranetDocumentos.Controllers
         }
 
         // Visualizar workflow de um documento específico
-        public async Task<IActionResult> Document(int id)
+        public async Task<ActionResult> Document(int id)
         {
             try
             {
@@ -67,7 +67,7 @@ namespace IntranetDocumentos.Controllers
 
         // Executar ação de workflow
         [HttpPost]
-        public async Task<IActionResult> ExecuteAction(int documentId, WorkflowAction action, string? comments = null, string? assignedToUserId = null, DateTime? dueDate = null)
+        public async Task<ActionResult> ExecuteAction(int documentId, WorkflowAction action, string? comments = null, string? assignedToUserId = null, DateTime? dueDate = null)
         {
             try
             {
@@ -104,7 +104,7 @@ namespace IntranetDocumentos.Controllers
 
         // Ações em lote
         [HttpPost]
-        public async Task<IActionResult> BulkAction(List<int> documentIds, WorkflowAction action, string? comments = null)
+        public async Task<ActionResult> BulkAction(List<int> documentIds, WorkflowAction action, string? comments = null)
         {
             try
             {
@@ -137,7 +137,7 @@ namespace IntranetDocumentos.Controllers
         }
 
         // Histórico de um documento
-        public async Task<IActionResult> History(int id)
+        public async Task<ActionResult> History(int id)
         {
             try
             {
@@ -155,7 +155,7 @@ namespace IntranetDocumentos.Controllers
 
         // Configuração do workflow (apenas Admin)
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Configuration()
+        public async Task<ActionResult> Configuration()
         {
             try
             {
@@ -173,7 +173,7 @@ namespace IntranetDocumentos.Controllers
         // Salvar configuração do workflow (apenas Admin)
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Configuration(WorkflowConfigurationViewModel config)
+        public async Task<ActionResult> Configuration(WorkflowConfigurationViewModel config)
         {
             try
             {
@@ -242,7 +242,7 @@ namespace IntranetDocumentos.Controllers
 
         // Método para administradores visualizarem todos os workflows
         [Authorize(Roles = "Admin,Gestor")]
-        public async Task<IActionResult> AllDocuments()
+        public async Task<ActionResult> AllDocuments()
         {
             try
             {
@@ -266,7 +266,7 @@ namespace IntranetDocumentos.Controllers
 
         // Aprovar todos os documentos pendentes
         [HttpPost]
-        public async Task<IActionResult> ApproveAll()
+        public async Task<ActionResult> ApproveAll()
         {
             try
             {

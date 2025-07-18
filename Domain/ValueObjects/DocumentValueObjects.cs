@@ -127,7 +127,6 @@ namespace IntranetDocumentos.Domain.ValueObjects
     public class DocumentDescription : ValidatableValueObject, IConvertible<string>
     {
         private static readonly int MaxLength = 1000;
-        private static readonly int MinLength = 0;
 
         public string Value { get; }
         public bool IsEmpty => string.IsNullOrWhiteSpace(Value);

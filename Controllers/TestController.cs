@@ -4,17 +4,17 @@ namespace IntranetDocumentos.Controllers
 {
     public class TestController : Controller
     {
-        public IActionResult FooterPequeno()
+        public ActionResult FooterPequeno()
         {
             return View();
         }
 
-        public IActionResult FooterLongo()
+        public ActionResult FooterLongo()
         {
             return View();
         }
         
-        public IActionResult FooterFinal()
+        public ActionResult FooterFinal()
         {
             return View();
         }

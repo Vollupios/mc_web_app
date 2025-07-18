@@ -23,7 +23,7 @@ namespace IntranetDocumentos.Controllers
             _reuniaoService = reuniaoService;
             _logger = logger;
         }        // GET: Reunioes
-        public async Task<IActionResult> Index(int ano = 0, int mes = 0)
+        public async Task<ActionResult> Index(int ano = 0, int mes = 0)
         {
             try
             {
@@ -51,7 +51,7 @@ namespace IntranetDocumentos.Controllers
                 return View(new CalendarioViewModel { Ano = DateTime.Now.Year, Mes = DateTime.Now.Month, Reunioes = new List<Reuniao>() });
             }
         }        // GET: Reunioes/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<ActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
 
@@ -69,7 +69,7 @@ namespace IntranetDocumentos.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }        // GET: Reunioes/Create
-        public async Task<IActionResult> Create()
+        public async Task<ActionResult> Create()
         {
             try
             {
@@ -92,7 +92,7 @@ namespace IntranetDocumentos.Controllers
         }// POST: Reunioes/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ReuniaoViewModel viewModel)
+        public async Task<ActionResult> Create(ReuniaoViewModel viewModel)
         {
             if (!ModelState.IsValid)
                 return await ReturnCreateViewWithData(viewModel);
@@ -120,12 +120,12 @@ namespace IntranetDocumentos.Controllers
             }
         }
 
-        private async Task<IActionResult> ReturnCreateViewWithData(ReuniaoViewModel viewModel)
+        private async Task<ActionResult> ReturnCreateViewWithData(ReuniaoViewModel viewModel)
         {
             await _reuniaoService.PopularDadosViewModelAsync(viewModel);
             return View(viewModel);
         }        // GET: Reunioes/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<ActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
 
@@ -155,7 +155,7 @@ namespace IntranetDocumentos.Controllers
         }        // POST: Reunioes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ReuniaoViewModel viewModel)
+        public async Task<ActionResult> Edit(int id, ReuniaoViewModel viewModel)
         {
             if (id != viewModel.Id) return NotFound();
 
@@ -198,14 +198,14 @@ namespace IntranetDocumentos.Controllers
             }
         }
 
-        private async Task<IActionResult> ReturnEditViewWithData(ReuniaoViewModel viewModel)
+        private async Task<ActionResult> ReturnEditViewWithData(ReuniaoViewModel viewModel)
         {
             await _reuniaoService.PopularDadosViewModelAsync(viewModel);
             return View(viewModel);
         }        // POST: Reunioes/MarcarRealizada/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MarcarRealizada(int id)
+        public async Task<ActionResult> MarcarRealizada(int id)
         {
             try
             {
@@ -235,7 +235,7 @@ namespace IntranetDocumentos.Controllers
         // POST: Reunioes/Cancelar/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Cancelar(int id)
+        public async Task<ActionResult> Cancelar(int id)
         {
             try
             {
@@ -265,7 +265,7 @@ namespace IntranetDocumentos.Controllers
         // POST: Reunioes/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             try
             {
@@ -292,7 +292,7 @@ namespace IntranetDocumentos.Controllers
             }
         }        // GET: Reunioes/CreateSimple - Teste simples
         [AllowAnonymous]
-        public IActionResult CreateSimple()
+        public ActionResult CreateSimple()
         {
             var viewModel = new ReuniaoViewModel
             {

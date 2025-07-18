@@ -22,7 +22,7 @@ namespace IntranetDocumentos.Controllers
         }        /// <summary>
         /// Página principal do dashboard de analytics
         /// </summary>
-        public async Task<IActionResult> Dashboard()
+        public async Task<ActionResult> Dashboard()
         {
             try
             {
@@ -40,7 +40,7 @@ namespace IntranetDocumentos.Controllers
         /// API endpoint para dados do dashboard (JSON)
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetDashboardData()
+        public async Task<ActionResult> GetDashboardData()
         {
             try
             {
@@ -55,7 +55,7 @@ namespace IntranetDocumentos.Controllers
         }        /// <summary>
         /// Página específica para estatísticas de documentos
         /// </summary>
-        public async Task<IActionResult> DocumentStatistics()
+        public async Task<ActionResult> DocumentStatistics()
         {
             try
             {
@@ -71,7 +71,7 @@ namespace IntranetDocumentos.Controllers
         }        /// <summary>
         /// Página específica para métricas de reuniões
         /// </summary>
-        public async Task<IActionResult> MeetingMetrics()
+        public async Task<ActionResult> MeetingMetrics()
         {
             try
             {
@@ -87,7 +87,7 @@ namespace IntranetDocumentos.Controllers
         }        /// <summary>
         /// Página específica para atividade por departamento
         /// </summary>
-        public async Task<IActionResult> DepartmentActivity()
+        public async Task<ActionResult> DepartmentActivity()
         {
             try
             {
@@ -105,7 +105,7 @@ namespace IntranetDocumentos.Controllers
         /// Endpoint para verificar a saúde da API
         /// </summary>
         [HttpGet("health")]
-        public IActionResult HealthCheck()
+        public ActionResult HealthCheck()
         {
             return Ok(new { status = "Healthy" });
         }

@@ -22,7 +22,7 @@ namespace IntranetDocumentos.Controllers
         /// <summary>
         /// Página principal de gerenciamento de backups
         /// </summary>
-        public async Task<IActionResult> Index()
+        public async Task<ActionResult> Index()
         {
             try
             {
@@ -51,7 +51,7 @@ namespace IntranetDocumentos.Controllers
         /// Cria um backup manual
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> CreateBackup()
+        public async Task<ActionResult> CreateBackup()
         {
             try
             {
@@ -68,7 +68,7 @@ namespace IntranetDocumentos.Controllers
         }        /// <summary>
         /// Download de um arquivo de backup
         /// </summary>
-        public IActionResult Download(string fileName)
+        public ActionResult Download(string fileName)
         {
             try
             {
@@ -108,7 +108,7 @@ namespace IntranetDocumentos.Controllers
         /// Restaura um backup (cuidado!)
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> RestoreBackup(string fileName)
+        public async Task<ActionResult> RestoreBackup(string fileName)
         {
             try
             {
@@ -149,7 +149,7 @@ namespace IntranetDocumentos.Controllers
         /// Limpa backups antigos
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> CleanOldBackups(int keepDays = 30)
+        public async Task<ActionResult> CleanOldBackups(int keepDays = 30)
         {
             try
             {

@@ -33,7 +33,7 @@ namespace IntranetDocumentos.Controllers
         /// Exibe tela de login.
         /// </summary>
         [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
+        public ActionResult Login(string? returnUrl = null)
         {
             ViewBag.ReturnUrl = returnUrl;
             _logger.LogInformation("Acessando tela de login.");
@@ -45,7 +45,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
+        public async Task<ActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             ViewBag.ReturnUrl = returnUrl;
 
@@ -115,7 +115,7 @@ namespace IntranetDocumentos.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
+        public async Task<ActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("Usuário fez logout.");
@@ -123,13 +123,13 @@ namespace IntranetDocumentos.Controllers
         }
 
         [HttpGet]
-        public IActionResult Lockout()
+        public ActionResult Lockout()
         {
             return View();
         }
 
         [HttpGet]
-        public IActionResult LoginWith2fa(bool rememberMe, string? returnUrl = null)
+        public ActionResult LoginWith2fa(bool rememberMe, string? returnUrl = null)
         {
             // Implementar autenticação de dois fatores se necessário
             return View();

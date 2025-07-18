@@ -34,7 +34,7 @@ namespace IntranetDocumentos.Controllers
         /// Exibe a lista de ramais
         /// </summary>
         /// <returns>View com lista de ramais</returns>
-        public async Task<IActionResult> Index()
+        public async Task<ActionResult> Index()
         {
             try
             {
@@ -61,7 +61,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         /// <returns>View de criação</returns>
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create()
+        public async Task<ActionResult> Create()
         {
             try
             {
@@ -90,7 +90,7 @@ namespace IntranetDocumentos.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create(RamalViewModel viewModel)
+        public async Task<ActionResult> Create(RamalViewModel viewModel)
         {            try
             {
                 if (ModelState.IsValid)
@@ -143,7 +143,7 @@ namespace IntranetDocumentos.Controllers
         /// <param name="id">ID do ramal</param>
         /// <returns>View de edição</returns>
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<ActionResult> Edit(int id)
         {
             try
             {
@@ -189,7 +189,7 @@ namespace IntranetDocumentos.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, RamalViewModel viewModel)
+        public async Task<ActionResult> Edit(int id, RamalViewModel viewModel)
         {
             try
             {
@@ -254,7 +254,7 @@ namespace IntranetDocumentos.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             try
             {

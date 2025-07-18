@@ -38,7 +38,7 @@ namespace IntranetDocumentos.Controllers
         /// <summary>
         /// Lista todos os usuários e seus papéis.
         /// </summary>
-        public async Task<IActionResult> Index()
+        public async Task<ActionResult> Index()
         {
             _logger.LogInformation("Acessando lista de usuários.");
             var users = await _userManager.Users
@@ -58,7 +58,7 @@ namespace IntranetDocumentos.Controllers
         /// Exibe formulário para criação de usuário.
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> CreateUser()
+        public async Task<ActionResult> CreateUser()
         {
             var departments = await _context.Departments.OrderBy(d => d.Name).ToListAsync();
             var roles = await _roleManager.Roles.Select(r => r.Name!).ToListAsync();
@@ -77,7 +77,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateUser(CreateUserViewModel model)
+        public async Task<ActionResult> CreateUser(CreateUserViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -117,7 +117,7 @@ namespace IntranetDocumentos.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> EditUser(string id)
+        public async Task<ActionResult> EditUser(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -152,7 +152,7 @@ namespace IntranetDocumentos.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditUser(string id, CreateUserViewModel model)
+        public async Task<ActionResult> EditUser(string id, CreateUserViewModel model)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -213,7 +213,7 @@ namespace IntranetDocumentos.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<ActionResult> DeleteUser(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -240,7 +240,7 @@ namespace IntranetDocumentos.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> Departments()
+        public async Task<ActionResult> Departments()
         {
             var departments = await _context.Departments
                 .Include(d => d.Users)
@@ -255,7 +255,7 @@ namespace IntranetDocumentos.Controllers
         /// Exibe a página de envio de emails para administradores
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> SendEmail()
+        public async Task<ActionResult> SendEmail()
         {
             var model = new SendEmailViewModel
             {
@@ -270,7 +270,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SendEmail(SendEmailViewModel model)
+        public async Task<ActionResult> SendEmail(SendEmailViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -334,7 +334,7 @@ namespace IntranetDocumentos.Controllers
         /// API para obter contagem de destinatários em tempo real
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> GetRecipientsCount([FromBody] SendEmailViewModel model)
+        public async Task<ActionResult> GetRecipientsCount([FromBody] SendEmailViewModel model)
         {
             try
             {
@@ -354,7 +354,7 @@ namespace IntranetDocumentos.Controllers
         /// API para obter detalhes dos destinatários (contagem e emails)
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> GetRecipientsDetails([FromBody] SendEmailViewModel model)
+        public async Task<ActionResult> GetRecipientsDetails([FromBody] SendEmailViewModel model)
         {
             try
             {
@@ -477,7 +477,7 @@ namespace IntranetDocumentos.Controllers
         /// Exibe a página de configuração de email
         /// </summary>
         [HttpGet]
-        public IActionResult EmailConfig()
+        public ActionResult EmailConfig()
         {
             var config = _configuration.GetSection("Email");
             var notificationConfig = _configuration.GetSection("Notifications");
@@ -506,7 +506,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult EmailConfig(EmailConfigViewModel model)
+        public ActionResult EmailConfig(EmailConfigViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -536,7 +536,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> TestEmail(EmailConfigViewModel model)
+        public async Task<ActionResult> TestEmail(EmailConfigViewModel model)
         {
             try
             {
@@ -602,7 +602,7 @@ namespace IntranetDocumentos.Controllers
         /// API para verificar status do sistema de email
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetSystemStatus()
+        public async Task<ActionResult> GetSystemStatus()
         {
             try
             {

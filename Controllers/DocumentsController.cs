@@ -50,7 +50,7 @@ namespace IntranetDocumentos.Controllers
         /// <summary>
         /// Lista documentos disponíveis para o usuário logado com navegação hierárquica.
         /// </summary>
-        public async Task<IActionResult> Index(int? folderId, int? departmentId, string? searchTerm)
+        public async Task<ActionResult> Index(int? folderId, int? departmentId, string? searchTerm)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -80,7 +80,7 @@ namespace IntranetDocumentos.Controllers
         /// Exibe o formulário de upload de documentos.
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> Upload()
+        public async Task<ActionResult> Upload()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -102,7 +102,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Upload(UploadViewModel model)
+        public async Task<ActionResult> Upload(UploadViewModel model)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -197,7 +197,7 @@ namespace IntranetDocumentos.Controllers
         /// Realiza o download de um documento.
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> Download(int id)
+        public async Task<ActionResult> Download(int id)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -231,7 +231,7 @@ namespace IntranetDocumentos.Controllers
         /// Exibe a página de busca avançada de documentos.
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> AdvancedSearch()
+        public async Task<ActionResult> AdvancedSearch()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -249,7 +249,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AdvancedSearch(
+        public async Task<ActionResult> AdvancedSearch(
             string? searchTerm, 
             int? departmentId, 
             string? contentType, 
@@ -304,7 +304,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -336,7 +336,7 @@ namespace IntranetDocumentos.Controllers
         /// Visualiza um documento no navegador (PDFs, imagens, etc).
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> View(int id)
+        public async Task<ActionResult> View(int id)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -454,7 +454,7 @@ namespace IntranetDocumentos.Controllers
         /// <summary>
         /// Exibe a visualização hierárquica de documentos com pastas e subpastas
         /// </summary>
-        public async Task<IActionResult> Tree(int? folderId, int? departmentId, string? search)
+        public async Task<ActionResult> Tree(int? folderId, int? departmentId, string? search)
         {
             try
             {
@@ -482,7 +482,7 @@ namespace IntranetDocumentos.Controllers
         /// <summary>
         /// Navegação dentro de uma pasta específica
         /// </summary>
-        public async Task<IActionResult> Browse(int? folderId)
+        public async Task<ActionResult> Browse(int? folderId)
         {
             try
             {
@@ -516,7 +516,7 @@ namespace IntranetDocumentos.Controllers
         /// Formulário para criar nova pasta
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> CreateFolder(int? parentFolderId, int? departmentId)
+        public async Task<ActionResult> CreateFolder(int? parentFolderId, int? departmentId)
         {
             try
             {
@@ -553,7 +553,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateFolder(FolderFormViewModel model)
+        public async Task<ActionResult> CreateFolder(FolderFormViewModel model)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -594,7 +594,7 @@ namespace IntranetDocumentos.Controllers
         /// Formulário para editar pasta
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> EditFolder(int id)
+        public async Task<ActionResult> EditFolder(int id)
         {
             try
             {
@@ -643,7 +643,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditFolder(FolderFormViewModel model)
+        public async Task<ActionResult> EditFolder(FolderFormViewModel model)
         {
             try
             {
@@ -692,7 +692,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteFolder(int id)
+        public async Task<ActionResult> DeleteFolder(int id)
         {
             try
             {
@@ -740,7 +740,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MoveDocumentAjax(int documentId, int? targetFolderId)
+        public async Task<ActionResult> MoveDocumentAjax(int documentId, int? targetFolderId)
         {
             try
             {
@@ -773,7 +773,7 @@ namespace IntranetDocumentos.Controllers
         /// <summary>
         /// Obter pastas para dropdown (AJAX)
         /// </summary>
-        public async Task<IActionResult> GetFoldersJson(int? departmentId)
+        public async Task<ActionResult> GetFoldersJson(int? departmentId)
         {
             try
             {
@@ -807,7 +807,7 @@ namespace IntranetDocumentos.Controllers
         /// Exibir modal para mover documento
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> MoveDocumentModal(int id)
+        public async Task<ActionResult> MoveDocumentModal(int id)
         {
             try
             {
@@ -853,7 +853,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MoveDocument(MoveDocumentViewModel model)
+        public async Task<ActionResult> MoveDocument(MoveDocumentViewModel model)
         {
             try
             {
@@ -931,7 +931,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MoveBulkDocuments(string documentIds, int? newFolderId, int? newDepartmentId)
+        public async Task<ActionResult> MoveBulkDocuments(string documentIds, int? newFolderId, int? newDepartmentId)
         {
             try
             {
@@ -1017,7 +1017,7 @@ namespace IntranetDocumentos.Controllers
         /// Carregar modal de movimentação em lote
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetBulkMoveModal()
+        public async Task<ActionResult> GetBulkMoveModal()
         {
             try
             {
@@ -1048,7 +1048,7 @@ namespace IntranetDocumentos.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateFolderAjax(FolderFormViewModel model)
+        public async Task<ActionResult> CreateFolderAjax(FolderFormViewModel model)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -1097,7 +1097,7 @@ namespace IntranetDocumentos.Controllers
         /// Debug: Listar todas as pastas do usuário atual
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> DebugFolders()
+        public async Task<ActionResult> DebugFolders()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -1139,7 +1139,7 @@ namespace IntranetDocumentos.Controllers
         /// Versão simplificada do Index para debug
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> DebugIndex()
+        public async Task<ActionResult> DebugIndex()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)

@@ -17,20 +17,20 @@ public class HomeController : Controller
         _logger = logger;
     }
 
-    public IActionResult Index()
+    public ActionResult Index()
     {
         _logger.LogInformation("Acessando página inicial.");
         return View();
     }
 
-    public IActionResult Privacy()
+    public ActionResult Privacy()
     {
         _logger.LogInformation("Acessando página de privacidade.");
         return View();
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    public ActionResult Error()
     {
         _logger.LogError("Erro detectado na aplicação. RequestId: {RequestId}", Activity.Current?.Id ?? HttpContext.TraceIdentifier);
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
