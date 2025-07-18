@@ -2,7 +2,7 @@
 
 ## 📐 Estrutura Reorganizada (Clean Architecture + DDD)
 
-```
+```text
 📁 IntranetDocumentos/
 ├── 🏛️ Domain/                          # Camada de Domínio (Core Business)
 │   ├── 📦 Entities/                    # Entidades de Domínio
@@ -60,31 +60,37 @@
 ## 🎯 Princípios SOLID Aplicados
 
 ### 1. **Single Responsibility Principle (SRP)**
+
 - ✅ **IDocumentWriter**: Apenas operações de escrita
 - ✅ **IDocumentReader**: Apenas operações de leitura  
 - ✅ **IDocumentSecurity**: Apenas validações de segurança
 - ✅ **DocumentRepository**: Apenas acesso a dados de documentos
 
 ### 2. **Open/Closed Principle (OCP)**
+
 - ✅ **Interfaces abstratas**: Extensíveis sem modificação
 - ✅ **Repository Pattern**: Novos repositórios sem alterar existentes
 - ✅ **Strategy Pattern**: Diferentes estratégias de processamento
 
 ### 3. **Liskov Substitution Principle (LSP)**
+
 - ✅ **Implementações intercambiáveis**: Qualquer implementação de `IDocumentRepository` pode substituir outra
 - ✅ **Hierarquia bem definida**: Entidades seguem contratos bem definidos
 
 ### 4. **Interface Segregation Principle (ISP)**
+
 - ✅ **Interfaces específicas**: `IDocumentWriter` ≠ `IDocumentReader`
 - ✅ **Responsabilidades isoladas**: Cliente só depende do que usa
 
 ### 5. **Dependency Inversion Principle (DIP)**
+
 - ✅ **Dependência de abstrações**: Controllers dependem de interfaces
 - ✅ **Injeção de dependência**: IoC Container gerencia dependências
 
 ## 🏗️ Padrões de Design Implementados
 
 ### 📚 **Repository Pattern**
+
 ```csharp
 // Interface no Domain
 public interface IDocumentRepository
@@ -102,6 +108,7 @@ public class DocumentRepository : IDocumentRepository
 ```
 
 ### 🎭 **Strategy Pattern**
+
 ```csharp
 // Diferentes estratégias para processamento de documentos
 public interface IFileProcessor
@@ -114,6 +121,7 @@ public class DocumentFileProcessor : IFileProcessor { }
 ```
 
 ### 🏭 **Factory Pattern**
+
 ```csharp
 public class FileProcessorFactory
 {
@@ -130,6 +138,7 @@ public class FileProcessorFactory
 ```
 
 ### 📦 **DTO Pattern**
+
 ```csharp
 // Separação entre entidades de domínio e dados de transporte
 public class CreateDocumentDto
@@ -143,27 +152,32 @@ public class CreateDocumentDto
 ## 🔗 Benefícios da Nova Estrutura
 
 ### 🎯 **Separação de Responsabilidades**
+
 - **Domain**: Regras de negócio puras
 - **Application**: Orquestração de use cases
 - **Infrastructure**: Detalhes técnicos
 - **Presentation**: Interface com usuário
 
 ### 🧪 **Testabilidade**
+
 - Interfaces permitem mocking fácil
 - Testes unitários isolados por camada
 - Testes de integração focados
 
 ### 📈 **Manutenibilidade**
+
 - Código organizado por responsabilidade
 - Fácil localização de funcionalidades
 - Evolução independente das camadas
 
 ### 🔌 **Extensibilidade**
+
 - Novos repositórios sem quebrar código existente
 - Novas estratégias de processamento
 - Integração com novos serviços externos
 
 ### ♻️ **Reutilização**
+
 - DTOs reutilizáveis entre controllers
 - Serviços de domínio compartilhados
 - Repositórios base para diferentes entidades

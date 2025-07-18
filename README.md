@@ -138,19 +138,6 @@ MIT License - veja [LICENSE](LICENSE) para detalhes.
 
 ---
 
-## 📞 Suporte
-
-- **GitHub**: [mc_web_app](https://github.com/Vollupios/mc_web_app)
-- **Documentação**: [DOCUMENTACAO-PRINCIPAL.md](DOCUMENTACAO-PRINCIPAL.md)
-
----
-
-## 📄 Licença
-
-MIT License
-
----
-
 **Status**: ✅ **Produção**  
 **Versão**: 2.0.0  
 **Última Atualização**: 17 de julho de 2025
