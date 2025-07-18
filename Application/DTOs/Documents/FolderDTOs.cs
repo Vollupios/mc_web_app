@@ -50,6 +50,9 @@ namespace IntranetDocumentos.Application.DTOs.Documents
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public bool IsPublic { get; set; }
+        public bool IsActive { get; set; } = true;
+        public string? Color { get; set; }
+        public string? Icon { get; set; }
         
         // Relacionamentos
         public int DepartmentId { get; set; }

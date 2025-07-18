@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using IntranetDocumentos.Application.DTOs.Documents;
 using IntranetDocumentos.Application.DTOs.Users;
 using IntranetDocumentos.Application.DTOs.Departments;
+using IntranetDocumentos.Application.DTOs.Ramais;
+using IntranetDocumentos.Application.DTOs.Reunioes;
 using IntranetDocumentos.Application.Mappers;
 using IntranetDocumentos.Models;
 using IntranetDocumentos.Data;
@@ -127,7 +129,7 @@ namespace IntranetDocumentos.Tests.Application.DTOs
             Assert.Equal(document.UploadDate, dto.UploadDate);
             Assert.Equal(document.LastModified, dto.LastModified);
             Assert.Equal(".pdf", dto.FileExtension);
-            Assert.Equal((Application.DTOs.Documents.DocumentStatus)document.Status, dto.Status);
+            Assert.Equal(document.Status, (Models.DocumentStatus)dto.Status);
         }
 
         [Fact]
@@ -144,8 +146,8 @@ namespace IntranetDocumentos.Tests.Application.DTOs
                 DepartmentId = 1,
                 FolderId = 1,
                 UploaderId = "user123",
-                Status = Application.DTOs.Documents.DocumentStatus.Draft,
-                Version = 1
+                Status = Models.DocumentStatus.Draft,
+                Version = "1"
             };
 
             // Act
@@ -160,7 +162,7 @@ namespace IntranetDocumentos.Tests.Application.DTOs
             Assert.Equal(dto.DepartmentId, entity.DepartmentId);
             Assert.Equal(dto.FolderId, entity.FolderId);
             Assert.Equal(dto.UploaderId, entity.UploaderId);
-            Assert.Equal(dto.Version, entity.Version);
+            Assert.Equal(int.Parse(dto.Version), entity.Version);
             Assert.Equal((Models.DocumentStatus)dto.Status, entity.Status);
         }
 
@@ -199,8 +201,7 @@ namespace IntranetDocumentos.Tests.Application.DTOs
                 FirstName = "Novo",
                 LastName = "Usuário",
                 DepartmentId = 1,
-                IsActive = true,
-                EmailConfirmed = true
+                IsActive = true
             };
 
             // Act
@@ -213,7 +214,7 @@ namespace IntranetDocumentos.Tests.Application.DTOs
             Assert.Equal(dto.LastName, entity.LastName);
             Assert.Equal(dto.DepartmentId, entity.DepartmentId);
             Assert.Equal(dto.IsActive, entity.IsActive);
-            Assert.Equal(dto.EmailConfirmed, entity.EmailConfirmed);
+            Assert.False(entity.EmailConfirmed); // Default value
         }
 
         [Fact]

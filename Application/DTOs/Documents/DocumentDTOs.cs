@@ -49,6 +49,7 @@ namespace IntranetDocumentos.Application.DTOs.Documents
     public class DocumentDTO : BaseDTO
     {
         public string OriginalFileName { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
         public string StoredFileName { get; set; } = string.Empty;
         public string FileExtension { get; set; } = string.Empty;
         public long FileSize { get; set; }
@@ -69,6 +70,7 @@ namespace IntranetDocumentos.Application.DTOs.Documents
         
         // Metadados
         public DateTime UploadDate { get; set; }
+        public DateTime? LastModified { get; set; }
         public int DownloadCount { get; set; }
         public DateTime? LastDownload { get; set; }
         public int Version { get; set; }
@@ -133,11 +135,15 @@ namespace IntranetDocumentos.Application.DTOs.Documents
     public class DocumentSearchDTO
     {
         public string? Query { get; set; }
+        public string? FileName { get; set; }
+        public string? ContentType { get; set; }
         public int? DepartmentId { get; set; }
         public int? FolderId { get; set; }
         public string? FileType { get; set; }
         public DateTime? UploadDateFrom { get; set; }
         public DateTime? UploadDateTo { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public string? UploaderName { get; set; }
         public List<string> Tags { get; set; } = new();
         public DocumentStatus? Status { get; set; }

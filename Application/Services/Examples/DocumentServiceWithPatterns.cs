@@ -35,7 +35,7 @@ namespace IntranetDocumentos.Application.Services.Examples
         /// <summary>
         /// Exemplo de upload usando Factory Pattern e Strategy Pattern
         /// </summary>
-        public async Task<Document?> UploadDocumentAsync(CreateDocumentDTO createDto)
+        public Document? UploadDocumentAsync(CreateDocumentDTO createDto)
         {
             try
             {
@@ -66,7 +66,7 @@ namespace IntranetDocumentos.Application.Services.Examples
                     Description = createDto.Description,
                     DepartmentId = createDto.DepartmentId,
                     FolderId = createDto.FolderId,
-                    Status = DocumentStatus.Active,
+                    Status = Models.DocumentStatus.Published,
                     Version = "1.0"
                 };
 
@@ -96,7 +96,7 @@ namespace IntranetDocumentos.Application.Services.Examples
         /// <summary>
         /// Exemplo de busca usando Strategy Pattern
         /// </summary>
-        public async Task<SearchResult<DocumentResponseDTO>> SearchDocumentsAsync(SearchFilterDTO filter)
+        public SearchResult<DocumentResponseDTO> SearchDocumentsAsync(SearchFilterDTO filter)
         {
             try
             {
@@ -170,7 +170,7 @@ namespace IntranetDocumentos.Application.Services.Examples
         /// <summary>
         /// Exemplo de processamento com múltiplas strategies
         /// </summary>
-        public async Task<ProcessingResult> ProcessDocumentAsync(DocumentCreateDTO createDto)
+        public ProcessingResult ProcessDocumentAsync(DocumentCreateDTO createDto)
         {
             var processingResult = new ProcessingResult();
 
@@ -220,23 +220,18 @@ namespace IntranetDocumentos.Application.Services.Examples
         /// <summary>
         /// Exemplo de uso de diferentes strategies baseadas em contexto
         /// </summary>
-        public IStrategy<DocumentCreateDTO, DocumentProcessingResult> GetUploadStrategy(string userRole)
+        public DocumentUploadStrategy GetUploadStrategy(string userRole)
         {
-            return userRole switch
-            {
-                "Admin" => new DocumentUploadStrategy(), // Sem restrições
-                "Gestor" => new DocumentUploadStrategy(), // Restrições moderadas
-                "Usuario" => new DocumentUploadStrategy(), // Restrições completas
-                _ => throw new ArgumentException($"Role '{userRole}' não reconhecida")
-            };
+            // Retornar sempre a mesma strategy, mas com contexto diferente
+            return new DocumentUploadStrategy();
         }
 
         /// <summary>
         /// Exemplo de uso de Strategy Pattern para diferentes tipos de busca
         /// </summary>
-        public async Task<SearchResult<DocumentResponseDTO>> SearchByTypeAsync(string searchType, object searchCriteria)
+        public Task<SearchResult<DocumentResponseDTO>> SearchByTypeAsync(string searchType, object searchCriteria)
         {
-            return searchType.ToLower() switch
+            var result = searchType.ToLower() switch
             {
                 "simple" => new SimpleTextSearchStrategy().Execute((string)searchCriteria, 
                     new SearchContext { UserId = _context.UserId, UserRole = _context.UserRole }),
@@ -249,6 +244,8 @@ namespace IntranetDocumentos.Application.Services.Examples
                 
                 _ => throw new ArgumentException($"Tipo de busca '{searchType}' não suportado")
             };
+            
+            return Task.FromResult(result);
         }
 
         private DocumentProcessingContext CreateContext(string userId, string userRole)
@@ -311,27 +308,20 @@ namespace IntranetDocumentos.Application.Services.Examples
         /// <summary>
         /// Exemplo de action que usa todos os padrões
         /// </summary>
-        public async Task<IActionResult> UploadDocument(DocumentCreateDTO createDto)
+        public ProcessingResult UploadDocument(DocumentCreateDTO createDto)
         {
             try
             {
                 // Usar o serviço que integra todos os padrões
-                var result = await _documentService.ProcessDocumentAsync(createDto);
+                var result = _documentService.ProcessDocumentAsync(createDto);
 
-                if (!result.IsSuccess)
-                {
-                    return BadRequest(new { errors = result.Errors });
-                }
-
-                return Ok(new { 
-                    documentId = result.Document?.Id,
-                    message = "Documento enviado com sucesso",
-                    metadata = result.Metadata 
-                });
+                return result;
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = "Erro interno do servidor", details = ex.Message });
+                var errorResult = new ProcessingResult();
+                errorResult.AddError($"Erro interno do servidor: {ex.Message}");
+                return errorResult;
             }
         }
     }

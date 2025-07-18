@@ -9,6 +9,13 @@ namespace IntranetDocumentos.Models
         [Required]
         public int DepartmentId { get; set; }
         
+        // Additional user properties
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public bool IsActive { get; set; } = true;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        
         // Navigation properties
         public virtual Department Department { get; set; } = null!;
         public virtual ICollection<Document> UploadedDocuments { get; set; } = new List<Document>();

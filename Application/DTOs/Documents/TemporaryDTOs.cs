@@ -9,13 +9,17 @@ namespace IntranetDocumentos.Application.DTOs.Documents
     public class DocumentCreateDTO : BaseDTO
     {
         public string OriginalFileName { get; set; } = string.Empty;
+        public string StoredFileName { get; set; } = string.Empty;
         public string ContentType { get; set; } = string.Empty;
         public long FileSize { get; set; }
         public string? Description { get; set; }
         public int DepartmentId { get; set; }
         public int? FolderId { get; set; }
-        public DocumentStatus Status { get; set; }
+        public string? UploaderId { get; set; }
+        public Models.DocumentStatus Status { get; set; }
         public string Version { get; set; } = "1.0";
+        public string? ContentText { get; set; }
+        public byte[]? FileData { get; set; }
     }
 
     /// <summary>
@@ -48,6 +52,11 @@ namespace IntranetDocumentos.Application.DTOs.Documents
         public string? Description { get; set; }
         public int DepartmentId { get; set; }
         public int? ParentFolderId { get; set; }
+        public string? Color { get; set; }
+        public string? Icon { get; set; }
+        public int DisplayOrder { get; set; }
+        public bool IsSystemFolder { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 
     /// <summary>

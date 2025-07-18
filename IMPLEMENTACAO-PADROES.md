@@ -3,6 +3,7 @@
 ## Implementação dos Padrões
 
 ### 1. Factory Pattern ✅
+
 - **Base**: `IFactory<T>`, `BaseFactory<T>`, `UserContextFactory<T>`
 - **Implementação**: `DocumentFactory`, `DocumentFolderFactory`
 - **Funcionalidades**:
@@ -12,6 +13,7 @@
   - Aplicação de regras de negócio na criação
 
 ### 2. Strategy Pattern ✅
+
 - **Base**: `IStrategy<TInput, TOutput>`, `IAsyncStrategy<TInput, TOutput>`
 - **Implementações**:
   - `DocumentUploadStrategy`: Processamento de upload
@@ -25,6 +27,7 @@
   - `AsyncSearchStrategy`: Busca assíncrona
 
 ### 3. Value Objects ✅
+
 - **Base**: `ValueObject`, `ValidatableValueObject`
 - **Implementações**:
   - **Documentos**: `FileName`, `FileSize`, `DocumentDescription`, `DocumentVersion`, `ContentType`, `StoredFilePath`
@@ -34,21 +37,25 @@
 ## Próximos Passos
 
 ### 1. Integração nos Serviços
+
 - Atualizar `DocumentService` para usar as strategies
 - Implementar factories nos controllers
 - Aplicar Value Objects nos models
 
 ### 2. Validação
+
 - Integrar Value Objects na validação de DTOs
 - Usar strategies para validação complexa
 - Implementar testes unitários para todos os padrões
 
 ### 3. Performance
+
 - Implementar cache nas strategies
 - Otimizar queries com os novos padrões
 - Monitoramento de performance
 
 ### 4. Documentação
+
 - Exemplos de uso dos padrões
 - Guias de implementação
 - Padrões de arquitetura
@@ -56,11 +63,13 @@
 ## Benefícios Alcançados
 
 ### Clean Architecture
+
 - Separação clara de responsabilidades
 - Baixo acoplamento entre camadas
 - Alta coesão dentro das camadas
 
 ### SOLID Principles
+
 - **Single Responsibility**: Cada classe tem uma responsabilidade específica
 - **Open/Closed**: Extensível via strategies e factories
 - **Liskov Substitution**: Interfaces bem definidas
@@ -68,6 +77,7 @@
 - **Dependency Inversion**: Dependências via interfaces
 
 ### Domain-Driven Design
+
 - Value Objects para conceitos de domínio
 - Factories para criação de entidades
 - Strategies para políticas de negócio
@@ -75,7 +85,7 @@
 
 ## Arquitetura Final
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                      Presentation Layer                      │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
@@ -107,6 +117,7 @@
 ```
 
 ## Status
+
 - ✅ Factory Pattern implementado
 - ✅ Strategy Pattern implementado  
 - ✅ Value Objects implementados

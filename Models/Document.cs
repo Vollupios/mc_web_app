@@ -78,6 +78,9 @@ namespace IntranetDocumentos.Models
         // ID do usuário que fez a última modificação
         public string? LastModifiedById { get; set; }
         
+        // Flag para indicar se o documento está ativo
+        public bool IsActive { get; set; } = true;
+        
         // Navigation properties
         public virtual ApplicationUser Uploader { get; set; } = null!;
         public virtual Department? Department { get; set; }

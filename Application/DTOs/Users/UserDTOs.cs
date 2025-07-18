@@ -54,10 +54,13 @@ namespace IntranetDocumentos.Application.DTOs.Users
         public string Id { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? UserName { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         public int DepartmentId { get; set; }
         public string DepartmentName { get; set; } = string.Empty;
         public List<string> Roles { get; set; } = new();
         public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
         public bool EmailConfirmed { get; set; }
         public bool IsActive { get; set; }
     }

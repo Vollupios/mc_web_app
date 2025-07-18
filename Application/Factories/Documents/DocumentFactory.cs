@@ -44,8 +44,8 @@ namespace IntranetDocumentos.Application.Factories.Documents
                 Description = createDto.Description,
                 DepartmentId = createDto.DepartmentId,
                 FolderId = createDto.FolderId,
-                Status = (Models.DocumentStatus)createDto.Status,
-                Version = createDto.Version,
+                Status = createDto.Status,
+                Version = int.TryParse(createDto.Version, out int version) ? version : 1,
                 UploadDate = DateTime.UtcNow,
                 LastModified = DateTime.UtcNow,
                 ContentText = createDto.ContentText
@@ -114,9 +114,9 @@ namespace IntranetDocumentos.Application.Factories.Documents
             }
 
             // Validar versão
-            if (createDto.Version <= 0)
+            if (string.IsNullOrEmpty(createDto.Version))
             {
-                errors.Add("Versão deve ser maior que zero");
+                errors.Add("Versão não pode ser vazia");
             }
 
             return errors;
