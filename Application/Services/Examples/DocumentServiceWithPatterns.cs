@@ -1,3 +1,4 @@
+using IntranetDocumentos.Application.DTOs;
 using IntranetDocumentos.Application.DTOs.Documents;
 using IntranetDocumentos.Application.DTOs.Common;
 using IntranetDocumentos.Application.Strategies;

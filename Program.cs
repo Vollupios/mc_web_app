@@ -112,7 +112,19 @@ public partial class Program
 
         // 🔒 Configurar JWT Authentication para API
         var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-        var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"] ?? "your-super-secret-key-that-is-at-least-32-characters-long");
+        
+        // 🔐 Obter JWT Secret de forma segura (User Secrets → Environment Variable → Fallback)
+        var jwtSecret = jwtSettings["Secret"] 
+                       ?? Environment.GetEnvironmentVariable("JWT_SECRET")
+                       ?? throw new InvalidOperationException(
+                           "JWT Secret não configurado! Configure via User Secrets (desenvolvimento) ou variável de ambiente JWT_SECRET (produção)");
+        
+        if (jwtSecret.Length < 32)
+        {
+            throw new InvalidOperationException("JWT Secret deve ter pelo menos 32 caracteres para ser seguro!");
+        }
+        
+        var key = Encoding.ASCII.GetBytes(jwtSecret);
 
         builder.Services.AddAuthentication()
             .AddJwtBearer("Bearer", options =>
@@ -398,9 +410,22 @@ public static class SeedData
                 await roleManager.CreateAsync(new IdentityRole(roleName));
                 logger.LogInformation("Role {RoleName} criada.", roleName);
             }
-        }        // Create default admin user if it doesn't exist
-        var adminEmail = config["AdminUser:Email"] ?? "admin@intranet.com";
-        var adminPassword = config["AdminUser:Password"] ?? "Admin123!";
+        }        // 🔐 Create default admin user if it doesn't exist - usando secrets seguros
+        var adminEmail = config["AdminUser:Email"] 
+                        ?? Environment.GetEnvironmentVariable("ADMIN_EMAIL")
+                        ?? throw new InvalidOperationException(
+                            "Email do admin não configurado! Configure via User Secrets (desenvolvimento) ou variável ADMIN_EMAIL (produção)");
+        
+        var adminPassword = config["AdminUser:Password"] 
+                           ?? Environment.GetEnvironmentVariable("ADMIN_PASSWORD")
+                           ?? throw new InvalidOperationException(
+                               "Senha do admin não configurada! Configure via User Secrets (desenvolvimento) ou variável ADMIN_PASSWORD (produção)");
+        
+        // 🔒 Validar força da senha do admin
+        if (adminPassword.Length < 12)
+        {
+            throw new InvalidOperationException("Senha do admin deve ter pelo menos 12 caracteres!");
+        }
         
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
         
