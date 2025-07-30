@@ -8,12 +8,13 @@
 			"args": [
 				"run",
 				"--project",
-				"../IntranetDocumentos.csproj"
+				"IntranetDocumentos.csproj"
 			],
 			"group": "build",
 			"isBackground": true,
 			"problemMatcher": [
 				"$msCompile"
-			]		}
+			]
+		}
 	]
 }

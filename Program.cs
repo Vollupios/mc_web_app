@@ -2,7 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Threading.RateLimiting;
+using System.Text;
 using IntranetDocumentos.Data;
 using IntranetDocumentos.Models;
 using IntranetDocumentos.Services;
@@ -105,6 +109,28 @@ public partial class Program
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders()
         .AddPasswordValidator<IntranetDocumentos.Services.Security.CustomPasswordValidator>(); // 🔒 Validador customizado
+
+        // 🔒 Configurar JWT Authentication para API
+        var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+        var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"] ?? "your-super-secret-key-that-is-at-least-32-characters-long");
+
+        builder.Services.AddAuthentication()
+            .AddJwtBearer("Bearer", options =>
+            {
+                options.RequireHttpsMetadata = false; // Definir como true em produção
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings["Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings["Audience"],
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
 
         // 🔒 Configure cookie settings with security hardening
         builder.Services.ConfigureApplicationCookie(options =>
@@ -230,6 +256,43 @@ public partial class Program
 
         builder.Services.AddControllersWithViews();
 
+        // 📚 Configuração do Swagger para documentação da API
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo 
+            { 
+                Title = "Intranet Documentos API", 
+                Version = "v1",
+                Description = "API REST para gerenciamento de documentos internos"
+            });
+
+            // Configuração JWT no Swagger
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header usando o esquema Bearer. Exemplo: \"Authorization: Bearer {token}\"",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[] {}
+                }
+            });
+        });
+
         var app = builder.Build();
 
         // Ativa CORS
@@ -251,6 +314,14 @@ public partial class Program
             app.UseHsts();
         }
 
+        // Swagger em todos os ambientes para facilitar testes da API
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Intranet Documentos API v1");
+            c.RoutePrefix = "swagger"; // Acesso via /swagger
+        });
+
         // Força HTTPS sempre
         app.UseHttpsRedirection();
         app.UseRouting();
@@ -264,6 +335,9 @@ public partial class Program
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Documents}/{action=Index}/{id?}");
+
+        // Mapear controllers da API
+        app.MapControllers();
 
         // Inicialização assíncrona do banco e seed
         using (var scope = app.Services.CreateScope())

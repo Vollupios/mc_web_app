@@ -326,17 +326,3 @@ namespace IntranetDocumentos.Application.Services.Examples
         }
     }
 }
-
-// Interface para simular IActionResult
-public interface IActionResult { }
-public class BadRequestObjectResult : IActionResult { public BadRequestObjectResult(object value) { } }
-public class OkObjectResult : IActionResult { public OkObjectResult(object value) { } }
-public class ObjectResult : IActionResult { public ObjectResult(object value) { } public int StatusCode { get; set; } }
-
-// Métodos de extensão para simular controller
-public static class ControllerExtensions
-{
-    public static IActionResult BadRequest(this object controller, object value) => new BadRequestObjectResult(value);
-    public static IActionResult Ok(this object controller, object value) => new OkObjectResult(value);
-    public static IActionResult StatusCode(this object controller, int statusCode, object value) => new ObjectResult(value) { StatusCode = statusCode };
-}
